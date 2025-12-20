@@ -5,6 +5,8 @@ import (
 	"fmt"
 	"io"
 	"net/http"
+	"strings"
+	"sync"
 	"time"
 
 	"github.com/imroc/req/v3"
@@ -66,6 +68,18 @@ func Query(kv ...string) Option {
 func Queries(values map[string]string) Option {
 	return func(r *req.Request) {
 		r.SetQueryParams(values)
+	}
+}
+
+// Auth sets the Authorization header using a scheme and token.
+//
+// Example: custom auth scheme
+//
+//	c := httpx.New()
+//	_ = httpx.Get[string](c, "https://example.com", httpx.Auth("Token", "abc123"))
+func Auth(scheme, token string) Option {
+	return func(r *req.Request) {
+		r.SetHeader("Authorization", scheme+" "+token)
 	}
 }
 
@@ -152,6 +166,457 @@ func Form(values map[string]string) Option {
 	return func(r *req.Request) {
 		r.SetFormData(values)
 	}
+}
+
+// File attaches a file from disk as multipart form data.
+//
+// Example: upload a file
+//
+//	c := httpx.New()
+//	_ = httpx.Post[any, string](c, "https://example.com/upload", nil, httpx.File("file", "/tmp/report.txt"))
+func File(paramName, filePath string) Option {
+	return func(r *req.Request) {
+		r.SetFile(paramName, filePath)
+	}
+}
+
+// Files attaches multiple files from disk as multipart form data.
+//
+// Example: upload multiple files
+//
+//	c := httpx.New()
+//	_ = httpx.Post[any, string](c, "https://example.com/upload", nil, httpx.Files(map[string]string{
+//		"fileA": "/tmp/a.txt",
+//		"fileB": "/tmp/b.txt",
+//	}))
+func Files(files map[string]string) Option {
+	return func(r *req.Request) {
+		r.SetFiles(files)
+	}
+}
+
+// FileBytes attaches a file from bytes as multipart form data.
+//
+// Example: upload bytes as a file
+//
+//	c := httpx.New()
+//	_ = httpx.Post[any, string](c, "https://example.com/upload", nil, httpx.FileBytes("file", "report.txt", []byte("hello")))
+func FileBytes(paramName, filename string, content []byte) Option {
+	return func(r *req.Request) {
+		r.SetFileBytes(paramName, filename, content)
+	}
+}
+
+// FileReader attaches a file from a reader as multipart form data.
+//
+// Example: upload from reader
+//
+//	c := httpx.New()
+//	_ = httpx.Post[any, string](c, "https://example.com/upload", nil, httpx.FileReader("file", "report.txt", strings.NewReader("hello")))
+func FileReader(paramName, filename string, reader io.Reader) Option {
+	return func(r *req.Request) {
+		r.SetFileReader(paramName, filename, reader)
+	}
+}
+
+// UploadCallback registers a callback for upload progress.
+//
+// Example: track upload progress
+//
+//	srv1 := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+//		defer r.Body.Close()
+//		buf := make([]byte, 32*1024)
+//		for {
+//			n, err := r.Body.Read(buf)
+//			if n > 0 {
+//				time.Sleep(10 * time.Millisecond)
+//			}
+//			if err == io.EOF {
+//				break
+//			}
+//			if err != nil {
+//				return
+//			}
+//		}
+//		w.WriteHeader(http.StatusOK)
+//	}))
+//	defer srv1.Close()
+//
+//	payload1 := bytes.Repeat([]byte("x"), 4*1024*1024)
+//	pr1, pw1 := io.Pipe()
+//	go func() {
+//		defer pw1.Close()
+//		chunk := 64 * 1024
+//		for i := 0; i < len(payload1); i += chunk {
+//			end := i + chunk
+//			if end > len(payload1) {
+//				end = len(payload1)
+//			}
+//			_, _ = pw1.Write(payload1[i:end])
+//			time.Sleep(50 * time.Millisecond)
+//		}
+//	}()
+//	c1 := httpx.New()
+//	total1 := float64(len(payload1))
+//	barWidth1 := 20
+//	spin1 := []string{"|", "/", "-", "\\"}
+//	spinIndex1 := 0
+//	_ = httpx.Post[any, string](c1, srv1.URL+"/upload", nil,
+//		httpx.FileReader("file", "payload.bin", pr1),
+//		httpx.UploadCallback(func(info req.UploadInfo) {
+//			spinIndex1 = (spinIndex1 + 1) % len(spin1)
+//			percent := float64(info.UploadedSize) / total1 * 100
+//			filled := int(percent / 100 * float64(barWidth1))
+//			bar := strings.Repeat("=", filled) + strings.Repeat("-", barWidth1-filled)
+//			fmt.Printf("\r%s [%s] %.1f%%", spin1[spinIndex1], bar, percent)
+//			if info.FileSize > 0 && info.UploadedSize >= info.FileSize {
+//				fmt.Print("\n")
+//			}
+//		}),
+//	)
+//
+// Example: emit progress percent
+//
+//	srv2 := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+//		defer r.Body.Close()
+//		buf := make([]byte, 32*1024)
+//		for {
+//			n, err := r.Body.Read(buf)
+//			if n > 0 {
+//				time.Sleep(10 * time.Millisecond)
+//			}
+//			if err == io.EOF {
+//				break
+//			}
+//			if err != nil {
+//				return
+//			}
+//		}
+//		w.WriteHeader(http.StatusOK)
+//	}))
+//	defer srv2.Close()
+//
+//	payload2 := bytes.Repeat([]byte("x"), 4*1024*1024)
+//	pr2, pw2 := io.Pipe()
+//	go func() {
+//		defer pw2.Close()
+//		chunk := 64 * 1024
+//		for i := 0; i < len(payload2); i += chunk {
+//			end := i + chunk
+//			if end > len(payload2) {
+//				end = len(payload2)
+//			}
+//			_, _ = pw2.Write(payload2[i:end])
+//			time.Sleep(50 * time.Millisecond)
+//		}
+//	}()
+//	c2 := httpx.New()
+//	total2 := float64(len(payload2))
+//	barWidth2 := 20
+//	spin2 := []string{"|", "/", "-", "\\"}
+//	spinIndex2 := 0
+//	_ = httpx.Post[any, string](c2, srv2.URL+"/upload", nil,
+//		httpx.FileReader("file", "payload.bin", pr2),
+//		httpx.UploadCallback(func(info req.UploadInfo) {
+//			spinIndex2 = (spinIndex2 + 1) % len(spin2)
+//			percent := float64(info.UploadedSize) / total2 * 100
+//			filled := int(percent / 100 * float64(barWidth2))
+//			bar := strings.Repeat("=", filled) + strings.Repeat("-", barWidth2-filled)
+//			fmt.Printf("\r%s [%s] %.1f%%", spin2[spinIndex2], bar, percent)
+//			if info.FileSize > 0 && info.UploadedSize >= info.FileSize {
+//				fmt.Print("\n")
+//			}
+//		}),
+//	)
+func UploadCallback(callback req.UploadCallback) Option {
+	return func(r *req.Request) {
+		if callback == nil {
+			return
+		}
+		var mu sync.Mutex
+		var last req.UploadInfo
+		var seen bool
+		r.SetUploadCallback(func(info req.UploadInfo) {
+			mu.Lock()
+			last = info
+			seen = true
+			mu.Unlock()
+			callback(info)
+		})
+		r.OnAfterResponse(func(_ *req.Client, _ *req.Response) error {
+			mu.Lock()
+			info := last
+			seenLocal := seen
+			mu.Unlock()
+			if !seenLocal {
+				return nil
+			}
+			if info.FileSize > 0 && info.UploadedSize < info.FileSize {
+				info.UploadedSize = info.FileSize
+				callback(info)
+			}
+			return nil
+		})
+	}
+}
+
+// UploadCallbackWithInterval registers a callback for upload progress with a minimum interval.
+//
+// Example: throttle upload progress updates
+//
+//	srv1 := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+//		defer r.Body.Close()
+//		buf := make([]byte, 32*1024)
+//		for {
+//			n, err := r.Body.Read(buf)
+//			if n > 0 {
+//				time.Sleep(20 * time.Millisecond)
+//			}
+//			if err == io.EOF {
+//				break
+//			}
+//			if err != nil {
+//				return
+//			}
+//		}
+//		w.WriteHeader(http.StatusOK)
+//	}))
+//	defer srv1.Close()
+//
+//	payload1 := bytes.Repeat([]byte("x"), 4*1024*1024)
+//	pr1, pw1 := io.Pipe()
+//	go func() {
+//		defer pw1.Close()
+//		chunk := 64 * 1024
+//		for i := 0; i < len(payload1); i += chunk {
+//			end := i + chunk
+//			if end > len(payload1) {
+//				end = len(payload1)
+//			}
+//			_, _ = pw1.Write(payload1[i:end])
+//			time.Sleep(50 * time.Millisecond)
+//		}
+//	}()
+//	c1 := httpx.New()
+//	total1 := float64(len(payload1))
+//	_ = httpx.Post[any, string](c1, srv1.URL+"/upload", nil,
+//		httpx.FileReader("file", "payload.bin", pr1),
+//		httpx.UploadCallbackWithInterval(func(info req.UploadInfo) {
+//			percent := float64(info.UploadedSize) / total1 * 100
+//			fmt.Printf("\rprogress: %.1f%% (%.0f bytes)", percent, float64(info.UploadedSize))
+//			if info.FileSize > 0 && info.UploadedSize >= info.FileSize {
+//				fmt.Print("\n")
+//			}
+//		}, 200*time.Millisecond),
+//	)
+//
+// Example: report filename and bytes
+//
+//	srv2 := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+//		defer r.Body.Close()
+//		buf := make([]byte, 32*1024)
+//		for {
+//			n, err := r.Body.Read(buf)
+//			if n > 0 {
+//				time.Sleep(20 * time.Millisecond)
+//			}
+//			if err == io.EOF {
+//				break
+//			}
+//			if err != nil {
+//				return
+//			}
+//		}
+//		w.WriteHeader(http.StatusOK)
+//	}))
+//	defer srv2.Close()
+//
+//	payload2 := bytes.Repeat([]byte("x"), 4*1024*1024)
+//	pr2, pw2 := io.Pipe()
+//	go func() {
+//		defer pw2.Close()
+//		chunk := 64 * 1024
+//		for i := 0; i < len(payload2); i += chunk {
+//			end := i + chunk
+//			if end > len(payload2) {
+//				end = len(payload2)
+//			}
+//			_, _ = pw2.Write(payload2[i:end])
+//			time.Sleep(50 * time.Millisecond)
+//		}
+//	}()
+//	c2 := httpx.New()
+//	total2 := float64(len(payload2))
+//	_ = httpx.Post[any, string](c2, srv2.URL+"/upload", nil,
+//		httpx.FileReader("file", "payload.bin", pr2),
+//		httpx.UploadCallbackWithInterval(func(info req.UploadInfo) {
+//			percent := float64(info.UploadedSize) / total2 * 100
+//			fmt.Printf("\r%s: %.1f%% (%d bytes)", info.FileName, percent, info.UploadedSize)
+//			if info.FileSize > 0 && info.UploadedSize >= info.FileSize {
+//				fmt.Print("\n")
+//			}
+//		}, 200*time.Millisecond),
+//	)
+func UploadCallbackWithInterval(callback req.UploadCallback, minInterval time.Duration) Option {
+	return func(r *req.Request) {
+		if callback == nil {
+			return
+		}
+		var mu sync.Mutex
+		var last req.UploadInfo
+		var seen bool
+		r.SetUploadCallbackWithInterval(func(info req.UploadInfo) {
+			mu.Lock()
+			last = info
+			seen = true
+			mu.Unlock()
+			callback(info)
+		}, minInterval)
+		r.OnAfterResponse(func(_ *req.Client, _ *req.Response) error {
+			mu.Lock()
+			info := last
+			seenLocal := seen
+			mu.Unlock()
+			if !seenLocal {
+				return nil
+			}
+			if info.FileSize > 0 && info.UploadedSize < info.FileSize {
+				info.UploadedSize = info.FileSize
+				callback(info)
+			}
+			return nil
+		})
+	}
+}
+
+// OutputFile streams the response body to a file path.
+//
+// Example: download to file
+//
+//	c := httpx.New()
+//	_ = httpx.Get[string](c, "https://example.com/file", httpx.OutputFile("/tmp/file.bin"))
+func OutputFile(path string) Option {
+	return func(r *req.Request) {
+		r.SetOutputFile(path)
+	}
+}
+
+// UploadProgress enables a default progress spinner and bar for uploads.
+//
+// Example: upload with automatic progress
+//
+//	srv := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+//		defer r.Body.Close()
+//		buf := make([]byte, 32*1024)
+//		for {
+//			n, err := r.Body.Read(buf)
+//			if n > 0 {
+//				time.Sleep(10 * time.Millisecond)
+//			}
+//			if err == io.EOF {
+//				break
+//			}
+//			if err != nil {
+//				return
+//			}
+//		}
+//		w.WriteHeader(http.StatusOK)
+//	}))
+//	defer srv.Close()
+//
+//	payload := bytes.Repeat([]byte("x"), 4*1024*1024)
+//	pr, pw := io.Pipe()
+//	go func() {
+//		defer pw.Close()
+//		chunk := 64 * 1024
+//		for i := 0; i < len(payload); i += chunk {
+//			end := i + chunk
+//			if end > len(payload) {
+//				end = len(payload)
+//			}
+//			_, _ = pw.Write(payload[i:end])
+//			time.Sleep(50 * time.Millisecond)
+//		}
+//	}()
+//
+//	c := httpx.New()
+//	_ = httpx.Post[any, string](c, srv.URL+"/upload", nil,
+//		httpx.FileReader("file", "payload.bin", pr),
+//		httpx.UploadProgress(),
+//	)
+func UploadProgress() Option {
+	return func(r *req.Request) {
+		var mu sync.Mutex
+		var last string
+		var total int64
+		spin := []string{"|", "/", "-", "\\"}
+		spinIndex := 0
+		barWidth := 20
+
+		r.SetUploadCallback(func(info req.UploadInfo) {
+			mu.Lock()
+			defer mu.Unlock()
+
+			if info.FileSize > 0 {
+				total = info.FileSize
+			}
+			spinIndex = (spinIndex + 1) % len(spin)
+
+			if total > 0 {
+				percent := float64(info.UploadedSize) / float64(total) * 100
+				filled := int(percent / 100 * float64(barWidth))
+				bar := strings.Repeat("=", filled) + strings.Repeat("-", barWidth-filled)
+				last = fmt.Sprintf(
+					"\r%s upload [%s] %.1f%% (%s/%s)",
+					spin[spinIndex],
+					bar,
+					percent,
+					formatBytes(info.UploadedSize),
+					formatBytes(total),
+				)
+			} else {
+				last = fmt.Sprintf("\r%s upload %s", spin[spinIndex], formatBytes(info.UploadedSize))
+			}
+			fmt.Print(last)
+		})
+
+		r.OnAfterResponse(func(_ *req.Client, _ *req.Response) error {
+			mu.Lock()
+			defer mu.Unlock()
+			if last == "" {
+				return nil
+			}
+			if total > 0 {
+				fmt.Printf(
+					"\r%s upload [%s] 100.0%% (%s/%s)\n",
+					spin[spinIndex],
+					strings.Repeat("=", barWidth),
+					formatBytes(total),
+					formatBytes(total),
+				)
+			} else {
+				fmt.Print("\n")
+			}
+			return nil
+		})
+	}
+}
+
+func formatBytes(size int64) string {
+	if size < 1024 {
+		return fmt.Sprintf("%d B", size)
+	}
+	units := []string{"KiB", "MiB", "GiB", "TiB", "PiB"}
+	value := float64(size)
+	unit := "B"
+	for _, u := range units {
+		value /= 1024
+		unit = u
+		if value < 1024 {
+			break
+		}
+	}
+	return fmt.Sprintf("%.1f %s", value, unit)
 }
 
 // Dump enables req's request-level dump output.
@@ -301,6 +766,82 @@ func WithHeaders(values map[string]string) ClientOption {
 // RetryOption configures retry behavior on the underlying req client.
 type RetryOption func(*req.Client)
 
+// RetryCount enables retry for a request and sets the maximum retry count.
+//
+// Example: request retry count
+//
+//	c := httpx.New()
+//	_ = httpx.Get[string](c, "https://example.com", httpx.RetryCount(2))
+func RetryCount(count int) Option {
+	return func(r *req.Request) {
+		r.SetRetryCount(count)
+	}
+}
+
+// RetryFixedInterval sets a fixed retry interval for a request.
+//
+// Example: request retry interval
+//
+//	c := httpx.New()
+//	_ = httpx.Get[string](c, "https://example.com", httpx.RetryFixedInterval(200*time.Millisecond))
+func RetryFixedInterval(interval time.Duration) Option {
+	return func(r *req.Request) {
+		r.SetRetryFixedInterval(interval)
+	}
+}
+
+// RetryBackoff sets a capped exponential backoff retry interval for a request.
+//
+// Example: request retry backoff
+//
+//	c := httpx.New()
+//	_ = httpx.Get[string](c, "https://example.com", httpx.RetryBackoff(100*time.Millisecond, 2*time.Second))
+func RetryBackoff(min, max time.Duration) Option {
+	return func(r *req.Request) {
+		r.SetRetryBackoffInterval(min, max)
+	}
+}
+
+// RetryInterval sets a custom retry interval function for a request.
+//
+// Example: custom retry interval
+//
+//	c := httpx.New()
+//	_ = httpx.Get[string](c, "https://example.com", httpx.RetryInterval(func(_ *req.Response, attempt int) time.Duration {
+//		return time.Duration(attempt) * 100 * time.Millisecond
+//	}))
+func RetryInterval(fn req.GetRetryIntervalFunc) Option {
+	return func(r *req.Request) {
+		r.SetRetryInterval(fn)
+	}
+}
+
+// RetryCondition sets the retry condition for a request.
+//
+// Example: retry on 503
+//
+//	c := httpx.New()
+//	_ = httpx.Get[string](c, "https://example.com", httpx.RetryCondition(func(resp *req.Response, _ error) bool {
+//		return resp != nil && resp.StatusCode == 503
+//	}))
+func RetryCondition(condition req.RetryConditionFunc) Option {
+	return func(r *req.Request) {
+		r.SetRetryCondition(condition)
+	}
+}
+
+// RetryHook registers a retry hook for a request.
+//
+// Example: hook on retry
+//
+//	c := httpx.New()
+//	_ = httpx.Get[string](c, "https://example.com", httpx.RetryHook(func(_ *req.Response, _ error) {}))
+func RetryHook(hook req.RetryHookFunc) Option {
+	return func(r *req.Request) {
+		r.SetRetryHook(hook)
+	}
+}
+
 // WithRetry applies a retry configuration to the client.
 //
 // Example: set retry count
@@ -314,6 +855,82 @@ func WithRetry(opt RetryOption) ClientOption {
 		if opt != nil {
 			opt(c.req)
 		}
+	}
+}
+
+// WithRetryCount enables retry for the client and sets the maximum retry count.
+//
+// Example: client retry count
+//
+//	c := httpx.New(httpx.WithRetryCount(2))
+//	_ = c
+func WithRetryCount(count int) ClientOption {
+	return func(c *Client) {
+		c.req.SetCommonRetryCount(count)
+	}
+}
+
+// WithRetryFixedInterval sets a fixed retry interval for the client.
+//
+// Example: client retry interval
+//
+//	c := httpx.New(httpx.WithRetryFixedInterval(200 * time.Millisecond))
+//	_ = c
+func WithRetryFixedInterval(interval time.Duration) ClientOption {
+	return func(c *Client) {
+		c.req.SetCommonRetryFixedInterval(interval)
+	}
+}
+
+// WithRetryBackoff sets a capped exponential backoff retry interval for the client.
+//
+// Example: client retry backoff
+//
+//	c := httpx.New(httpx.WithRetryBackoff(100*time.Millisecond, 2*time.Second))
+//	_ = c
+func WithRetryBackoff(min, max time.Duration) ClientOption {
+	return func(c *Client) {
+		c.req.SetCommonRetryBackoffInterval(min, max)
+	}
+}
+
+// WithRetryInterval sets a custom retry interval function for the client.
+//
+// Example: client retry interval
+//
+//	c := httpx.New(httpx.WithRetryInterval(func(_ *req.Response, attempt int) time.Duration {
+//		return time.Duration(attempt) * 100 * time.Millisecond
+//	}))
+//	_ = c
+func WithRetryInterval(fn req.GetRetryIntervalFunc) ClientOption {
+	return func(c *Client) {
+		c.req.SetCommonRetryInterval(fn)
+	}
+}
+
+// WithRetryCondition sets the retry condition for the client.
+//
+// Example: retry on 503
+//
+//	c := httpx.New(httpx.WithRetryCondition(func(resp *req.Response, _ error) bool {
+//		return resp != nil && resp.StatusCode == 503
+//	}))
+//	_ = c
+func WithRetryCondition(condition req.RetryConditionFunc) ClientOption {
+	return func(c *Client) {
+		c.req.SetCommonRetryCondition(condition)
+	}
+}
+
+// WithRetryHook registers a retry hook for the client.
+//
+// Example: hook on retry
+//
+//	c := httpx.New(httpx.WithRetryHook(func(_ *req.Response, _ error) {}))
+//	_ = c
+func WithRetryHook(hook req.RetryHookFunc) ClientOption {
+	return func(c *Client) {
+		c.req.SetCommonRetryHook(hook)
 	}
 }
 

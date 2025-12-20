@@ -4,9 +4,8 @@
 package main
 
 import (
-	"net/http"
-
 	"github.com/goforj/httpx"
+	"net/http"
 )
 
 func main() {

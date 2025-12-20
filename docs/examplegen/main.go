@@ -4,6 +4,7 @@ import (
 	"bytes"
 	"fmt"
 	"go/ast"
+	"go/format"
 	"go/parser"
 	"go/token"
 	"os"
@@ -375,45 +376,33 @@ func writeMain(base string, fd *FuncDoc, importPath string) error {
 		importPath: true,
 	}
 
+	patternImports := map[string]string{
+		"fmt.":      "fmt",
+		"bytes.":    "bytes",
+		"errors.":   "errors",
+		"strings.":  "strings",
+		"io.":       "io",
+		"os.":       "os",
+		"http.":     "net/http",
+		"httptest.": "net/http/httptest",
+		"context.":  "context",
+		"regexp.":   "regexp",
+		"redis.":    "github.com/redis/go-redis/v9",
+		"time.":     "time",
+		"gocron":    "github.com/go-co-op/gocron/v2",
+		"scheduler": "github.com/goforj/scheduler",
+		"filepath.": "path/filepath",
+		"godump.":   "github.com/goforj/godump",
+		"req.":      "github.com/imroc/req/v3",
+		"rand.":     "crypto/rand",
+		"base64.":   "encoding/base64",
+	}
+
 	for _, ex := range fd.Examples {
-		if strings.Contains(ex.Code, "fmt.") {
-			imports["fmt"] = true
-		}
-		if strings.Contains(ex.Code, "strings.") {
-			imports["strings"] = true
-		}
-		if strings.Contains(ex.Code, "os.") {
-			imports["os"] = true
-		}
-		if strings.Contains(ex.Code, "context.") {
-			imports["context"] = true
-		}
-		if strings.Contains(ex.Code, "regexp.") {
-			imports["regexp"] = true
-		}
-		if strings.Contains(ex.Code, "redis.") {
-			imports["github.com/redis/go-redis/v9"] = true
-		}
-		if strings.Contains(ex.Code, "time.") {
-			imports["time"] = true
-		}
-		if strings.Contains(ex.Code, "gocron") {
-			imports["github.com/go-co-op/gocron/v2"] = true
-		}
-		if strings.Contains(ex.Code, "scheduler") {
-			imports["github.com/goforj/scheduler"] = true
-		}
-		if strings.Contains(ex.Code, "filepath.") {
-			imports["path/filepath"] = true
-		}
-		if strings.Contains(ex.Code, "godump.") {
-			imports["github.com/goforj/godump"] = true
-		}
-		if strings.Contains(ex.Code, "rand.") {
-			imports["crypto/rand"] = true
-		}
-		if strings.Contains(ex.Code, "base64.") {
-			imports["encoding/base64"] = true
+		for pattern, imp := range patternImports {
+			if strings.Contains(ex.Code, pattern) {
+				imports[imp] = true
+			}
 		}
 	}
 
@@ -465,5 +454,10 @@ func writeMain(base string, fd *FuncDoc, importPath string) error {
 
 	buf.WriteString("}\n")
 
-	return os.WriteFile(filepath.Join(dir, "main.go"), buf.Bytes(), 0o644)
+	formatted, err := format.Source(buf.Bytes())
+	if err != nil {
+		return fmt.Errorf("format example file: %w", err)
+	}
+
+	return os.WriteFile(filepath.Join(dir, "main.go"), formatted, 0o644)
 }

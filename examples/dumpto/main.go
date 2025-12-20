@@ -5,7 +5,6 @@ package main
 
 import (
 	"bytes"
-
 	"github.com/goforj/httpx"
 )
 

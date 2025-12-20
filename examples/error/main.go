@@ -5,7 +5,6 @@ package main
 
 import (
 	"errors"
-
 	"github.com/goforj/httpx"
 )
 

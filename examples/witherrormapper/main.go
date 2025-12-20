@@ -5,7 +5,6 @@ package main
 
 import (
 	"fmt"
-
 	"github.com/goforj/httpx"
 	"github.com/imroc/req/v3"
 )
