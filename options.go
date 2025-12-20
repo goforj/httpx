@@ -37,15 +37,20 @@ func Headers(values map[string]string) Option {
 	}
 }
 
-// Query adds a single query parameter.
+// Query adds query parameters as key/value pairs.
 //
-// Example: add query param
+// Example: add query params
 //
 //	c := httpx.New()
-//	_ = httpx.Get[string](c, "https://example.com/search", httpx.Query("q", "go"))
-func Query(key, value string) Option {
+//	_ = httpx.Get[string](c, "https://example.com/search", httpx.Query("q", "go", "ok", "1"))
+func Query(kv ...string) Option {
 	return func(r *req.Request) {
-		r.SetQueryParam(key, value)
+		if len(kv)%2 != 0 {
+			panic("httpx: Query expects even number of key/value arguments")
+		}
+		for i := 0; i < len(kv); i += 2 {
+			r.AddQueryParam(kv[i], kv[i+1])
+		}
 	}
 }
 

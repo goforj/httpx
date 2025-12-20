@@ -11,6 +11,7 @@ import (
 )
 
 const defaultTimeout = 10 * time.Second
+const defaultUserAgent = "httpx (https://github.com/goforj/httpx)"
 
 var (
 	defaultClient *Client
@@ -39,7 +40,7 @@ type Client struct {
 //	_ = c
 func New(opts ...ClientOption) *Client {
 	c := &Client{
-		req: req.C().SetTimeout(defaultTimeout),
+		req: req.C().SetTimeout(defaultTimeout).SetUserAgent(defaultUserAgent),
 	}
 	for _, opt := range opts {
 		opt(c)

@@ -20,7 +20,6 @@ func main() {
 	c := httpx.New(httpx.WithHeader("Accept", "application/vnd.github+json"))
 	res := httpx.Get[[]PullRequest](c, "https://api.github.com/repos/goforj/httpx/pulls")
 	if res.Err != nil {
-		godump.Dump(res.Err.Error())
 		return
 	}
 	godump.Dump(res.Body)

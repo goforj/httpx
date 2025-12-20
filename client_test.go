@@ -140,7 +140,7 @@ func TestOptionsApplied(t *testing.T) {
 		client,
 		server.URL+"/users/{id}",
 		Path("id", 123),
-		Query("q", "ok"),
+		Query("q", "ok", "ok2", "1"),
 		Header("X-Test", "1"),
 	)
 	if res.Err != nil {
@@ -191,4 +191,15 @@ func TestEmptySliceOnEmptyBody(t *testing.T) {
 	if len(res.Body) != 0 {
 		t.Fatalf("expected empty slice, got %d", len(res.Body))
 	}
+}
+
+func TestQueryOddPanics(t *testing.T) {
+	defer func() {
+		if recover() == nil {
+			t.Fatal("expected panic")
+		}
+	}()
+
+	req := req.C().R()
+	Query("q")(req)
 }
