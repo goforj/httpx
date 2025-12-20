@@ -845,36 +845,46 @@ _ = httpx.Post[any, string](c, "https://example.com/upload", nil, httpx.Files(ma
 UploadCallback registers a callback for upload progress.
 
 ```go
-srv1 := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-	defer r.Body.Close()
-	buf := make([]byte, 32*1024)
-	for {
-		if _, err := r.Body.Read(buf); err != nil {
-			if err == io.EOF {
-				break
+startServer := func(delay time.Duration) *httptest.Server {
+	return httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		defer r.Body.Close()
+		buf := make([]byte, 32*1024)
+		for {
+			if _, err := r.Body.Read(buf); err != nil {
+				if err == io.EOF {
+					break
+				}
+				return
 			}
-			return
+			time.Sleep(delay)
 		}
-		time.Sleep(10 * time.Millisecond)
+		w.WriteHeader(http.StatusOK)
+	}))
+}
+tempFile := func(size int) string {
+	tmp, err := os.CreateTemp("", "httpx-upload-*.bin")
+	if err != nil {
+		return ""
 	}
-	w.WriteHeader(http.StatusOK)
-}))
-defer srv1.Close()
+	_, _ = tmp.Write(make([]byte, size))
+	_ = tmp.Close()
+	return tmp.Name()
+}
 
-tmp, err := os.CreateTemp("", "httpx-upload-*.bin")
-if err != nil {
+srv1 := startServer(10 * time.Millisecond)
+defer srv1.Close()
+path := tempFile(4 * 1024 * 1024)
+if path == "" {
 	return
 }
-defer os.Remove(tmp.Name())
-payload := bytes.Repeat([]byte("x"), 4*1024*1024)
-_, _ = tmp.Write(payload)
-_ = tmp.Close()
+defer os.Remove(path)
+
 c := httpx.New()
 barWidth := 20
 spin := []string{"|", "/", "-", "\\"}
 spinIndex := 0
 _ = httpx.Post[any, string](c, srv1.URL+"/upload", nil,
-	httpx.File("file", tmp.Name()),
+	httpx.File("file", path),
 	httpx.UploadCallback(func(info req.UploadInfo) {
 		spinIndex = (spinIndex + 1) % len(spin)
 		percent := float64(info.UploadedSize) / float64(info.FileSize) * 100
@@ -893,33 +903,43 @@ _ = httpx.Post[any, string](c, srv1.URL+"/upload", nil,
 UploadCallbackWithInterval registers a callback for upload progress with a minimum interval.
 
 ```go
-srv := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-	defer r.Body.Close()
-	buf := make([]byte, 32*1024)
-	for {
-		if _, err := r.Body.Read(buf); err != nil {
-			if err == io.EOF {
-				break
+startServer := func(delay time.Duration) *httptest.Server {
+	return httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		defer r.Body.Close()
+		buf := make([]byte, 32*1024)
+		for {
+			if _, err := r.Body.Read(buf); err != nil {
+				if err == io.EOF {
+					break
+				}
+				return
 			}
-			return
+			time.Sleep(delay)
 		}
-		time.Sleep(20 * time.Millisecond)
+		w.WriteHeader(http.StatusOK)
+	}))
+}
+tempFile := func(size int) string {
+	tmp, err := os.CreateTemp("", "httpx-upload-*.bin")
+	if err != nil {
+		return ""
 	}
-	w.WriteHeader(http.StatusOK)
-}))
-defer srv.Close()
+	_, _ = tmp.Write(make([]byte, size))
+	_ = tmp.Close()
+	return tmp.Name()
+}
 
-tmp, err := os.CreateTemp("", "httpx-upload-*.bin")
-if err != nil {
+srv := startServer(20 * time.Millisecond)
+defer srv.Close()
+path := tempFile(4 * 1024 * 1024)
+if path == "" {
 	return
 }
-defer os.Remove(tmp.Name())
-payload := bytes.Repeat([]byte("x"), 4*1024*1024)
-_, _ = tmp.Write(payload)
-_ = tmp.Close()
+defer os.Remove(path)
+
 c := httpx.New()
 _ = httpx.Post[any, string](c, srv.URL+"/upload", nil,
-	httpx.File("file", tmp.Name()),
+	httpx.File("file", path),
 	httpx.UploadCallbackWithInterval(func(info req.UploadInfo) {
 		percent := float64(info.UploadedSize) / float64(info.FileSize) * 100
 		fmt.Printf("\rprogress: %.1f%% (%.0f bytes)", percent, float64(info.UploadedSize))
@@ -935,34 +955,43 @@ _ = httpx.Post[any, string](c, srv.URL+"/upload", nil,
 UploadProgress enables a default progress spinner and bar for uploads.
 
 ```go
-srv := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-	defer r.Body.Close()
-	buf := make([]byte, 32*1024)
-	for {
-		if _, err := r.Body.Read(buf); err != nil {
-			if err == io.EOF {
-				break
+startServer := func(delay time.Duration) *httptest.Server {
+	return httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		defer r.Body.Close()
+		buf := make([]byte, 32*1024)
+		for {
+			if _, err := r.Body.Read(buf); err != nil {
+				if err == io.EOF {
+					break
+				}
+				return
 			}
-			return
+			time.Sleep(delay)
 		}
-		time.Sleep(10 * time.Millisecond)
+		w.WriteHeader(http.StatusOK)
+	}))
+}
+tempFile := func(size int) string {
+	tmp, err := os.CreateTemp("", "httpx-upload-*.bin")
+	if err != nil {
+		return ""
 	}
-	w.WriteHeader(http.StatusOK)
-}))
-defer srv.Close()
+	_, _ = tmp.Write(make([]byte, size))
+	_ = tmp.Close()
+	return tmp.Name()
+}
 
-tmp, err := os.CreateTemp("", "httpx-upload-*.bin")
-if err != nil {
+srv := startServer(10 * time.Millisecond)
+defer srv.Close()
+path := tempFile(4 * 1024 * 1024)
+if path == "" {
 	return
 }
-defer os.Remove(tmp.Name())
-payload := bytes.Repeat([]byte("x"), 4*1024*1024)
-_, _ = tmp.Write(payload)
-_ = tmp.Close()
+defer os.Remove(path)
 
 c := httpx.New()
 _ = httpx.Post[any, string](c, srv.URL+"/upload", nil,
-	httpx.File("file", tmp.Name()),
+	httpx.File("file", path),
 	httpx.UploadProgress(),
 )
 ```
