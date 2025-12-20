@@ -1,10 +1,12 @@
 package httpx
 
 import (
+	"context"
 	"encoding/json"
 	"errors"
 	"net/http"
 	"net/http/httptest"
+	"os"
 	"testing"
 
 	"github.com/imroc/req/v3"
@@ -202,4 +204,132 @@ func TestQueryOddPanics(t *testing.T) {
 
 	req := req.C().R()
 	Query("q")(req)
+}
+
+func TestDefaultReqRaw(t *testing.T) {
+	c1 := Default()
+	c2 := Default()
+	if c1 == nil || c2 == nil || c1 != c2 {
+		t.Fatalf("expected default client singleton")
+	}
+	if c1.Req() == nil {
+		t.Fatalf("expected req client")
+	}
+	if c1.Raw() == nil {
+		t.Fatalf("expected raw client")
+	}
+}
+
+func TestRequestMethods(t *testing.T) {
+	var gotMethod string
+	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		gotMethod = r.Method
+		_, _ = w.Write([]byte(`{"name":"ok"}`))
+	}))
+	t.Cleanup(server.Close)
+
+	client := New()
+	res := Put[createUser, user](client, server.URL, createUser{Name: "ok"})
+	if res.Err != nil {
+		t.Fatalf("put error: %v", res.Err)
+	}
+	if gotMethod != http.MethodPut {
+		t.Fatalf("method = %q", gotMethod)
+	}
+
+	res = Patch[createUser, user](client, server.URL, createUser{Name: "ok"})
+	if res.Err != nil {
+		t.Fatalf("patch error: %v", res.Err)
+	}
+	if gotMethod != http.MethodPatch {
+		t.Fatalf("method = %q", gotMethod)
+	}
+
+	resDel := Delete[user](client, server.URL)
+	if resDel.Err != nil {
+		t.Fatalf("delete error: %v", resDel.Err)
+	}
+	if gotMethod != http.MethodDelete {
+		t.Fatalf("method = %q", gotMethod)
+	}
+}
+
+func TestContextMethods(t *testing.T) {
+	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		_, _ = w.Write([]byte(`{"name":"ctx"}`))
+	}))
+	t.Cleanup(server.Close)
+
+	client := New()
+	ctx := context.Background()
+
+	if res := GetCtx[user](client, ctx, server.URL); res.Err != nil {
+		t.Fatalf("getctx error: %v", res.Err)
+	}
+	if res := PostCtx[createUser, user](client, ctx, server.URL, createUser{Name: "ctx"}); res.Err != nil {
+		t.Fatalf("postctx error: %v", res.Err)
+	}
+	if res := PutCtx[createUser, user](client, ctx, server.URL, createUser{Name: "ctx"}); res.Err != nil {
+		t.Fatalf("putctx error: %v", res.Err)
+	}
+	if res := PatchCtx[createUser, user](client, ctx, server.URL, createUser{Name: "ctx"}); res.Err != nil {
+		t.Fatalf("patchctx error: %v", res.Err)
+	}
+	if res := DeleteCtx[user](client, ctx, server.URL); res.Err != nil {
+		t.Fatalf("deletectx error: %v", res.Err)
+	}
+}
+
+func TestSendUnknownMethod(t *testing.T) {
+	_, err := send(req.C().R(), "TRACE-UNKNOWN", "http://example.com")
+	if err == nil {
+		t.Fatalf("expected error for unsupported method")
+	}
+}
+
+func TestNewWithHTTPTrace(t *testing.T) {
+	if err := os.Setenv("HTTP_TRACE", "1"); err != nil {
+		t.Fatalf("set env: %v", err)
+	}
+	defer os.Unsetenv("HTTP_TRACE")
+	_ = New()
+}
+
+func TestDumpExample(t *testing.T) {
+	dumpExample("ok")
+}
+
+func TestDoIgnoresAfterResponseErrorOnEmptyBody(t *testing.T) {
+	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		w.WriteHeader(http.StatusOK)
+	}))
+	t.Cleanup(server.Close)
+
+	client := New()
+	res := Get[user](client, server.URL, Before(func(r *req.Request) {
+		r.OnAfterResponse(func(_ *req.Client, _ *req.Response) error {
+			return errors.New("after response error")
+		})
+	}))
+	if res.Err != nil {
+		t.Fatalf("expected error to be ignored, got %v", res.Err)
+	}
+	if res.Response == nil {
+		t.Fatalf("expected response")
+	}
+}
+
+func TestNilClientDefaults(t *testing.T) {
+	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		_ = json.NewEncoder(w).Encode(user{Name: "default"})
+	}))
+	t.Cleanup(server.Close)
+
+	res := Get[user](nil, server.URL)
+	if res.Err != nil {
+		t.Fatalf("unexpected error: %v", res.Err)
+	}
+	if res.Body.Name != "default" {
+		t.Fatalf("unexpected response: %s", res.Body.Name)
+	}
 }
