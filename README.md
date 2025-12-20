@@ -121,13 +121,16 @@ They are compiled by `example_compile_test.go` to keep docs and code in sync.
 
 | Group | Functions |
 |------:|-----------|
-| **Auth** | [Auth](#auth) |
+| **Auth** | [Auth](#auth) [Basic](#basic) [Bearer](#bearer) |
 | **Client** | [Default](#default) [New](#new) [Raw](#raw) [Req](#req) |
-| **Other** | [Basic](#basic) [Bearer](#bearer) [Before](#before) [Dump](#dump) [DumpTo](#dumpto) [DumpToFile](#dumptofile) [Error](#error) [OutputFile](#outputfile) [RetryBackoff](#retrybackoff) [RetryCondition](#retrycondition) [RetryCount](#retrycount) [RetryFixedInterval](#retryfixedinterval) [RetryHook](#retryhook) [RetryInterval](#retryinterval) [Timeout](#timeout) [UploadCallbackWithInterval](#uploadcallbackwithinterval) [UploadProgress](#uploadprogress) [WithBaseURL](#withbaseurl) [WithDumpAll](#withdumpall) [WithDumpEachRequest](#withdumpeachrequest) [WithDumpEachRequestTo](#withdumpeachrequestto) [WithErrorMapper](#witherrormapper) [WithHeader](#withheader) [WithHeaders](#withheaders) [WithMiddleware](#withmiddleware) [WithRetry](#withretry) [WithRetryBackoff](#withretrybackoff) [WithRetryCondition](#withretrycondition) [WithRetryCount](#withretrycount) [WithRetryFixedInterval](#withretryfixedinterval) [WithRetryHook](#withretryhook) [WithRetryInterval](#withretryinterval) [WithTimeout](#withtimeout) [WithTransport](#withtransport) |
-| **Request Options** | [Body](#body) [Form](#form) [Header](#header) [Headers](#headers) [JSON](#json) [Path](#path) [Paths](#paths) [Queries](#queries) [Query](#query) |
+| **Client Options** | [WithBaseURL](#withbaseurl) [WithHeader](#withheader) [WithHeaders](#withheaders) [WithTimeout](#withtimeout) |
+| **Debugging** | [Dump](#dump) [DumpTo](#dumpto) [DumpToFile](#dumptofile) |
+| **Download Options** | [OutputFile](#outputfile) |
+| **Other** | [Error](#error) [RetryBackoff](#retrybackoff) [RetryCondition](#retrycondition) [RetryCount](#retrycount) [RetryFixedInterval](#retryfixedinterval) [RetryHook](#retryhook) [RetryInterval](#retryinterval) [WithDumpAll](#withdumpall) [WithDumpEachRequest](#withdumpeachrequest) [WithDumpEachRequestTo](#withdumpeachrequestto) [WithErrorMapper](#witherrormapper) [WithMiddleware](#withmiddleware) [WithRetry](#withretry) [WithRetryBackoff](#withretrybackoff) [WithRetryCondition](#withretrycondition) [WithRetryCount](#withretrycount) [WithRetryFixedInterval](#withretryfixedinterval) [WithRetryHook](#withretryhook) [WithRetryInterval](#withretryinterval) [WithTransport](#withtransport) |
+| **Request Options** | [Before](#before) [Body](#body) [Form](#form) [Header](#header) [Headers](#headers) [JSON](#json) [Path](#path) [Paths](#paths) [Queries](#queries) [Query](#query) [Timeout](#timeout) |
 | **Requests** | [Delete](#delete) [Get](#get) [Patch](#patch) [Post](#post) [Put](#put) |
 | **Requests (Context)** | [DeleteCtx](#deletectx) [GetCtx](#getctx) [PatchCtx](#patchctx) [PostCtx](#postctx) [PutCtx](#putctx) |
-| **Upload Options** | [File](#file) [FileBytes](#filebytes) [FileReader](#filereader) [Files](#files) [UploadCallback](#uploadcallback) |
+| **Upload Options** | [File](#file) [FileBytes](#filebytes) [FileReader](#filereader) [Files](#files) [UploadCallback](#uploadcallback) [UploadCallbackWithInterval](#uploadcallbackwithinterval) [UploadProgress](#uploadprogress) |
 
 
 ## Auth
@@ -139,6 +142,24 @@ Auth sets the Authorization header using a scheme and token.
 ```go
 c := httpx.New()
 _ = httpx.Get[string](c, "https://example.com", httpx.Auth("Token", "abc123"))
+```
+
+### <a id="basic"></a>Basic
+
+Basic sets HTTP basic authentication headers.
+
+```go
+c := httpx.New()
+_ = httpx.Get[string](c, "https://example.com", httpx.Basic("user", "pass"))
+```
+
+### <a id="bearer"></a>Bearer
+
+Bearer sets the Authorization header with a bearer token.
+
+```go
+c := httpx.New()
+_ = httpx.Get[string](c, "https://example.com", httpx.Bearer("token"))
 ```
 
 ## Client
@@ -183,36 +204,48 @@ c := httpx.New()
 c.Req().EnableDumpEachRequest()
 ```
 
-## Other
+## Client Options
 
-### <a id="basic"></a>Basic
+### <a id="withbaseurl"></a>WithBaseURL
 
-Basic sets HTTP basic authentication headers.
+WithBaseURL sets a base URL on the client.
 
 ```go
-c := httpx.New()
-_ = httpx.Get[string](c, "https://example.com", httpx.Basic("user", "pass"))
+c := httpx.New(httpx.WithBaseURL("https://api.example.com"))
+_ = c
 ```
 
-### <a id="bearer"></a>Bearer
+### <a id="withheader"></a>WithHeader
 
-Bearer sets the Authorization header with a bearer token.
+WithHeader sets a default header for all requests.
 
 ```go
-c := httpx.New()
-_ = httpx.Get[string](c, "https://example.com", httpx.Bearer("token"))
+c := httpx.New(httpx.WithHeader("X-Trace", "1"))
+_ = c
 ```
 
-### <a id="before"></a>Before
+### <a id="withheaders"></a>WithHeaders
 
-Before runs a hook before the request is sent.
+WithHeaders sets default headers for all requests.
 
 ```go
-c := httpx.New()
-_ = httpx.Get[string](c, "https://example.com", httpx.Before(func(r *req.Request) {
-	r.EnableDump()
+c := httpx.New(httpx.WithHeaders(map[string]string{
+	"X-Trace": "1",
+	"Accept":  "application/json",
 }))
+_ = c
 ```
+
+### <a id="withtimeout"></a>WithTimeout
+
+WithTimeout sets the default timeout for the client.
+
+```go
+c := httpx.New(httpx.WithTimeout(3 * time.Second))
+_ = c
+```
+
+## Debugging
 
 ### <a id="dump"></a>Dump
 
@@ -242,6 +275,19 @@ c := httpx.New()
 _ = httpx.Get[string](c, "https://example.com", httpx.DumpToFile("httpx.dump"))
 ```
 
+## Download Options
+
+### <a id="outputfile"></a>OutputFile
+
+OutputFile streams the response body to a file path.
+
+```go
+c := httpx.New()
+_ = httpx.Get[string](c, "https://example.com/file", httpx.OutputFile("/tmp/file.bin"))
+```
+
+## Other
+
 ### <a id="error"></a>Error
 
 Error returns a short, human-friendly summary of the HTTP error.
@@ -257,15 +303,6 @@ var httpErr *httpx.HTTPError
 if errors.As(res.Err, &httpErr) {
 	_ = httpErr.StatusCode
 }
-```
-
-### <a id="outputfile"></a>OutputFile
-
-OutputFile streams the response body to a file path.
-
-```go
-c := httpx.New()
-_ = httpx.Get[string](c, "https://example.com/file", httpx.OutputFile("/tmp/file.bin"))
 ```
 
 ### <a id="retrybackoff"></a>RetryBackoff
@@ -326,174 +363,6 @@ _ = httpx.Get[string](c, "https://example.com", httpx.RetryInterval(func(_ *req.
 }))
 ```
 
-### <a id="timeout"></a>Timeout
-
-Timeout sets a per-request timeout using context cancellation.
-
-```go
-c := httpx.New()
-_ = httpx.Get[string](c, "https://example.com", httpx.Timeout(2*time.Second))
-```
-
-### <a id="uploadcallbackwithinterval"></a>UploadCallbackWithInterval
-
-UploadCallbackWithInterval registers a callback for upload progress with a minimum interval.
-
-_Example: throttle upload progress updates_
-
-```go
-srv1 := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-	defer r.Body.Close()
-	buf := make([]byte, 32*1024)
-	for {
-		n, err := r.Body.Read(buf)
-		if n > 0 {
-			time.Sleep(20 * time.Millisecond)
-		}
-		if err == io.EOF {
-			break
-		}
-		if err != nil {
-			return
-		}
-	}
-	w.WriteHeader(http.StatusOK)
-}))
-defer srv1.Close()
-
-payload1 := bytes.Repeat([]byte("x"), 4*1024*1024)
-pr1, pw1 := io.Pipe()
-go func() {
-	defer pw1.Close()
-	chunk := 64 * 1024
-	for i := 0; i < len(payload1); i += chunk {
-		end := i + chunk
-		if end > len(payload1) {
-			end = len(payload1)
-		}
-		_, _ = pw1.Write(payload1[i:end])
-		time.Sleep(50 * time.Millisecond)
-	}
-}()
-c1 := httpx.New()
-total1 := float64(len(payload1))
-_ = httpx.Post[any, string](c1, srv1.URL+"/upload", nil,
-	httpx.FileReader("file", "payload.bin", pr1),
-	httpx.UploadCallbackWithInterval(func(info req.UploadInfo) {
-		percent := float64(info.UploadedSize) / total1 * 100
-		fmt.Printf("\rprogress: %.1f%% (%.0f bytes)", percent, float64(info.UploadedSize))
-		if info.FileSize > 0 && info.UploadedSize >= info.FileSize {
-			fmt.Print("\n")
-		}
-	}, 200*time.Millisecond),
-)
-```
-
-_Example: report filename and bytes_
-
-```go
-srv2 := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-	defer r.Body.Close()
-	buf := make([]byte, 32*1024)
-	for {
-		n, err := r.Body.Read(buf)
-		if n > 0 {
-			time.Sleep(20 * time.Millisecond)
-		}
-		if err == io.EOF {
-			break
-		}
-		if err != nil {
-			return
-		}
-	}
-	w.WriteHeader(http.StatusOK)
-}))
-defer srv2.Close()
-
-payload2 := bytes.Repeat([]byte("x"), 4*1024*1024)
-pr2, pw2 := io.Pipe()
-go func() {
-	defer pw2.Close()
-	chunk := 64 * 1024
-	for i := 0; i < len(payload2); i += chunk {
-		end := i + chunk
-		if end > len(payload2) {
-			end = len(payload2)
-		}
-		_, _ = pw2.Write(payload2[i:end])
-		time.Sleep(50 * time.Millisecond)
-	}
-}()
-c2 := httpx.New()
-total2 := float64(len(payload2))
-_ = httpx.Post[any, string](c2, srv2.URL+"/upload", nil,
-	httpx.FileReader("file", "payload.bin", pr2),
-	httpx.UploadCallbackWithInterval(func(info req.UploadInfo) {
-		percent := float64(info.UploadedSize) / total2 * 100
-		fmt.Printf("\r%s: %.1f%% (%d bytes)", info.FileName, percent, info.UploadedSize)
-		if info.FileSize > 0 && info.UploadedSize >= info.FileSize {
-			fmt.Print("\n")
-		}
-	}, 200*time.Millisecond),
-)
-```
-
-### <a id="uploadprogress"></a>UploadProgress
-
-UploadProgress enables a default progress spinner and bar for uploads.
-
-```go
-srv := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-	defer r.Body.Close()
-	buf := make([]byte, 32*1024)
-	for {
-		n, err := r.Body.Read(buf)
-		if n > 0 {
-			time.Sleep(10 * time.Millisecond)
-		}
-		if err == io.EOF {
-			break
-		}
-		if err != nil {
-			return
-		}
-	}
-	w.WriteHeader(http.StatusOK)
-}))
-defer srv.Close()
-
-payload := bytes.Repeat([]byte("x"), 4*1024*1024)
-pr, pw := io.Pipe()
-go func() {
-	defer pw.Close()
-	chunk := 64 * 1024
-	for i := 0; i < len(payload); i += chunk {
-		end := i + chunk
-		if end > len(payload) {
-			end = len(payload)
-		}
-		_, _ = pw.Write(payload[i:end])
-		time.Sleep(50 * time.Millisecond)
-	}
-}()
-
-c := httpx.New()
-_ = httpx.Post[any, string](c, srv.URL+"/upload", nil,
-	httpx.FileReader("file", "payload.bin", pr),
-	httpx.UploadProgress(),
-)
-```
-
-### <a id="withbaseurl"></a>WithBaseURL
-
-WithBaseURL sets a base URL on the client.
-
-```go
-c := httpx.New(httpx.WithBaseURL("https://api.example.com"))
-_ = c
-```
-
 ### <a id="withdumpall"></a>WithDumpAll
 
 WithDumpAll enables req's client-level dump output for all requests.
@@ -531,27 +400,6 @@ WithErrorMapper sets a custom error mapper for non-2xx responses.
 ```go
 c := httpx.New(httpx.WithErrorMapper(func(resp *req.Response) error {
 	return fmt.Errorf("status %d", resp.StatusCode)
-}))
-_ = c
-```
-
-### <a id="withheader"></a>WithHeader
-
-WithHeader sets a default header for all requests.
-
-```go
-c := httpx.New(httpx.WithHeader("X-Trace", "1"))
-_ = c
-```
-
-### <a id="withheaders"></a>WithHeaders
-
-WithHeaders sets default headers for all requests.
-
-```go
-c := httpx.New(httpx.WithHeaders(map[string]string{
-	"X-Trace": "1",
-	"Accept":  "application/json",
 }))
 _ = c
 ```
@@ -637,15 +485,6 @@ c := httpx.New(httpx.WithRetryInterval(func(_ *req.Response, attempt int) time.D
 _ = c
 ```
 
-### <a id="withtimeout"></a>WithTimeout
-
-WithTimeout sets the default timeout for the client.
-
-```go
-c := httpx.New(httpx.WithTimeout(3 * time.Second))
-_ = c
-```
-
 ### <a id="withtransport"></a>WithTransport
 
 WithTransport wraps the underlying transport with a custom RoundTripper.
@@ -656,6 +495,17 @@ _ = c
 ```
 
 ## Request Options
+
+### <a id="before"></a>Before
+
+Before runs a hook before the request is sent.
+
+```go
+c := httpx.New()
+_ = httpx.Get[string](c, "https://example.com", httpx.Before(func(r *req.Request) {
+	r.EnableDump()
+}))
+```
 
 ### <a id="body"></a>Body
 
@@ -763,6 +613,15 @@ Query adds query parameters as key/value pairs.
 ```go
 c := httpx.New()
 _ = httpx.Get[string](c, "https://example.com/search", httpx.Query("q", "go", "ok", "1"))
+```
+
+### <a id="timeout"></a>Timeout
+
+Timeout sets a per-request timeout using context cancellation.
+
+```go
+c := httpx.New()
+_ = httpx.Get[string](c, "https://example.com", httpx.Timeout(2*time.Second))
 ```
 
 ## Requests
@@ -1090,6 +949,156 @@ _ = httpx.Post[any, string](c2, srv2.URL+"/upload", nil,
 			fmt.Print("\n")
 		}
 	}),
+)
+```
+
+### <a id="uploadcallbackwithinterval"></a>UploadCallbackWithInterval
+
+UploadCallbackWithInterval registers a callback for upload progress with a minimum interval.
+
+_Example: throttle upload progress updates_
+
+```go
+srv1 := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+	defer r.Body.Close()
+	buf := make([]byte, 32*1024)
+	for {
+		n, err := r.Body.Read(buf)
+		if n > 0 {
+			time.Sleep(20 * time.Millisecond)
+		}
+		if err == io.EOF {
+			break
+		}
+		if err != nil {
+			return
+		}
+	}
+	w.WriteHeader(http.StatusOK)
+}))
+defer srv1.Close()
+
+payload1 := bytes.Repeat([]byte("x"), 4*1024*1024)
+pr1, pw1 := io.Pipe()
+go func() {
+	defer pw1.Close()
+	chunk := 64 * 1024
+	for i := 0; i < len(payload1); i += chunk {
+		end := i + chunk
+		if end > len(payload1) {
+			end = len(payload1)
+		}
+		_, _ = pw1.Write(payload1[i:end])
+		time.Sleep(50 * time.Millisecond)
+	}
+}()
+c1 := httpx.New()
+total1 := float64(len(payload1))
+_ = httpx.Post[any, string](c1, srv1.URL+"/upload", nil,
+	httpx.FileReader("file", "payload.bin", pr1),
+	httpx.UploadCallbackWithInterval(func(info req.UploadInfo) {
+		percent := float64(info.UploadedSize) / total1 * 100
+		fmt.Printf("\rprogress: %.1f%% (%.0f bytes)", percent, float64(info.UploadedSize))
+		if info.FileSize > 0 && info.UploadedSize >= info.FileSize {
+			fmt.Print("\n")
+		}
+	}, 200*time.Millisecond),
+)
+```
+
+_Example: report filename and bytes_
+
+```go
+srv2 := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+	defer r.Body.Close()
+	buf := make([]byte, 32*1024)
+	for {
+		n, err := r.Body.Read(buf)
+		if n > 0 {
+			time.Sleep(20 * time.Millisecond)
+		}
+		if err == io.EOF {
+			break
+		}
+		if err != nil {
+			return
+		}
+	}
+	w.WriteHeader(http.StatusOK)
+}))
+defer srv2.Close()
+
+payload2 := bytes.Repeat([]byte("x"), 4*1024*1024)
+pr2, pw2 := io.Pipe()
+go func() {
+	defer pw2.Close()
+	chunk := 64 * 1024
+	for i := 0; i < len(payload2); i += chunk {
+		end := i + chunk
+		if end > len(payload2) {
+			end = len(payload2)
+		}
+		_, _ = pw2.Write(payload2[i:end])
+		time.Sleep(50 * time.Millisecond)
+	}
+}()
+c2 := httpx.New()
+total2 := float64(len(payload2))
+_ = httpx.Post[any, string](c2, srv2.URL+"/upload", nil,
+	httpx.FileReader("file", "payload.bin", pr2),
+	httpx.UploadCallbackWithInterval(func(info req.UploadInfo) {
+		percent := float64(info.UploadedSize) / total2 * 100
+		fmt.Printf("\r%s: %.1f%% (%d bytes)", info.FileName, percent, info.UploadedSize)
+		if info.FileSize > 0 && info.UploadedSize >= info.FileSize {
+			fmt.Print("\n")
+		}
+	}, 200*time.Millisecond),
+)
+```
+
+### <a id="uploadprogress"></a>UploadProgress
+
+UploadProgress enables a default progress spinner and bar for uploads.
+
+```go
+srv := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+	defer r.Body.Close()
+	buf := make([]byte, 32*1024)
+	for {
+		n, err := r.Body.Read(buf)
+		if n > 0 {
+			time.Sleep(10 * time.Millisecond)
+		}
+		if err == io.EOF {
+			break
+		}
+		if err != nil {
+			return
+		}
+	}
+	w.WriteHeader(http.StatusOK)
+}))
+defer srv.Close()
+
+payload := bytes.Repeat([]byte("x"), 4*1024*1024)
+pr, pw := io.Pipe()
+go func() {
+	defer pw.Close()
+	chunk := 64 * 1024
+	for i := 0; i < len(payload); i += chunk {
+		end := i + chunk
+		if end > len(payload) {
+			end = len(payload)
+		}
+		_, _ = pw.Write(payload[i:end])
+		time.Sleep(50 * time.Millisecond)
+	}
+}()
+
+c := httpx.New()
+_ = httpx.Post[any, string](c, srv.URL+"/upload", nil,
+	httpx.FileReader("file", "payload.bin", pr),
+	httpx.UploadProgress(),
 )
 ```
 <!-- api:embed:end -->

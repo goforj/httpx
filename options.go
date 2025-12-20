@@ -381,6 +381,7 @@ func UploadCallback(callback req.UploadCallback) Option {
 }
 
 // UploadCallbackWithInterval registers a callback for upload progress with a minimum interval.
+// @group Upload Options
 //
 // Example: throttle upload progress updates
 //
@@ -515,6 +516,7 @@ func UploadCallbackWithInterval(callback req.UploadCallback, minInterval time.Du
 }
 
 // OutputFile streams the response body to a file path.
+// @group Download Options
 //
 // Example: download to file
 //
@@ -527,6 +529,7 @@ func OutputFile(path string) Option {
 }
 
 // UploadProgress enables a default progress spinner and bar for uploads.
+// @group Upload Options
 //
 // Example: upload with automatic progress
 //
@@ -645,6 +648,7 @@ func formatBytes(size int64) string {
 }
 
 // Dump enables req's request-level dump output.
+// @group Debugging
 //
 // Example: dump a single request
 //
@@ -657,6 +661,7 @@ func Dump() Option {
 }
 
 // DumpTo enables req's request-level dump output to a writer.
+// @group Debugging
 //
 // Example: dump to a buffer
 //
@@ -670,6 +675,7 @@ func DumpTo(output io.Writer) Option {
 }
 
 // DumpToFile enables req's request-level dump output to a file path.
+// @group Debugging
 //
 // Example: dump to a file
 //
@@ -682,6 +688,7 @@ func DumpToFile(filename string) Option {
 }
 
 // Timeout sets a per-request timeout using context cancellation.
+// @group Request Options
 //
 // Example: per-request timeout
 //
@@ -700,6 +707,7 @@ func Timeout(d time.Duration) Option {
 }
 
 // Bearer sets the Authorization header with a bearer token.
+// @group Auth
 //
 // Example: bearer auth
 //
@@ -712,6 +720,7 @@ func Bearer(token string) Option {
 }
 
 // Basic sets HTTP basic authentication headers.
+// @group Auth
 //
 // Example: basic auth
 //
@@ -724,6 +733,7 @@ func Basic(user, pass string) Option {
 }
 
 // Before runs a hook before the request is sent.
+// @group Request Options
 //
 // Example: mutate req.Request
 //
@@ -738,6 +748,7 @@ func Before(fn func(*req.Request)) Option {
 }
 
 // WithBaseURL sets a base URL on the client.
+// @group Client Options
 //
 // Example: client base URL
 //
@@ -750,6 +761,7 @@ func WithBaseURL(url string) ClientOption {
 }
 
 // WithTimeout sets the default timeout for the client.
+// @group Client Options
 //
 // Example: client timeout
 //
@@ -762,6 +774,7 @@ func WithTimeout(d time.Duration) ClientOption {
 }
 
 // WithHeader sets a default header for all requests.
+// @group Client Options
 //
 // Example: client header
 //
@@ -774,6 +787,7 @@ func WithHeader(key, value string) ClientOption {
 }
 
 // WithHeaders sets default headers for all requests.
+// @group Client Options
 //
 // Example: client headers
 //
