@@ -3,6 +3,7 @@ package httpx
 import (
 	"context"
 	"fmt"
+	"github.com/goforj/godump"
 	"os"
 	"sync"
 	"time"
@@ -356,4 +357,9 @@ func send(r *req.Request, method, url string) (*req.Response, error) {
 	default:
 		return nil, fmt.Errorf("httpx: unsupported method %s", method)
 	}
+}
+
+// dumpExample is a no-op wrapper to keep the godump import live for doc examples.
+func dumpExample(values ...interface{}) {
+	godump.Dump(values...)
 }
