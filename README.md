@@ -12,7 +12,7 @@ It keeps req's power and escape hatches, while making the 90% use case feel effo
     <a href="https://golang.org"><img src="https://img.shields.io/badge/go-1.18+-blue?logo=go" alt="Go version"></a>
     <img src="https://img.shields.io/github/v/tag/goforj/httpx?label=version&sort=semver" alt="Latest tag">
     <a href="https://goreportcard.com/report/github.com/goforj/httpx"><img src="https://goreportcard.com/badge/github.com/goforj/httpx" alt="Go Report Card"></a>
-    <a href="https://codecov.io/gh/goforj/httpx" ><img src="https://codecov.io/gh/goforj/httpx/graph/badge.svg?token=ULUTXL03XC"/></a>
+    <a href="https://codecov.io/gh/goforj/httpx" ><img src="https://codecov.io/gh/goforj/httpx/graph/badge.svg?token=R5O7LYAD4B"/></a>
 <!-- test-count:embed:start -->
     <img src="https://img.shields.io/badge/tests-74-brightgreen" alt="Tests">
 <!-- test-count:embed:end -->
@@ -123,13 +123,15 @@ They are compiled by `example_compile_test.go` to keep docs and code in sync.
 |------:|-----------|
 | **Auth** | [Auth](#auth) [Basic](#basic) [Bearer](#bearer) |
 | **Client** | [Default](#default) [New](#new) [Raw](#raw) [Req](#req) |
-| **Client Options** | [WithBaseURL](#withbaseurl) [WithHeader](#withheader) [WithHeaders](#withheaders) [WithTimeout](#withtimeout) |
-| **Debugging** | [Dump](#dump) [DumpTo](#dumpto) [DumpToFile](#dumptofile) |
+| **Client Options** | [WithBaseURL](#withbaseurl) [WithErrorMapper](#witherrormapper) [WithHeader](#withheader) [WithHeaders](#withheaders) [WithMiddleware](#withmiddleware) [WithTimeout](#withtimeout) [WithTransport](#withtransport) |
+| **Debugging** | [Dump](#dump) [DumpTo](#dumpto) [DumpToFile](#dumptofile) [WithDumpAll](#withdumpall) [WithDumpEachRequest](#withdumpeachrequest) [WithDumpEachRequestTo](#withdumpeachrequestto) |
 | **Download Options** | [OutputFile](#outputfile) |
-| **Other** | [Error](#error) [RetryBackoff](#retrybackoff) [RetryCondition](#retrycondition) [RetryCount](#retrycount) [RetryFixedInterval](#retryfixedinterval) [RetryHook](#retryhook) [RetryInterval](#retryinterval) [WithDumpAll](#withdumpall) [WithDumpEachRequest](#withdumpeachrequest) [WithDumpEachRequestTo](#withdumpeachrequestto) [WithErrorMapper](#witherrormapper) [WithMiddleware](#withmiddleware) [WithRetry](#withretry) [WithRetryBackoff](#withretrybackoff) [WithRetryCondition](#withretrycondition) [WithRetryCount](#withretrycount) [WithRetryFixedInterval](#withretryfixedinterval) [WithRetryHook](#withretryhook) [WithRetryInterval](#withretryinterval) [WithTransport](#withtransport) |
+| **Errors** | [Error](#error) |
 | **Request Options** | [Before](#before) [Body](#body) [Form](#form) [Header](#header) [Headers](#headers) [JSON](#json) [Path](#path) [Paths](#paths) [Queries](#queries) [Query](#query) [Timeout](#timeout) |
 | **Requests** | [Delete](#delete) [Get](#get) [Patch](#patch) [Post](#post) [Put](#put) |
 | **Requests (Context)** | [DeleteCtx](#deletectx) [GetCtx](#getctx) [PatchCtx](#patchctx) [PostCtx](#postctx) [PutCtx](#putctx) |
+| **Retry** | [RetryBackoff](#retrybackoff) [RetryCondition](#retrycondition) [RetryCount](#retrycount) [RetryFixedInterval](#retryfixedinterval) [RetryHook](#retryhook) [RetryInterval](#retryinterval) |
+| **Retry (Client)** | [WithRetry](#withretry) [WithRetryBackoff](#withretrybackoff) [WithRetryCondition](#withretrycondition) [WithRetryCount](#withretrycount) [WithRetryFixedInterval](#withretryfixedinterval) [WithRetryHook](#withretryhook) [WithRetryInterval](#withretryinterval) |
 | **Upload Options** | [File](#file) [FileBytes](#filebytes) [FileReader](#filereader) [Files](#files) [UploadCallback](#uploadcallback) [UploadCallbackWithInterval](#uploadcallbackwithinterval) [UploadProgress](#uploadprogress) |
 
 
@@ -215,6 +217,17 @@ c := httpx.New(httpx.WithBaseURL("https://api.example.com"))
 _ = c
 ```
 
+### <a id="witherrormapper"></a>WithErrorMapper
+
+WithErrorMapper sets a custom error mapper for non-2xx responses.
+
+```go
+c := httpx.New(httpx.WithErrorMapper(func(resp *req.Response) error {
+	return fmt.Errorf("status %d", resp.StatusCode)
+}))
+_ = c
+```
+
 ### <a id="withheader"></a>WithHeader
 
 WithHeader sets a default header for all requests.
@@ -236,12 +249,33 @@ c := httpx.New(httpx.WithHeaders(map[string]string{
 _ = c
 ```
 
+### <a id="withmiddleware"></a>WithMiddleware
+
+WithMiddleware adds request middleware to the client.
+
+```go
+c := httpx.New(httpx.WithMiddleware(func(_ *req.Client, r *req.Request) error {
+	r.SetHeader("X-Trace", "1")
+	return nil
+}))
+_ = c
+```
+
 ### <a id="withtimeout"></a>WithTimeout
 
 WithTimeout sets the default timeout for the client.
 
 ```go
 c := httpx.New(httpx.WithTimeout(3 * time.Second))
+_ = c
+```
+
+### <a id="withtransport"></a>WithTransport
+
+WithTransport wraps the underlying transport with a custom RoundTripper.
+
+```go
+c := httpx.New(httpx.WithTransport(http.RoundTripper(http.DefaultTransport)))
 _ = c
 ```
 
@@ -275,94 +309,6 @@ c := httpx.New()
 _ = httpx.Get[string](c, "https://example.com", httpx.DumpToFile("httpx.dump"))
 ```
 
-## Download Options
-
-### <a id="outputfile"></a>OutputFile
-
-OutputFile streams the response body to a file path.
-
-```go
-c := httpx.New()
-_ = httpx.Get[string](c, "https://example.com/file", httpx.OutputFile("/tmp/file.bin"))
-```
-
-## Other
-
-### <a id="error"></a>Error
-
-Error returns a short, human-friendly summary of the HTTP error.
-
-```go
-type User struct {
-	Name string `json:"name"`
-}
-
-c := httpx.New()
-res := httpx.Get[User](c, "https://example.com/users/1")
-var httpErr *httpx.HTTPError
-if errors.As(res.Err, &httpErr) {
-	_ = httpErr.StatusCode
-}
-```
-
-### <a id="retrybackoff"></a>RetryBackoff
-
-RetryBackoff sets a capped exponential backoff retry interval for a request.
-
-```go
-c := httpx.New()
-_ = httpx.Get[string](c, "https://example.com", httpx.RetryBackoff(100*time.Millisecond, 2*time.Second))
-```
-
-### <a id="retrycondition"></a>RetryCondition
-
-RetryCondition sets the retry condition for a request.
-
-```go
-c := httpx.New()
-_ = httpx.Get[string](c, "https://example.com", httpx.RetryCondition(func(resp *req.Response, _ error) bool {
-	return resp != nil && resp.StatusCode == 503
-}))
-```
-
-### <a id="retrycount"></a>RetryCount
-
-RetryCount enables retry for a request and sets the maximum retry count.
-
-```go
-c := httpx.New()
-_ = httpx.Get[string](c, "https://example.com", httpx.RetryCount(2))
-```
-
-### <a id="retryfixedinterval"></a>RetryFixedInterval
-
-RetryFixedInterval sets a fixed retry interval for a request.
-
-```go
-c := httpx.New()
-_ = httpx.Get[string](c, "https://example.com", httpx.RetryFixedInterval(200*time.Millisecond))
-```
-
-### <a id="retryhook"></a>RetryHook
-
-RetryHook registers a retry hook for a request.
-
-```go
-c := httpx.New()
-_ = httpx.Get[string](c, "https://example.com", httpx.RetryHook(func(_ *req.Response, _ error) {}))
-```
-
-### <a id="retryinterval"></a>RetryInterval
-
-RetryInterval sets a custom retry interval function for a request.
-
-```go
-c := httpx.New()
-_ = httpx.Get[string](c, "https://example.com", httpx.RetryInterval(func(_ *req.Response, attempt int) time.Duration {
-	return time.Duration(attempt) * 100 * time.Millisecond
-}))
-```
-
 ### <a id="withdumpall"></a>WithDumpAll
 
 WithDumpAll enables req's client-level dump output for all requests.
@@ -384,7 +330,6 @@ _ = c
 ### <a id="withdumpeachrequestto"></a>WithDumpEachRequestTo
 
 WithDumpEachRequestTo enables request-level dumps for each request and writes
-them to the provided output.
 
 ```go
 var buf bytes.Buffer
@@ -393,105 +338,34 @@ _ = httpx.Get[string](c, "https://example.com")
 _ = buf.String()
 ```
 
-### <a id="witherrormapper"></a>WithErrorMapper
+## Download Options
 
-WithErrorMapper sets a custom error mapper for non-2xx responses.
+### <a id="outputfile"></a>OutputFile
+
+OutputFile streams the response body to a file path.
 
 ```go
-c := httpx.New(httpx.WithErrorMapper(func(resp *req.Response) error {
-	return fmt.Errorf("status %d", resp.StatusCode)
-}))
-_ = c
+c := httpx.New()
+_ = httpx.Get[string](c, "https://example.com/file", httpx.OutputFile("/tmp/file.bin"))
 ```
 
-### <a id="withmiddleware"></a>WithMiddleware
+## Errors
 
-WithMiddleware adds request middleware to the client.
+### <a id="error"></a>Error
 
-```go
-c := httpx.New(httpx.WithMiddleware(func(_ *req.Client, r *req.Request) error {
-	r.SetHeader("X-Trace", "1")
-	return nil
-}))
-_ = c
-```
-
-### <a id="withretry"></a>WithRetry
-
-WithRetry applies a retry configuration to the client.
+Error returns a short, human-friendly summary of the HTTP error.
 
 ```go
-c := httpx.New(httpx.WithRetry(func(rc *req.Client) {
-	rc.SetCommonRetryCount(2)
-}))
-_ = c
-```
+type User struct {
+	Name string `json:"name"`
+}
 
-### <a id="withretrybackoff"></a>WithRetryBackoff
-
-WithRetryBackoff sets a capped exponential backoff retry interval for the client.
-
-```go
-c := httpx.New(httpx.WithRetryBackoff(100*time.Millisecond, 2*time.Second))
-_ = c
-```
-
-### <a id="withretrycondition"></a>WithRetryCondition
-
-WithRetryCondition sets the retry condition for the client.
-
-```go
-c := httpx.New(httpx.WithRetryCondition(func(resp *req.Response, _ error) bool {
-	return resp != nil && resp.StatusCode == 503
-}))
-_ = c
-```
-
-### <a id="withretrycount"></a>WithRetryCount
-
-WithRetryCount enables retry for the client and sets the maximum retry count.
-
-```go
-c := httpx.New(httpx.WithRetryCount(2))
-_ = c
-```
-
-### <a id="withretryfixedinterval"></a>WithRetryFixedInterval
-
-WithRetryFixedInterval sets a fixed retry interval for the client.
-
-```go
-c := httpx.New(httpx.WithRetryFixedInterval(200 * time.Millisecond))
-_ = c
-```
-
-### <a id="withretryhook"></a>WithRetryHook
-
-WithRetryHook registers a retry hook for the client.
-
-```go
-c := httpx.New(httpx.WithRetryHook(func(_ *req.Response, _ error) {}))
-_ = c
-```
-
-### <a id="withretryinterval"></a>WithRetryInterval
-
-WithRetryInterval sets a custom retry interval function for the client.
-
-```go
-c := httpx.New(httpx.WithRetryInterval(func(_ *req.Response, attempt int) time.Duration {
-	return time.Duration(attempt) * 100 * time.Millisecond
-}))
-_ = c
-```
-
-### <a id="withtransport"></a>WithTransport
-
-WithTransport wraps the underlying transport with a custom RoundTripper.
-
-```go
-c := httpx.New(httpx.WithTransport(http.RoundTripper(http.DefaultTransport)))
-_ = c
+c := httpx.New()
+res := httpx.Get[User](c, "https://example.com/users/1")
+var httpErr *httpx.HTTPError
+if errors.As(res.Err, &httpErr) {
+	_ = httpErr.StatusCode
+}
 ```
 
 ## Request Options
@@ -793,6 +667,137 @@ c := httpx.New()
 ctx := context.Background()
 res := httpx.PutCtx[UpdateUser, User](c, ctx, "https://api.example.com/users/1", UpdateUser{Name: "Ana"})
 _, _ = res.Body, res.Err
+```
+
+## Retry
+
+### <a id="retrybackoff"></a>RetryBackoff
+
+RetryBackoff sets a capped exponential backoff retry interval for a request.
+
+```go
+c := httpx.New()
+_ = httpx.Get[string](c, "https://example.com", httpx.RetryBackoff(100*time.Millisecond, 2*time.Second))
+```
+
+### <a id="retrycondition"></a>RetryCondition
+
+RetryCondition sets the retry condition for a request.
+
+```go
+c := httpx.New()
+_ = httpx.Get[string](c, "https://example.com", httpx.RetryCondition(func(resp *req.Response, _ error) bool {
+	return resp != nil && resp.StatusCode == 503
+}))
+```
+
+### <a id="retrycount"></a>RetryCount
+
+RetryCount enables retry for a request and sets the maximum retry count.
+
+```go
+c := httpx.New()
+_ = httpx.Get[string](c, "https://example.com", httpx.RetryCount(2))
+```
+
+### <a id="retryfixedinterval"></a>RetryFixedInterval
+
+RetryFixedInterval sets a fixed retry interval for a request.
+
+```go
+c := httpx.New()
+_ = httpx.Get[string](c, "https://example.com", httpx.RetryFixedInterval(200*time.Millisecond))
+```
+
+### <a id="retryhook"></a>RetryHook
+
+RetryHook registers a retry hook for a request.
+
+```go
+c := httpx.New()
+_ = httpx.Get[string](c, "https://example.com", httpx.RetryHook(func(_ *req.Response, _ error) {}))
+```
+
+### <a id="retryinterval"></a>RetryInterval
+
+RetryInterval sets a custom retry interval function for a request.
+
+```go
+c := httpx.New()
+_ = httpx.Get[string](c, "https://example.com", httpx.RetryInterval(func(_ *req.Response, attempt int) time.Duration {
+	return time.Duration(attempt) * 100 * time.Millisecond
+}))
+```
+
+## Retry (Client)
+
+### <a id="withretry"></a>WithRetry
+
+WithRetry applies a retry configuration to the client.
+
+```go
+c := httpx.New(httpx.WithRetry(func(rc *req.Client) {
+	rc.SetCommonRetryCount(2)
+}))
+_ = c
+```
+
+### <a id="withretrybackoff"></a>WithRetryBackoff
+
+WithRetryBackoff sets a capped exponential backoff retry interval for the client.
+
+```go
+c := httpx.New(httpx.WithRetryBackoff(100*time.Millisecond, 2*time.Second))
+_ = c
+```
+
+### <a id="withretrycondition"></a>WithRetryCondition
+
+WithRetryCondition sets the retry condition for the client.
+
+```go
+c := httpx.New(httpx.WithRetryCondition(func(resp *req.Response, _ error) bool {
+	return resp != nil && resp.StatusCode == 503
+}))
+_ = c
+```
+
+### <a id="withretrycount"></a>WithRetryCount
+
+WithRetryCount enables retry for the client and sets the maximum retry count.
+
+```go
+c := httpx.New(httpx.WithRetryCount(2))
+_ = c
+```
+
+### <a id="withretryfixedinterval"></a>WithRetryFixedInterval
+
+WithRetryFixedInterval sets a fixed retry interval for the client.
+
+```go
+c := httpx.New(httpx.WithRetryFixedInterval(200 * time.Millisecond))
+_ = c
+```
+
+### <a id="withretryhook"></a>WithRetryHook
+
+WithRetryHook registers a retry hook for the client.
+
+```go
+c := httpx.New(httpx.WithRetryHook(func(_ *req.Response, _ error) {}))
+_ = c
+```
+
+### <a id="withretryinterval"></a>WithRetryInterval
+
+WithRetryInterval sets a custom retry interval function for the client.
+
+```go
+c := httpx.New(httpx.WithRetryInterval(func(_ *req.Response, attempt int) time.Duration {
+	return time.Duration(attempt) * 100 * time.Millisecond
+}))
+_ = c
 ```
 
 ## Upload Options

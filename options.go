@@ -806,6 +806,7 @@ func WithHeaders(values map[string]string) ClientOption {
 type RetryOption func(*req.Client)
 
 // RetryCount enables retry for a request and sets the maximum retry count.
+// @group Retry
 //
 // Example: request retry count
 //
@@ -818,6 +819,7 @@ func RetryCount(count int) Option {
 }
 
 // RetryFixedInterval sets a fixed retry interval for a request.
+// @group Retry
 //
 // Example: request retry interval
 //
@@ -830,6 +832,7 @@ func RetryFixedInterval(interval time.Duration) Option {
 }
 
 // RetryBackoff sets a capped exponential backoff retry interval for a request.
+// @group Retry
 //
 // Example: request retry backoff
 //
@@ -842,6 +845,7 @@ func RetryBackoff(min, max time.Duration) Option {
 }
 
 // RetryInterval sets a custom retry interval function for a request.
+// @group Retry
 //
 // Example: custom retry interval
 //
@@ -856,6 +860,7 @@ func RetryInterval(fn req.GetRetryIntervalFunc) Option {
 }
 
 // RetryCondition sets the retry condition for a request.
+// @group Retry
 //
 // Example: retry on 503
 //
@@ -870,6 +875,7 @@ func RetryCondition(condition req.RetryConditionFunc) Option {
 }
 
 // RetryHook registers a retry hook for a request.
+// @group Retry
 //
 // Example: hook on retry
 //
@@ -882,6 +888,7 @@ func RetryHook(hook req.RetryHookFunc) Option {
 }
 
 // WithRetry applies a retry configuration to the client.
+// @group Retry (Client)
 //
 // Example: set retry count
 //
@@ -898,6 +905,7 @@ func WithRetry(opt RetryOption) ClientOption {
 }
 
 // WithRetryCount enables retry for the client and sets the maximum retry count.
+// @group Retry (Client)
 //
 // Example: client retry count
 //
@@ -910,6 +918,7 @@ func WithRetryCount(count int) ClientOption {
 }
 
 // WithRetryFixedInterval sets a fixed retry interval for the client.
+// @group Retry (Client)
 //
 // Example: client retry interval
 //
@@ -922,6 +931,7 @@ func WithRetryFixedInterval(interval time.Duration) ClientOption {
 }
 
 // WithRetryBackoff sets a capped exponential backoff retry interval for the client.
+// @group Retry (Client)
 //
 // Example: client retry backoff
 //
@@ -934,6 +944,7 @@ func WithRetryBackoff(min, max time.Duration) ClientOption {
 }
 
 // WithRetryInterval sets a custom retry interval function for the client.
+// @group Retry (Client)
 //
 // Example: client retry interval
 //
@@ -948,6 +959,7 @@ func WithRetryInterval(fn req.GetRetryIntervalFunc) ClientOption {
 }
 
 // WithRetryCondition sets the retry condition for the client.
+// @group Retry (Client)
 //
 // Example: retry on 503
 //
@@ -962,6 +974,7 @@ func WithRetryCondition(condition req.RetryConditionFunc) ClientOption {
 }
 
 // WithRetryHook registers a retry hook for the client.
+// @group Retry (Client)
 //
 // Example: hook on retry
 //
@@ -974,6 +987,7 @@ func WithRetryHook(hook req.RetryHookFunc) ClientOption {
 }
 
 // WithTransport wraps the underlying transport with a custom RoundTripper.
+// @group Client Options
 //
 // Example: wrap transport
 //
@@ -991,6 +1005,7 @@ func WithTransport(rt http.RoundTripper) ClientOption {
 }
 
 // WithDumpAll enables req's client-level dump output for all requests.
+// @group Debugging
 //
 // Example: dump every request and response
 //
@@ -1003,6 +1018,7 @@ func WithDumpAll() ClientOption {
 }
 
 // WithDumpEachRequest enables request-level dumps for each request on the client.
+// @group Debugging
 //
 // Example: dump each request as it is sent
 //
@@ -1015,6 +1031,7 @@ func WithDumpEachRequest() ClientOption {
 }
 
 // WithDumpEachRequestTo enables request-level dumps for each request and writes
+// @group Debugging
 // them to the provided output.
 //
 // Example: dump each request to a buffer
@@ -1040,6 +1057,7 @@ func WithDumpEachRequestTo(output io.Writer) ClientOption {
 }
 
 // WithMiddleware adds request middleware to the client.
+// @group Client Options
 //
 // Example: add request middleware
 //
@@ -1057,6 +1075,7 @@ func WithMiddleware(mw ...req.RequestMiddleware) ClientOption {
 }
 
 // WithErrorMapper sets a custom error mapper for non-2xx responses.
+// @group Client Options
 //
 // Example: map error responses
 //

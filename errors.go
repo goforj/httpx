@@ -15,6 +15,7 @@ type HTTPError struct {
 }
 
 // Error returns a short, human-friendly summary of the HTTP error.
+// @group Errors
 //
 // Example: check for HTTP errors
 //
