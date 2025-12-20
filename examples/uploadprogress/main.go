@@ -9,6 +9,7 @@ import (
 	"io"
 	"net/http"
 	"net/http/httptest"
+	"os"
 	"time"
 )
 
@@ -20,39 +21,30 @@ func main() {
 		defer r.Body.Close()
 		buf := make([]byte, 32*1024)
 		for {
-			n, err := r.Body.Read(buf)
-			if n > 0 {
-				time.Sleep(10 * time.Millisecond)
-			}
-			if err == io.EOF {
-				break
-			}
-			if err != nil {
+			if _, err := r.Body.Read(buf); err != nil {
+				if err == io.EOF {
+					break
+				}
 				return
 			}
+			time.Sleep(10 * time.Millisecond)
 		}
 		w.WriteHeader(http.StatusOK)
 	}))
 	defer srv.Close()
 
+	tmp, err := os.CreateTemp("", "httpx-upload-*.bin")
+	if err != nil {
+		return
+	}
+	defer os.Remove(tmp.Name())
 	payload := bytes.Repeat([]byte("x"), 4*1024*1024)
-	pr, pw := io.Pipe()
-	go func() {
-		defer pw.Close()
-		chunk := 64 * 1024
-		for i := 0; i < len(payload); i += chunk {
-			end := i + chunk
-			if end > len(payload) {
-				end = len(payload)
-			}
-			_, _ = pw.Write(payload[i:end])
-			time.Sleep(50 * time.Millisecond)
-		}
-	}()
+	_, _ = tmp.Write(payload)
+	_ = tmp.Close()
 
 	c := httpx.New()
 	_ = httpx.Post[any, string](c, srv.URL+"/upload", nil,
-		httpx.FileReader("file", "payload.bin", pr),
+		httpx.File("file", tmp.Name()),
 		httpx.UploadProgress(),
 	)
 }

@@ -844,111 +844,43 @@ _ = httpx.Post[any, string](c, "https://example.com/upload", nil, httpx.Files(ma
 
 UploadCallback registers a callback for upload progress.
 
-_Example: track upload progress_
-
 ```go
 srv1 := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 	defer r.Body.Close()
 	buf := make([]byte, 32*1024)
 	for {
-		n, err := r.Body.Read(buf)
-		if n > 0 {
-			time.Sleep(10 * time.Millisecond)
-		}
-		if err == io.EOF {
-			break
-		}
-		if err != nil {
+		if _, err := r.Body.Read(buf); err != nil {
+			if err == io.EOF {
+				break
+			}
 			return
 		}
+		time.Sleep(10 * time.Millisecond)
 	}
 	w.WriteHeader(http.StatusOK)
 }))
 defer srv1.Close()
 
-payload1 := bytes.Repeat([]byte("x"), 4*1024*1024)
-pr1, pw1 := io.Pipe()
-go func() {
-	defer pw1.Close()
-	chunk := 64 * 1024
-	for i := 0; i < len(payload1); i += chunk {
-		end := i + chunk
-		if end > len(payload1) {
-			end = len(payload1)
-		}
-		_, _ = pw1.Write(payload1[i:end])
-		time.Sleep(50 * time.Millisecond)
-	}
-}()
-c1 := httpx.New()
-total1 := float64(len(payload1))
-barWidth1 := 20
-spin1 := []string{"|", "/", "-", "\\"}
-spinIndex1 := 0
-_ = httpx.Post[any, string](c1, srv1.URL+"/upload", nil,
-	httpx.FileReader("file", "payload.bin", pr1),
+tmp, err := os.CreateTemp("", "httpx-upload-*.bin")
+if err != nil {
+	return
+}
+defer os.Remove(tmp.Name())
+payload := bytes.Repeat([]byte("x"), 4*1024*1024)
+_, _ = tmp.Write(payload)
+_ = tmp.Close()
+c := httpx.New()
+barWidth := 20
+spin := []string{"|", "/", "-", "\\"}
+spinIndex := 0
+_ = httpx.Post[any, string](c, srv1.URL+"/upload", nil,
+	httpx.File("file", tmp.Name()),
 	httpx.UploadCallback(func(info req.UploadInfo) {
-		spinIndex1 = (spinIndex1 + 1) % len(spin1)
-		percent := float64(info.UploadedSize) / total1 * 100
-		filled := int(percent / 100 * float64(barWidth1))
-		bar := strings.Repeat("=", filled) + strings.Repeat("-", barWidth1-filled)
-		fmt.Printf("\r%s [%s] %.1f%%", spin1[spinIndex1], bar, percent)
-		if info.FileSize > 0 && info.UploadedSize >= info.FileSize {
-			fmt.Print("\n")
-		}
-	}),
-)
-```
-
-_Example: emit progress percent_
-
-```go
-srv2 := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-	defer r.Body.Close()
-	buf := make([]byte, 32*1024)
-	for {
-		n, err := r.Body.Read(buf)
-		if n > 0 {
-			time.Sleep(10 * time.Millisecond)
-		}
-		if err == io.EOF {
-			break
-		}
-		if err != nil {
-			return
-		}
-	}
-	w.WriteHeader(http.StatusOK)
-}))
-defer srv2.Close()
-
-payload2 := bytes.Repeat([]byte("x"), 4*1024*1024)
-pr2, pw2 := io.Pipe()
-go func() {
-	defer pw2.Close()
-	chunk := 64 * 1024
-	for i := 0; i < len(payload2); i += chunk {
-		end := i + chunk
-		if end > len(payload2) {
-			end = len(payload2)
-		}
-		_, _ = pw2.Write(payload2[i:end])
-		time.Sleep(50 * time.Millisecond)
-	}
-}()
-c2 := httpx.New()
-total2 := float64(len(payload2))
-barWidth2 := 20
-spin2 := []string{"|", "/", "-", "\\"}
-spinIndex2 := 0
-_ = httpx.Post[any, string](c2, srv2.URL+"/upload", nil,
-	httpx.FileReader("file", "payload.bin", pr2),
-	httpx.UploadCallback(func(info req.UploadInfo) {
-		spinIndex2 = (spinIndex2 + 1) % len(spin2)
-		percent := float64(info.UploadedSize) / total2 * 100
-		filled := int(percent / 100 * float64(barWidth2))
-		bar := strings.Repeat("=", filled) + strings.Repeat("-", barWidth2-filled)
-		fmt.Printf("\r%s [%s] %.1f%%", spin2[spinIndex2], bar, percent)
+		spinIndex = (spinIndex + 1) % len(spin)
+		percent := float64(info.UploadedSize) / float64(info.FileSize) * 100
+		filled := int(percent / 100 * float64(barWidth))
+		bar := strings.Repeat("=", filled) + strings.Repeat("-", barWidth-filled)
+		fmt.Printf("\r%s [%s] %.1f%%", spin[spinIndex], bar, percent)
 		if info.FileSize > 0 && info.UploadedSize >= info.FileSize {
 			fmt.Print("\n")
 		}
@@ -960,99 +892,37 @@ _ = httpx.Post[any, string](c2, srv2.URL+"/upload", nil,
 
 UploadCallbackWithInterval registers a callback for upload progress with a minimum interval.
 
-_Example: throttle upload progress updates_
-
 ```go
-srv1 := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+srv := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 	defer r.Body.Close()
 	buf := make([]byte, 32*1024)
 	for {
-		n, err := r.Body.Read(buf)
-		if n > 0 {
-			time.Sleep(20 * time.Millisecond)
-		}
-		if err == io.EOF {
-			break
-		}
-		if err != nil {
+		if _, err := r.Body.Read(buf); err != nil {
+			if err == io.EOF {
+				break
+			}
 			return
 		}
+		time.Sleep(20 * time.Millisecond)
 	}
 	w.WriteHeader(http.StatusOK)
 }))
-defer srv1.Close()
+defer srv.Close()
 
-payload1 := bytes.Repeat([]byte("x"), 4*1024*1024)
-pr1, pw1 := io.Pipe()
-go func() {
-	defer pw1.Close()
-	chunk := 64 * 1024
-	for i := 0; i < len(payload1); i += chunk {
-		end := i + chunk
-		if end > len(payload1) {
-			end = len(payload1)
-		}
-		_, _ = pw1.Write(payload1[i:end])
-		time.Sleep(50 * time.Millisecond)
-	}
-}()
-c1 := httpx.New()
-total1 := float64(len(payload1))
-_ = httpx.Post[any, string](c1, srv1.URL+"/upload", nil,
-	httpx.FileReader("file", "payload.bin", pr1),
+tmp, err := os.CreateTemp("", "httpx-upload-*.bin")
+if err != nil {
+	return
+}
+defer os.Remove(tmp.Name())
+payload := bytes.Repeat([]byte("x"), 4*1024*1024)
+_, _ = tmp.Write(payload)
+_ = tmp.Close()
+c := httpx.New()
+_ = httpx.Post[any, string](c, srv.URL+"/upload", nil,
+	httpx.File("file", tmp.Name()),
 	httpx.UploadCallbackWithInterval(func(info req.UploadInfo) {
-		percent := float64(info.UploadedSize) / total1 * 100
+		percent := float64(info.UploadedSize) / float64(info.FileSize) * 100
 		fmt.Printf("\rprogress: %.1f%% (%.0f bytes)", percent, float64(info.UploadedSize))
-		if info.FileSize > 0 && info.UploadedSize >= info.FileSize {
-			fmt.Print("\n")
-		}
-	}, 200*time.Millisecond),
-)
-```
-
-_Example: report filename and bytes_
-
-```go
-srv2 := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-	defer r.Body.Close()
-	buf := make([]byte, 32*1024)
-	for {
-		n, err := r.Body.Read(buf)
-		if n > 0 {
-			time.Sleep(20 * time.Millisecond)
-		}
-		if err == io.EOF {
-			break
-		}
-		if err != nil {
-			return
-		}
-	}
-	w.WriteHeader(http.StatusOK)
-}))
-defer srv2.Close()
-
-payload2 := bytes.Repeat([]byte("x"), 4*1024*1024)
-pr2, pw2 := io.Pipe()
-go func() {
-	defer pw2.Close()
-	chunk := 64 * 1024
-	for i := 0; i < len(payload2); i += chunk {
-		end := i + chunk
-		if end > len(payload2) {
-			end = len(payload2)
-		}
-		_, _ = pw2.Write(payload2[i:end])
-		time.Sleep(50 * time.Millisecond)
-	}
-}()
-c2 := httpx.New()
-total2 := float64(len(payload2))
-_ = httpx.Post[any, string](c2, srv2.URL+"/upload", nil,
-	httpx.FileReader("file", "payload.bin", pr2),
-	httpx.UploadCallbackWithInterval(func(info req.UploadInfo) {
-		percent := float64(info.UploadedSize) / total2 * 100
-		fmt.Printf("\r%s: %.1f%% (%d bytes)", info.FileName, percent, info.UploadedSize)
 		if info.FileSize > 0 && info.UploadedSize >= info.FileSize {
 			fmt.Print("\n")
 		}
@@ -1069,39 +939,30 @@ srv := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.R
 	defer r.Body.Close()
 	buf := make([]byte, 32*1024)
 	for {
-		n, err := r.Body.Read(buf)
-		if n > 0 {
-			time.Sleep(10 * time.Millisecond)
-		}
-		if err == io.EOF {
-			break
-		}
-		if err != nil {
+		if _, err := r.Body.Read(buf); err != nil {
+			if err == io.EOF {
+				break
+			}
 			return
 		}
+		time.Sleep(10 * time.Millisecond)
 	}
 	w.WriteHeader(http.StatusOK)
 }))
 defer srv.Close()
 
+tmp, err := os.CreateTemp("", "httpx-upload-*.bin")
+if err != nil {
+	return
+}
+defer os.Remove(tmp.Name())
 payload := bytes.Repeat([]byte("x"), 4*1024*1024)
-pr, pw := io.Pipe()
-go func() {
-	defer pw.Close()
-	chunk := 64 * 1024
-	for i := 0; i < len(payload); i += chunk {
-		end := i + chunk
-		if end > len(payload) {
-			end = len(payload)
-		}
-		_, _ = pw.Write(payload[i:end])
-		time.Sleep(50 * time.Millisecond)
-	}
-}()
+_, _ = tmp.Write(payload)
+_ = tmp.Close()
 
 c := httpx.New()
 _ = httpx.Post[any, string](c, srv.URL+"/upload", nil,
-	httpx.FileReader("file", "payload.bin", pr),
+	httpx.File("file", tmp.Name()),
 	httpx.UploadProgress(),
 )
 ```
