@@ -19,6 +19,7 @@ var (
 )
 
 // Client wraps a req client with typed helpers and defaults.
+// @group Client
 //
 // Example: create a client
 //
@@ -30,6 +31,7 @@ type Client struct {
 }
 
 // New creates a client with opinionated defaults and optional overrides.
+// @group Client
 //
 // Example: custom base URL and timeout
 //
@@ -52,6 +54,7 @@ func New(opts ...ClientOption) *Client {
 }
 
 // Default returns the shared default client.
+// @group Client
 //
 // Example: use default client for quick calls
 //
@@ -65,6 +68,7 @@ func Default() *Client {
 }
 
 // Req returns the underlying req client for advanced usage.
+// @group Client
 //
 // Example: enable req debugging
 //
@@ -75,6 +79,7 @@ func (c *Client) Req() *req.Client {
 }
 
 // Raw returns the underlying req client for chaining raw requests.
+// @group Client
 //
 // Example: drop down to req
 //
@@ -86,6 +91,7 @@ func (c *Client) Raw() *req.Client {
 }
 
 // Get issues a GET request using the provided client.
+// @group Requests
 //
 // Example: fetch GitHub pull requests
 //
@@ -105,6 +111,7 @@ func Get[T any](client *Client, url string, opts ...Option) Result[T] {
 }
 
 // Post issues a POST request using the provided client.
+// @group Requests
 //
 // Example: typed POST
 //
@@ -123,6 +130,7 @@ func Post[In any, Out any](client *Client, url string, body In, opts ...Option) 
 }
 
 // Put issues a PUT request using the provided client.
+// @group Requests
 //
 // Example: typed PUT
 //
@@ -141,6 +149,7 @@ func Put[In any, Out any](client *Client, url string, body In, opts ...Option) R
 }
 
 // Patch issues a PATCH request using the provided client.
+// @group Requests
 //
 // Example: typed PATCH
 //
@@ -159,6 +168,7 @@ func Patch[In any, Out any](client *Client, url string, body In, opts ...Option)
 }
 
 // Delete issues a DELETE request using the provided client.
+// @group Requests
 //
 // Example: typed DELETE
 //
@@ -174,6 +184,7 @@ func Delete[T any](client *Client, url string, opts ...Option) Result[T] {
 }
 
 // GetCtx issues a GET request using the provided client and context.
+// @group Requests (Context)
 //
 // Example: context-aware GET
 //
@@ -190,6 +201,7 @@ func GetCtx[T any](client *Client, ctx context.Context, url string, opts ...Opti
 }
 
 // PostCtx issues a POST request using the provided client and context.
+// @group Requests (Context)
 //
 // Example: context-aware POST
 //
@@ -209,6 +221,7 @@ func PostCtx[In any, Out any](client *Client, ctx context.Context, url string, b
 }
 
 // PutCtx issues a PUT request using the provided client and context.
+// @group Requests (Context)
 //
 // Example: context-aware PUT
 //
@@ -228,6 +241,7 @@ func PutCtx[In any, Out any](client *Client, ctx context.Context, url string, bo
 }
 
 // PatchCtx issues a PATCH request using the provided client and context.
+// @group Requests (Context)
 //
 // Example: context-aware PATCH
 //
@@ -247,6 +261,7 @@ func PatchCtx[In any, Out any](client *Client, ctx context.Context, url string, 
 }
 
 // DeleteCtx issues a DELETE request using the provided client and context.
+// @group Requests (Context)
 //
 // Example: context-aware DELETE
 //

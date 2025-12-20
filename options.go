@@ -13,6 +13,7 @@ import (
 )
 
 // Header sets a header on a request.
+// @group Request Options
 //
 // Example: apply a header
 //
@@ -25,6 +26,7 @@ func Header(key, value string) Option {
 }
 
 // Headers sets multiple headers on a request.
+// @group Request Options
 //
 // Example: apply headers
 //
@@ -40,6 +42,7 @@ func Headers(values map[string]string) Option {
 }
 
 // Query adds query parameters as key/value pairs.
+// @group Request Options
 //
 // Example: add query params
 //
@@ -57,6 +60,7 @@ func Query(kv ...string) Option {
 }
 
 // Queries adds multiple query parameters.
+// @group Request Options
 //
 // Example: add query params
 //
@@ -72,6 +76,7 @@ func Queries(values map[string]string) Option {
 }
 
 // Auth sets the Authorization header using a scheme and token.
+// @group Auth
 //
 // Example: custom auth scheme
 //
@@ -84,6 +89,7 @@ func Auth(scheme, token string) Option {
 }
 
 // Path sets a path parameter by name.
+// @group Request Options
 //
 // Example: path parameter
 //
@@ -100,6 +106,7 @@ func Path(key string, value any) Option {
 }
 
 // Paths sets multiple path parameters.
+// @group Request Options
 //
 // Example: multiple path parameters
 //
@@ -123,6 +130,7 @@ func Paths(values map[string]any) Option {
 }
 
 // Body sets the request body and infers JSON for structs and maps.
+// @group Request Options
 //
 // Example: send JSON body with inference
 //
@@ -139,6 +147,7 @@ func Body(value any) Option {
 }
 
 // JSON sets the request body as JSON.
+// @group Request Options
 //
 // Example: force JSON body
 //
@@ -155,6 +164,7 @@ func JSON(value any) Option {
 }
 
 // Form sets form data for the request.
+// @group Request Options
 //
 // Example: submit a form
 //
@@ -169,6 +179,7 @@ func Form(values map[string]string) Option {
 }
 
 // File attaches a file from disk as multipart form data.
+// @group Upload Options
 //
 // Example: upload a file
 //
@@ -181,6 +192,7 @@ func File(paramName, filePath string) Option {
 }
 
 // Files attaches multiple files from disk as multipart form data.
+// @group Upload Options
 //
 // Example: upload multiple files
 //
@@ -196,6 +208,7 @@ func Files(files map[string]string) Option {
 }
 
 // FileBytes attaches a file from bytes as multipart form data.
+// @group Upload Options
 //
 // Example: upload bytes as a file
 //
@@ -208,6 +221,7 @@ func FileBytes(paramName, filename string, content []byte) Option {
 }
 
 // FileReader attaches a file from a reader as multipart form data.
+// @group Upload Options
 //
 // Example: upload from reader
 //
@@ -220,6 +234,7 @@ func FileReader(paramName, filename string, reader io.Reader) Option {
 }
 
 // UploadCallback registers a callback for upload progress.
+// @group Upload Options
 //
 // Example: track upload progress
 //
@@ -336,10 +351,14 @@ func UploadCallback(callback req.UploadCallback) Option {
 		var mu sync.Mutex
 		var last req.UploadInfo
 		var seen bool
+		var completed bool
 		r.SetUploadCallback(func(info req.UploadInfo) {
 			mu.Lock()
 			last = info
 			seen = true
+			if info.FileSize > 0 && info.UploadedSize >= info.FileSize {
+				completed = true
+			}
 			mu.Unlock()
 			callback(info)
 		})
@@ -347,11 +366,12 @@ func UploadCallback(callback req.UploadCallback) Option {
 			mu.Lock()
 			info := last
 			seenLocal := seen
+			completedLocal := completed
 			mu.Unlock()
 			if !seenLocal {
 				return nil
 			}
-			if info.FileSize > 0 && info.UploadedSize < info.FileSize {
+			if !completedLocal && info.FileSize > 0 {
 				info.UploadedSize = info.FileSize
 				callback(info)
 			}
@@ -465,10 +485,14 @@ func UploadCallbackWithInterval(callback req.UploadCallback, minInterval time.Du
 		var mu sync.Mutex
 		var last req.UploadInfo
 		var seen bool
+		var completed bool
 		r.SetUploadCallbackWithInterval(func(info req.UploadInfo) {
 			mu.Lock()
 			last = info
 			seen = true
+			if info.FileSize > 0 && info.UploadedSize >= info.FileSize {
+				completed = true
+			}
 			mu.Unlock()
 			callback(info)
 		}, minInterval)
@@ -476,11 +500,12 @@ func UploadCallbackWithInterval(callback req.UploadCallback, minInterval time.Du
 			mu.Lock()
 			info := last
 			seenLocal := seen
+			completedLocal := completed
 			mu.Unlock()
 			if !seenLocal {
 				return nil
 			}
-			if info.FileSize > 0 && info.UploadedSize < info.FileSize {
+			if !completedLocal && info.FileSize > 0 {
 				info.UploadedSize = info.FileSize
 				callback(info)
 			}
