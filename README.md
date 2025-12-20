@@ -16,7 +16,6 @@ It keeps req's power and escape hatches, while making the 90% use case feel effo
 <!-- test-count:embed:start -->
     <img src="https://img.shields.io/badge/tests-74-brightgreen" alt="Tests">
 <!-- test-count:embed:end -->
-    <a href="https://github.com/avelino/awesome-go?tab=readme-ov-file#parsersencodersdecoders"><img src="https://awesome.re/mentioned-badge-flat.svg" alt="Mentioned in Awesome Go"></a>
 </p>
 
 ## Why httpx
