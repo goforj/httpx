@@ -14,7 +14,7 @@ It keeps req's power and escape hatches, while making the 90% use case feel effo
     <a href="https://goreportcard.com/report/github.com/goforj/httpx"><img src="https://goreportcard.com/badge/github.com/goforj/httpx" alt="Go Report Card"></a>
     <a href="https://codecov.io/gh/goforj/httpx" ><img src="https://codecov.io/gh/goforj/httpx/graph/badge.svg?token=R5O7LYAD4B"/></a>
 <!-- test-count:embed:start -->
-    <img src="https://img.shields.io/badge/tests-137-brightgreen" alt="Tests">
+    <img src="https://img.shields.io/badge/tests-135-brightgreen" alt="Tests">
 <!-- test-count:embed:end -->
 </p>
 
@@ -121,14 +121,13 @@ They are compiled by `example_compile_test.go` to keep docs and code in sync.
 | Group | Functions |
 |------:|-----------|
 | **Auth** | [Auth](#auth) [Basic](#basic) [Bearer](#bearer) |
-| **Bind** | [Bind](#bind) [Get](#get) |
 | **Client** | [Default](#default) [New](#new) [Raw](#raw) [Req](#req) |
 | **Client Options** | [WithBaseURL](#withbaseurl) [WithErrorMapper](#witherrormapper) [WithHeader](#withheader) [WithHeaders](#withheaders) [WithMiddleware](#withmiddleware) [WithTimeout](#withtimeout) [WithTransport](#withtransport) |
 | **Debugging** | [Dump](#dump) [DumpTo](#dumpto) [DumpToFile](#dumptofile) [WithDumpAll](#withdumpall) [WithDumpEachRequest](#withdumpeachrequest) [WithDumpEachRequestTo](#withdumpeachrequestto) |
 | **Download Options** | [OutputFile](#outputfile) |
 | **Errors** | [Error](#error) |
 | **Request Options** | [Before](#before) [Body](#body) [Form](#form) [Header](#header) [Headers](#headers) [JSON](#json) [Path](#path) [Paths](#paths) [Queries](#queries) [Query](#query) [Timeout](#timeout) |
-| **Requests** | [Delete](#delete) [Patch](#patch) [Post](#post) [Put](#put) |
+| **Requests** | [Delete](#delete) [Get](#get) [Patch](#patch) [Post](#post) [Put](#put) |
 | **Requests (Context)** | [DeleteCtx](#deletectx) [GetCtx](#getctx) [PatchCtx](#patchctx) [PostCtx](#postctx) [PutCtx](#putctx) |
 | **Retry** | [RetryBackoff](#retrybackoff) [RetryCondition](#retrycondition) [RetryCount](#retrycount) [RetryFixedInterval](#retryfixedinterval) [RetryHook](#retryhook) [RetryInterval](#retryinterval) |
 | **Retry (Client)** | [WithRetry](#withretry) [WithRetryBackoff](#withretrybackoff) [WithRetryCondition](#withretrycondition) [WithRetryCount](#withretrycount) [WithRetryFixedInterval](#withretryfixedinterval) [WithRetryHook](#withretryhook) [WithRetryInterval](#withretryinterval) |
@@ -164,42 +163,6 @@ c := httpx.New()
 _ = httpx.Get[string](c, "https://example.com", httpx.Bearer("token"))
 ```
 
-## Bind
-
-### <a id="bind"></a>Bind
-
-Bind returns a typed wrapper around a client for fluent calls.
-
-```go
-_ = httpx.Bind[string](httpx.New())
-```
-
-### <a id="get"></a>Get
-
-Get issues a GET request using the bound client.
-
-_Example: bound GET_
-
-```go
-_ = httpx.Bind[string](httpx.New()).Get("https://example.com")
-```
-
-_Example: fetch GitHub pull requests_
-
-```go
-type PullRequest struct {
-	Number int    `json:"number"`
-	Title  string `json:"title"`
-}
-
-c := httpx.New(httpx.WithHeader("Accept", "application/vnd.github+json"))
-res := httpx.Get[[]PullRequest](c, "https://api.github.com/repos/goforj/httpx/pulls")
-if res.Err != nil {
-	return
-}
-godump.Dump(res.Body)
-```
-
 ## Client
 
 ### <a id="default"></a>Default
@@ -219,6 +182,18 @@ New creates a client with opinionated defaults and optional overrides.
 c := httpx.New(
 	httpx.WithBaseURL("https://api.example.com"),
 	httpx.WithTimeout(5*time.Second),
+	httpx.WithHeader("X-Trace", "1"),
+	httpx.WithHeaders(map[string]string{
+		"Accept": "application/json",
+	}),
+	httpx.WithTransport(http.RoundTripper(http.DefaultTransport)),
+	httpx.WithMiddleware(func(_ *req.Client, r *req.Request) error {
+		r.SetHeader("X-Middleware", "1")
+		return nil
+	}),
+	httpx.WithErrorMapper(func(resp *req.Response) error {
+		return fmt.Errorf("status %d", resp.StatusCode)
+	}),
 )
 _ = c
 ```
@@ -548,6 +523,24 @@ type DeleteResponse struct {
 c := httpx.New()
 res := httpx.Delete[DeleteResponse](c, "https://api.example.com/users/1")
 _, _ = res.Body, res.Err
+```
+
+### <a id="get"></a>Get
+
+Get issues a GET request using the provided client.
+
+```go
+type PullRequest struct {
+	Number int    `json:"number"`
+	Title  string `json:"title"`
+}
+
+c := httpx.New(httpx.WithHeader("Accept", "application/vnd.github+json"))
+res := httpx.Get[[]PullRequest](c, "https://api.github.com/repos/goforj/httpx/pulls")
+if res.Err != nil {
+	return
+}
+godump.Dump(res.Body)
 ```
 
 ### <a id="patch"></a>Patch
