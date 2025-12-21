@@ -109,7 +109,7 @@ func TestErrorMapper(t *testing.T) {
 	t.Cleanup(server.Close)
 
 	sentinel := errors.New("mapped")
-	client := New(WithErrorMapper(func(resp *req.Response) error {
+	client := New(Opts().ErrorMapper(func(resp *req.Response) error {
 		return sentinel
 	}))
 
@@ -141,9 +141,7 @@ func TestOptionsApplied(t *testing.T) {
 	res := Get[user](
 		client,
 		server.URL+"/users/{id}",
-		Path("id", 123),
-		Query("q", "ok", "ok2", "1"),
-		Header("X-Test", "1"),
+		Opts().Path("id", 123).Query("q", "ok", "ok2", "1").Header("X-Test", "1"),
 	)
 	if res.Err != nil {
 		t.Fatalf("unexpected error: %v", res.Err)
@@ -203,7 +201,7 @@ func TestQueryOddPanics(t *testing.T) {
 	}()
 
 	req := req.C().R()
-	Query("q")(req)
+	Opts().Query("q").applyRequest(req)
 }
 
 func TestDefaultReqRaw(t *testing.T) {
@@ -306,7 +304,7 @@ func TestDoIgnoresAfterResponseErrorOnEmptyBody(t *testing.T) {
 	t.Cleanup(server.Close)
 
 	client := New()
-	res := Get[user](client, server.URL, Before(func(r *req.Request) {
+	res := Get[user](client, server.URL, Opts().Before(func(r *req.Request) {
 		r.OnAfterResponse(func(_ *req.Client, _ *req.Response) error {
 			return errors.New("after response error")
 		})

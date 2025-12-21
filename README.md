@@ -14,7 +14,7 @@ It keeps req's power and escape hatches, while making the 90% use case feel effo
     <a href="https://goreportcard.com/report/github.com/goforj/httpx"><img src="https://goreportcard.com/badge/github.com/goforj/httpx" alt="Go Report Card"></a>
     <a href="https://codecov.io/gh/goforj/httpx" ><img src="https://codecov.io/gh/goforj/httpx/graph/badge.svg?token=R5O7LYAD4B"/></a>
 <!-- test-count:embed:start -->
-    <img src="https://img.shields.io/badge/tests-135-brightgreen" alt="Tests">
+    <img src="https://img.shields.io/badge/tests-127-brightgreen" alt="Tests">
 <!-- test-count:embed:end -->
 </p>
 
@@ -85,7 +85,7 @@ _, _ = resp, err
 ## Options in Practice
 
 ```go
-c := httpx.New(httpx.WithBaseURL("https://api.example.com"))
+c := httpx.New(httpx.BaseURL("https://api.example.com"))
 
 res := httpx.Get[User](
 	c,
@@ -101,7 +101,7 @@ _ = res
 
 - `HTTP_TRACE=1` enables request/response dumps for all requests.
 - `httpx.Dump()` enables dump for a single request.
-- `httpx.WithDumpEachRequest()` enables per-request dumps on a client.
+- `httpx.DumpEachRequest()` enables per-request dumps on a client.
 
 ## Examples
 
@@ -122,15 +122,16 @@ They are compiled by `example_compile_test.go` to keep docs and code in sync.
 |------:|-----------|
 | **Auth** | [Auth](#auth) [Basic](#basic) [Bearer](#bearer) |
 | **Client** | [Default](#default) [New](#new) [Raw](#raw) [Req](#req) |
-| **Client Options** | [WithBaseURL](#withbaseurl) [WithErrorMapper](#witherrormapper) [WithHeader](#withheader) [WithHeaders](#withheaders) [WithMiddleware](#withmiddleware) [WithTimeout](#withtimeout) [WithTransport](#withtransport) |
-| **Debugging** | [Dump](#dump) [DumpTo](#dumpto) [DumpToFile](#dumptofile) [WithDumpAll](#withdumpall) [WithDumpEachRequest](#withdumpeachrequest) [WithDumpEachRequestTo](#withdumpeachrequestto) |
+| **Client Options** | [BaseURL](#baseurl) [ErrorMapper](#errormapper) [Middleware](#middleware) [Transport](#transport) |
+| **Debugging** | [Dump](#dump) [DumpAll](#dumpall) [DumpEachRequest](#dumpeachrequest) [DumpEachRequestTo](#dumpeachrequestto) [DumpTo](#dumpto) [DumpToFile](#dumptofile) |
 | **Download Options** | [OutputFile](#outputfile) |
 | **Errors** | [Error](#error) |
+| **Options** | [Opts](#opts) |
 | **Request Options** | [Before](#before) [Body](#body) [Form](#form) [Header](#header) [Headers](#headers) [JSON](#json) [Path](#path) [Paths](#paths) [Queries](#queries) [Query](#query) [Timeout](#timeout) |
 | **Requests** | [Delete](#delete) [Get](#get) [Patch](#patch) [Post](#post) [Put](#put) |
 | **Requests (Context)** | [DeleteCtx](#deletectx) [GetCtx](#getctx) [PatchCtx](#patchctx) [PostCtx](#postctx) [PutCtx](#putctx) |
 | **Retry** | [RetryBackoff](#retrybackoff) [RetryCondition](#retrycondition) [RetryCount](#retrycount) [RetryFixedInterval](#retryfixedinterval) [RetryHook](#retryhook) [RetryInterval](#retryinterval) |
-| **Retry (Client)** | [WithRetry](#withretry) [WithRetryBackoff](#withretrybackoff) [WithRetryCondition](#withretrycondition) [WithRetryCount](#withretrycount) [WithRetryFixedInterval](#withretryfixedinterval) [WithRetryHook](#withretryhook) [WithRetryInterval](#withretryinterval) |
+| **Retry (Client)** | [Retry](#retry) |
 | **Upload Options** | [File](#file) [FileBytes](#filebytes) [FileReader](#filereader) [Files](#files) [UploadCallback](#uploadcallback) [UploadCallbackWithInterval](#uploadcallbackwithinterval) [UploadProgress](#uploadprogress) |
 
 
@@ -179,21 +180,38 @@ _ = c
 New creates a client with opinionated defaults and optional overrides.
 
 ```go
-c := httpx.New(
-	httpx.WithBaseURL("https://api.example.com"),
-	httpx.WithTimeout(5*time.Second),
-	httpx.WithHeader("X-Trace", "1"),
-	httpx.WithHeaders(map[string]string{
+var buf bytes.Buffer
+c := httpx.New(httpx.Opts().
+	BaseURL("https://api.example.com").
+	Timeout(5*time.Second).
+	Header("X-Trace", "1").
+	Headers(map[string]string{
 		"Accept": "application/json",
-	}),
-	httpx.WithTransport(http.RoundTripper(http.DefaultTransport)),
-	httpx.WithMiddleware(func(_ *req.Client, r *req.Request) error {
+	}).
+	Transport(http.RoundTripper(http.DefaultTransport)).
+	Middleware(func(_ *req.Client, r *req.Request) error {
 		r.SetHeader("X-Middleware", "1")
 		return nil
-	}),
-	httpx.WithErrorMapper(func(resp *req.Response) error {
+	}).
+	ErrorMapper(func(resp *req.Response) error {
 		return fmt.Errorf("status %d", resp.StatusCode)
-	}),
+	}).
+	DumpAll().
+	DumpEachRequest().
+	DumpEachRequestTo(&buf).
+	Retry(func(rc *req.Client) {
+		rc.SetCommonRetryCount(2)
+	}).
+	RetryCount(2).
+	RetryFixedInterval(200 * time.Millisecond).
+	RetryBackoff(100*time.Millisecond, 2*time.Second).
+	RetryInterval(func(_ *req.Response, attempt int) time.Duration {
+		return time.Duration(attempt) * 100 * time.Millisecond
+	}).
+	RetryCondition(func(resp *req.Response, _ error) bool {
+		return resp != nil && resp.StatusCode == 503
+	}).
+	RetryHook(func(_ *req.Response, _ error) {}),
 )
 _ = c
 ```
@@ -219,74 +237,44 @@ c.Req().EnableDumpEachRequest()
 
 ## Client Options
 
-### <a id="withbaseurl"></a>WithBaseURL
+### <a id="baseurl"></a>BaseURL
 
-WithBaseURL sets a base URL on the client.
+BaseURL sets a base URL on the client.
 
 ```go
-c := httpx.New(httpx.WithBaseURL("https://api.example.com"))
+c := httpx.New(httpx.BaseURL("https://api.example.com"))
 _ = c
 ```
 
-### <a id="witherrormapper"></a>WithErrorMapper
+### <a id="errormapper"></a>ErrorMapper
 
-WithErrorMapper sets a custom error mapper for non-2xx responses.
+ErrorMapper sets a custom error mapper for non-2xx responses.
 
 ```go
-c := httpx.New(httpx.WithErrorMapper(func(resp *req.Response) error {
+c := httpx.New(httpx.ErrorMapper(func(resp *req.Response) error {
 	return fmt.Errorf("status %d", resp.StatusCode)
 }))
 _ = c
 ```
 
-### <a id="withheader"></a>WithHeader
+### <a id="middleware"></a>Middleware
 
-WithHeader sets a default header for all requests.
-
-```go
-c := httpx.New(httpx.WithHeader("X-Trace", "1"))
-_ = c
-```
-
-### <a id="withheaders"></a>WithHeaders
-
-WithHeaders sets default headers for all requests.
+Middleware adds request middleware to the client.
 
 ```go
-c := httpx.New(httpx.WithHeaders(map[string]string{
-	"X-Trace": "1",
-	"Accept":  "application/json",
-}))
-_ = c
-```
-
-### <a id="withmiddleware"></a>WithMiddleware
-
-WithMiddleware adds request middleware to the client.
-
-```go
-c := httpx.New(httpx.WithMiddleware(func(_ *req.Client, r *req.Request) error {
+c := httpx.New(httpx.Middleware(func(_ *req.Client, r *req.Request) error {
 	r.SetHeader("X-Trace", "1")
 	return nil
 }))
 _ = c
 ```
 
-### <a id="withtimeout"></a>WithTimeout
+### <a id="transport"></a>Transport
 
-WithTimeout sets the default timeout for the client.
-
-```go
-c := httpx.New(httpx.WithTimeout(3 * time.Second))
-_ = c
-```
-
-### <a id="withtransport"></a>WithTransport
-
-WithTransport wraps the underlying transport with a custom RoundTripper.
+Transport wraps the underlying transport with a custom RoundTripper.
 
 ```go
-c := httpx.New(httpx.WithTransport(http.RoundTripper(http.DefaultTransport)))
+c := httpx.New(httpx.Transport(http.RoundTripper(http.DefaultTransport)))
 _ = c
 ```
 
@@ -299,6 +287,35 @@ Dump enables req's request-level dump output.
 ```go
 c := httpx.New()
 _ = httpx.Get[string](c, "https://example.com", httpx.Dump())
+```
+
+### <a id="dumpall"></a>DumpAll
+
+DumpAll enables req's client-level dump output for all requests.
+
+```go
+c := httpx.New(httpx.DumpAll())
+_ = c
+```
+
+### <a id="dumpeachrequest"></a>DumpEachRequest
+
+DumpEachRequest enables request-level dumps for each request on the client.
+
+```go
+c := httpx.New(httpx.DumpEachRequest())
+_ = c
+```
+
+### <a id="dumpeachrequestto"></a>DumpEachRequestTo
+
+DumpEachRequestTo enables request-level dumps for each request and writes
+
+```go
+var buf bytes.Buffer
+c := httpx.New(httpx.DumpEachRequestTo(&buf))
+_ = httpx.Get[string](c, "https://example.com")
+_ = buf.String()
 ```
 
 ### <a id="dumpto"></a>DumpTo
@@ -318,35 +335,6 @@ DumpToFile enables req's request-level dump output to a file path.
 ```go
 c := httpx.New()
 _ = httpx.Get[string](c, "https://example.com", httpx.DumpToFile("httpx.dump"))
-```
-
-### <a id="withdumpall"></a>WithDumpAll
-
-WithDumpAll enables req's client-level dump output for all requests.
-
-```go
-c := httpx.New(httpx.WithDumpAll())
-_ = c
-```
-
-### <a id="withdumpeachrequest"></a>WithDumpEachRequest
-
-WithDumpEachRequest enables request-level dumps for each request on the client.
-
-```go
-c := httpx.New(httpx.WithDumpEachRequest())
-_ = c
-```
-
-### <a id="withdumpeachrequestto"></a>WithDumpEachRequestTo
-
-WithDumpEachRequestTo enables request-level dumps for each request and writes
-
-```go
-var buf bytes.Buffer
-c := httpx.New(httpx.WithDumpEachRequestTo(&buf))
-_ = httpx.Get[string](c, "https://example.com")
-_ = buf.String()
 ```
 
 ## Download Options
@@ -377,6 +365,17 @@ var httpErr *httpx.HTTPError
 if errors.As(res.Err, &httpErr) {
 	_ = httpErr.StatusCode
 }
+```
+
+## Options
+
+### <a id="opts"></a>Opts
+
+Opts creates a chainable option builder.
+
+```go
+opt := httpx.Opts().Header("X-Trace", "1").Query("q", "go")
+_ = opt
 ```
 
 ## Request Options
@@ -418,7 +417,7 @@ _ = httpx.Post[any, string](c, "https://example.com", nil, httpx.Form(map[string
 
 ### <a id="header"></a>Header
 
-Header sets a header on a request.
+Header sets a header on a request or client.
 
 ```go
 c := httpx.New()
@@ -427,7 +426,7 @@ _ = httpx.Get[string](c, "https://example.com", httpx.Header("X-Trace", "1"))
 
 ### <a id="headers"></a>Headers
 
-Headers sets multiple headers on a request.
+Headers sets multiple headers on a request or client.
 
 ```go
 c := httpx.New()
@@ -535,7 +534,7 @@ type PullRequest struct {
 	Title  string `json:"title"`
 }
 
-c := httpx.New(httpx.WithHeader("Accept", "application/vnd.github+json"))
+c := httpx.New(httpx.Opts().Header("Accept", "application/vnd.github+json"))
 res := httpx.Get[[]PullRequest](c, "https://api.github.com/repos/goforj/httpx/pulls")
 if res.Err != nil {
 	return
@@ -742,71 +741,13 @@ _ = httpx.Get[string](c, "https://example.com", httpx.RetryInterval(func(_ *req.
 
 ## Retry (Client)
 
-### <a id="withretry"></a>WithRetry
+### <a id="retry"></a>Retry
 
-WithRetry applies a retry configuration to the client.
+Retry applies a custom retry configuration to the client.
 
 ```go
-c := httpx.New(httpx.WithRetry(func(rc *req.Client) {
+c := httpx.New(httpx.Retry(func(rc *req.Client) {
 	rc.SetCommonRetryCount(2)
-}))
-_ = c
-```
-
-### <a id="withretrybackoff"></a>WithRetryBackoff
-
-WithRetryBackoff sets a capped exponential backoff retry interval for the client.
-
-```go
-c := httpx.New(httpx.WithRetryBackoff(100*time.Millisecond, 2*time.Second))
-_ = c
-```
-
-### <a id="withretrycondition"></a>WithRetryCondition
-
-WithRetryCondition sets the retry condition for the client.
-
-```go
-c := httpx.New(httpx.WithRetryCondition(func(resp *req.Response, _ error) bool {
-	return resp != nil && resp.StatusCode == 503
-}))
-_ = c
-```
-
-### <a id="withretrycount"></a>WithRetryCount
-
-WithRetryCount enables retry for the client and sets the maximum retry count.
-
-```go
-c := httpx.New(httpx.WithRetryCount(2))
-_ = c
-```
-
-### <a id="withretryfixedinterval"></a>WithRetryFixedInterval
-
-WithRetryFixedInterval sets a fixed retry interval for the client.
-
-```go
-c := httpx.New(httpx.WithRetryFixedInterval(200 * time.Millisecond))
-_ = c
-```
-
-### <a id="withretryhook"></a>WithRetryHook
-
-WithRetryHook registers a retry hook for the client.
-
-```go
-c := httpx.New(httpx.WithRetryHook(func(_ *req.Response, _ error) {}))
-_ = c
-```
-
-### <a id="withretryinterval"></a>WithRetryInterval
-
-WithRetryInterval sets a custom retry interval function for the client.
-
-```go
-c := httpx.New(httpx.WithRetryInterval(func(_ *req.Response, attempt int) time.Duration {
-	return time.Duration(attempt) * 100 * time.Millisecond
 }))
 _ = c
 ```

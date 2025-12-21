@@ -16,7 +16,7 @@ func TestAuthHeaders(t *testing.T) {
 	defer srv.Close()
 
 	c := New()
-	res := Get[string](c, srv.URL, Auth("Token", "abc123"))
+	res := Get[string](c, srv.URL, Opts().Auth("Token", "abc123"))
 	if res.Err != nil {
 		t.Fatalf("auth request failed: %v", res.Err)
 	}
@@ -34,11 +34,11 @@ func TestBearerAndBasic(t *testing.T) {
 	defer srv.Close()
 
 	c := New()
-	res := Get[string](c, srv.URL, Bearer("token"))
+	res := Get[string](c, srv.URL, Opts().Bearer("token"))
 	if res.Err != nil {
 		t.Fatalf("bearer request failed: %v", res.Err)
 	}
-	res = Get[string](c, srv.URL, Basic("user", "pass"))
+	res = Get[string](c, srv.URL, Opts().Basic("user", "pass"))
 	if res.Err != nil {
 		t.Fatalf("basic request failed: %v", res.Err)
 	}

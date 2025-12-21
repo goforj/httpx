@@ -24,7 +24,7 @@ func TestDumpTo(t *testing.T) {
 	defer srv.Close()
 
 	c := New()
-	res := Get[string](c, srv.URL, DumpTo(buf))
+	res := Get[string](c, srv.URL, Opts().DumpTo(buf))
 	if res.Err != nil {
 		t.Fatalf("request failed: %v", res.Err)
 	}
@@ -39,7 +39,7 @@ func TestDumpToFile(t *testing.T) {
 
 	path := t.TempDir() + "/dump.txt"
 	c := New()
-	res := Get[string](c, srv.URL, DumpToFile(path))
+	res := Get[string](c, srv.URL, Opts().DumpToFile(path))
 	if res.Err != nil {
 		t.Fatalf("request failed: %v", res.Err)
 	}
@@ -56,8 +56,8 @@ func TestDumpAndClientDump(t *testing.T) {
 	srv := debugServer()
 	defer srv.Close()
 
-	c := New(WithDumpAll(), WithDumpEachRequest())
-	res := Get[string](c, srv.URL, Dump())
+	c := New(Opts().DumpAll().DumpEachRequest())
+	res := Get[string](c, srv.URL, Opts().Dump())
 	if res.Err != nil {
 		t.Fatalf("request failed: %v", res.Err)
 	}
@@ -71,7 +71,7 @@ func TestWithDumpEachRequestTo(t *testing.T) {
 	srv := debugServer()
 	defer srv.Close()
 
-	c := New(WithDumpEachRequestTo(buf))
+	c := New(Opts().DumpEachRequestTo(buf))
 	res := Get[string](c, srv.URL)
 	if res.Err != nil {
 		t.Fatalf("request failed: %v", res.Err)
@@ -82,9 +82,9 @@ func TestWithDumpEachRequestTo(t *testing.T) {
 }
 
 func TestWithDumpEachRequestToNilAndRespNil(t *testing.T) {
-	c := New(WithDumpEachRequestTo(nil))
+	c := New(Opts().DumpEachRequestTo(nil))
 	buf := &bytes.Buffer{}
-	WithDumpEachRequestTo(buf)(c)
+	Opts().DumpEachRequestTo(buf).applyClient(c)
 
 	clientVal := reflect.ValueOf(c.Req()).Elem()
 	afterField := clientVal.FieldByName("afterResponse")

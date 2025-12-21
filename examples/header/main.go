@@ -6,7 +6,7 @@ package main
 import "github.com/goforj/httpx"
 
 func main() {
-	// Header sets a header on a request.
+	// Header sets a header on a request or client.
 
 	// Example: apply a header
 	c := httpx.New()

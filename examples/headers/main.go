@@ -6,7 +6,7 @@ package main
 import "github.com/goforj/httpx"
 
 func main() {
-	// Headers sets multiple headers on a request.
+	// Headers sets multiple headers on a request or client.
 
 	// Example: apply headers
 	c := httpx.New()

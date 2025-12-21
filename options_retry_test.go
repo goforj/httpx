@@ -9,37 +9,37 @@ import (
 
 func TestRetryRequestOptions(t *testing.T) {
 	r := req.C().R()
-	RetryCount(2)(r)
-	RetryFixedInterval(10 * time.Millisecond)(r)
-	RetryBackoff(5*time.Millisecond, 50*time.Millisecond)(r)
-	RetryInterval(func(_ *req.Response, attempt int) time.Duration {
+	Opts().RetryCount(2).applyRequest(r)
+	Opts().RetryFixedInterval(10 * time.Millisecond).applyRequest(r)
+	Opts().RetryBackoff(5*time.Millisecond, 50*time.Millisecond).applyRequest(r)
+	Opts().RetryInterval(func(_ *req.Response, attempt int) time.Duration {
 		return time.Duration(attempt) * time.Millisecond
-	})(r)
-	RetryCondition(func(resp *req.Response, _ error) bool {
+	}).applyRequest(r)
+	Opts().RetryCondition(func(resp *req.Response, _ error) bool {
 		return resp != nil && resp.StatusCode == 503
-	})(r)
-	RetryHook(func(_ *req.Response, _ error) {})(r)
+	}).applyRequest(r)
+	Opts().RetryHook(func(_ *req.Response, _ error) {}).applyRequest(r)
 }
 
 func TestRetryClientOptions(t *testing.T) {
 	c := New()
 	called := false
-	WithRetry(nil)(c)
-	WithRetry(func(rc *req.Client) {
+	Opts().Retry(nil).applyClient(c)
+	Opts().Retry(func(rc *req.Client) {
 		called = true
 		rc.SetCommonRetryCount(1)
-	})(c)
+	}).applyClient(c)
 	if !called {
 		t.Fatalf("expected retry option to be applied")
 	}
-	WithRetryCount(2)(c)
-	WithRetryFixedInterval(10 * time.Millisecond)(c)
-	WithRetryBackoff(5*time.Millisecond, 50*time.Millisecond)(c)
-	WithRetryInterval(func(_ *req.Response, attempt int) time.Duration {
+	Opts().RetryCount(2).applyClient(c)
+	Opts().RetryFixedInterval(10 * time.Millisecond).applyClient(c)
+	Opts().RetryBackoff(5*time.Millisecond, 50*time.Millisecond).applyClient(c)
+	Opts().RetryInterval(func(_ *req.Response, attempt int) time.Duration {
 		return time.Duration(attempt) * time.Millisecond
-	})(c)
-	WithRetryCondition(func(resp *req.Response, _ error) bool {
+	}).applyClient(c)
+	Opts().RetryCondition(func(resp *req.Response, _ error) bool {
 		return resp != nil && resp.StatusCode == 503
-	})(c)
-	WithRetryHook(func(_ *req.Response, _ error) {})(c)
+	}).applyClient(c)
+	Opts().RetryHook(func(_ *req.Response, _ error) {}).applyClient(c)
 }

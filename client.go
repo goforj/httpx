@@ -28,7 +28,7 @@ var (
 //	_ = c
 type Client struct {
 	req         *req.Client
-	errorMapper ErrorMapper
+	errorMapper ErrorMapperFunc
 }
 
 // New creates a client with opinionated defaults and optional overrides.
@@ -36,29 +36,49 @@ type Client struct {
 //
 // Example: configure all client options
 //
-//	c := httpx.New(
-//		httpx.WithBaseURL("https://api.example.com"),
-//		httpx.WithTimeout(5*time.Second),
-//		httpx.WithHeader("X-Trace", "1"),
-//		httpx.WithHeaders(map[string]string{
+//	var buf bytes.Buffer
+//	c := httpx.New(httpx.Opts().
+//		BaseURL("https://api.example.com").
+//		Timeout(5*time.Second).
+//		Header("X-Trace", "1").
+//		Headers(map[string]string{
 //			"Accept": "application/json",
-//		}),
-//		httpx.WithTransport(http.RoundTripper(http.DefaultTransport)),
-//		httpx.WithMiddleware(func(_ *req.Client, r *req.Request) error {
+//		}).
+//		Transport(http.RoundTripper(http.DefaultTransport)).
+//		Middleware(func(_ *req.Client, r *req.Request) error {
 //			r.SetHeader("X-Middleware", "1")
 //			return nil
-//		}),
-//		httpx.WithErrorMapper(func(resp *req.Response) error {
+//		}).
+//		ErrorMapper(func(resp *req.Response) error {
 //			return fmt.Errorf("status %d", resp.StatusCode)
-//		}),
+//		}).
+//		DumpAll().
+//		DumpEachRequest().
+//		DumpEachRequestTo(&buf).
+//		Retry(func(rc *req.Client) {
+//			rc.SetCommonRetryCount(2)
+//		}).
+//		RetryCount(2).
+//		RetryFixedInterval(200 * time.Millisecond).
+//		RetryBackoff(100*time.Millisecond, 2*time.Second).
+//		RetryInterval(func(_ *req.Response, attempt int) time.Duration {
+//			return time.Duration(attempt) * 100 * time.Millisecond
+//		}).
+//		RetryCondition(func(resp *req.Response, _ error) bool {
+//			return resp != nil && resp.StatusCode == 503
+//		}).
+//		RetryHook(func(_ *req.Response, _ error) {}),
 //	)
 //	_ = c
-func New(opts ...ClientOption) *Client {
+func New(opts ...Option) *Client {
 	c := &Client{
 		req: req.C().SetTimeout(defaultTimeout).SetUserAgent(defaultUserAgent),
 	}
 	for _, opt := range opts {
-		opt(c)
+		if opt == nil {
+			continue
+		}
+		opt.applyClient(c)
 	}
 	if _, ok := os.LookupEnv("HTTP_TRACE"); ok {
 		c.req.EnableDumpAll()
@@ -113,7 +133,7 @@ func (c *Client) Raw() *req.Client {
 //		Title  string `json:"title"`
 //	}
 //
-//	c := httpx.New(httpx.WithHeader("Accept", "application/vnd.github+json"))
+//	c := httpx.New(httpx.Opts().Header("Accept", "application/vnd.github+json"))
 //	res := httpx.Get[[]PullRequest](c, "https://api.github.com/repos/goforj/httpx/pulls")
 //	if res.Err != nil {
 //		return
@@ -304,7 +324,10 @@ func do[T any](client *Client, ctx context.Context, method, url string, body any
 		setBody(req, body)
 	}
 	for _, opt := range opts {
-		opt(req)
+		if opt == nil {
+			continue
+		}
+		opt.applyRequest(req)
 	}
 
 	rawKind := rawKindOf[T]()

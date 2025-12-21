@@ -22,7 +22,7 @@ func TestWithBaseURLAndHeaders(t *testing.T) {
 	}))
 	defer srv.Close()
 
-	c := New(WithBaseURL(srv.URL), WithHeader("X-Trace", "1"))
+	c := New(Opts().BaseURL(srv.URL).Header("X-Trace", "1"))
 	res := Get[string](c, "/users/1")
 	if res.Err != nil {
 		t.Fatalf("request failed: %v", res.Err)
@@ -43,7 +43,7 @@ func TestWithHeaders(t *testing.T) {
 	}))
 	defer srv.Close()
 
-	c := New(WithHeaders(map[string]string{"Accept": "application/json"}))
+	c := New(Opts().Headers(map[string]string{"Accept": "application/json"}))
 	res := Get[string](c, srv.URL)
 	if res.Err != nil {
 		t.Fatalf("request failed: %v", res.Err)
@@ -60,7 +60,7 @@ func TestWithTimeout(t *testing.T) {
 	}))
 	defer srv.Close()
 
-	c := New(WithTimeout(10 * time.Millisecond))
+	c := New(Opts().Timeout(10 * time.Millisecond))
 	res := Get[string](c, srv.URL)
 	if res.Err == nil {
 		t.Fatalf("expected timeout error")
@@ -75,7 +75,7 @@ func TestWithTransport(t *testing.T) {
 		return &http.Response{StatusCode: http.StatusOK, Body: body, Header: make(http.Header)}, nil
 	})
 
-	c := New(WithTransport(custom))
+	c := New(Opts().Transport(custom))
 	res := Get[string](c, "https://example.com")
 	if res.Err != nil {
 		t.Fatalf("request failed: %v", res.Err)
@@ -86,7 +86,7 @@ func TestWithTransport(t *testing.T) {
 }
 
 func TestWithTransportNil(t *testing.T) {
-	c := New(WithTransport(nil))
+	c := New(Opts().Transport(nil))
 	if c == nil {
 		t.Fatalf("expected client")
 	}
@@ -100,7 +100,7 @@ func TestWithMiddleware(t *testing.T) {
 	}))
 	defer srv.Close()
 
-	c := New(WithMiddleware(func(_ *req.Client, r *req.Request) error {
+	c := New(Opts().Middleware(func(_ *req.Client, r *req.Request) error {
 		r.SetHeader("X-Trace", "1")
 		return nil
 	}))
@@ -120,7 +120,7 @@ func TestWithErrorMapper(t *testing.T) {
 	defer srv.Close()
 
 	want := errors.New("mapped error")
-	c := New(WithErrorMapper(func(_ *req.Response) error {
+	c := New(Opts().ErrorMapper(func(_ *req.Response) error {
 		return want
 	}))
 	res := Get[string](c, srv.URL)

@@ -41,7 +41,7 @@ func TestHeaderAndHeaders(t *testing.T) {
 	defer srv.Close()
 
 	c := New()
-	res := Get[string](c, srv.URL, Header("X-Trace", "1"), Headers(map[string]string{
+	res := Get[string](c, srv.URL, Opts().Header("X-Trace", "1").Headers(map[string]string{
 		"Accept": "application/json",
 	}))
 	if res.Err != nil {
@@ -61,7 +61,7 @@ func TestQueryAndQueries(t *testing.T) {
 	defer srv.Close()
 
 	c := New()
-	res := Get[string](c, srv.URL, Query("q", "go"), Queries(map[string]string{"ok": "1"}))
+	res := Get[string](c, srv.URL, Opts().Query("q", "go").Queries(map[string]string{"ok": "1"}))
 	if res.Err != nil {
 		t.Fatalf("request failed: %v", res.Err)
 	}
@@ -79,7 +79,7 @@ func TestPathAndPaths(t *testing.T) {
 	defer srv.Close()
 
 	c := New()
-	res := Get[string](c, srv.URL+"/users/{id}", Path("id", 42))
+	res := Get[string](c, srv.URL+"/users/{id}", Opts().Path("id", 42))
 	if res.Err != nil {
 		t.Fatalf("path request failed: %v", res.Err)
 	}
@@ -91,7 +91,7 @@ func TestPathAndPaths(t *testing.T) {
 	srv2 := newCaptureServer(t, capture2)
 	defer srv2.Close()
 
-	res = Get[string](c, srv2.URL+"/orgs/{org}/users/{id}", Paths(map[string]any{"org": "goforj", "id": 7}))
+	res = Get[string](c, srv2.URL+"/orgs/{org}/users/{id}", Opts().Paths(map[string]any{"org": "goforj", "id": 7}))
 	if res.Err != nil {
 		t.Fatalf("paths request failed: %v", res.Err)
 	}
@@ -110,7 +110,7 @@ func TestBodyJSONForm(t *testing.T) {
 	}
 
 	c := New()
-	res := Post[any, string](c, srv.URL, nil, Body(payload{Name: "Ana"}))
+	res := Post[any, string](c, srv.URL, nil, Opts().Body(payload{Name: "Ana"}))
 	if res.Err != nil {
 		t.Fatalf("body request failed: %v", res.Err)
 	}
@@ -129,7 +129,7 @@ func TestBodyJSONForm(t *testing.T) {
 	srv2 := newCaptureServer(t, capture2)
 	defer srv2.Close()
 
-	res = Post[any, string](c, srv2.URL, nil, JSON(payload{Name: "Bea"}))
+	res = Post[any, string](c, srv2.URL, nil, Opts().JSON(payload{Name: "Bea"}))
 	if res.Err != nil {
 		t.Fatalf("json request failed: %v", res.Err)
 	}
@@ -141,7 +141,7 @@ func TestBodyJSONForm(t *testing.T) {
 	srv3 := newCaptureServer(t, capture3)
 	defer srv3.Close()
 
-	res = Post[any, string](c, srv3.URL, nil, Form(map[string]string{"name": "Cam"}))
+	res = Post[any, string](c, srv3.URL, nil, Opts().Form(map[string]string{"name": "Cam"}))
 	if res.Err != nil {
 		t.Fatalf("form request failed: %v", res.Err)
 	}
@@ -160,9 +160,9 @@ func TestTimeoutAndBefore(t *testing.T) {
 	defer srv.Close()
 
 	c := New()
-	res := Get[string](c, srv.URL, Before(func(r *req.Request) {
+	res := Get[string](c, srv.URL, Opts().Before(func(r *req.Request) {
 		r.SetHeader("X-Trace", "1")
-	}), Timeout(50*time.Millisecond))
+	}).Timeout(50*time.Millisecond))
 	if res.Err != nil {
 		t.Fatalf("request failed: %v", res.Err)
 	}
@@ -180,7 +180,7 @@ func TestSetBodyVariants(t *testing.T) {
 	defer srv.Close()
 
 	c := New()
-	res := Post[any, string](c, srv.URL, nil, Body("hello"))
+	res := Post[any, string](c, srv.URL, nil, Opts().Body("hello"))
 	if res.Err != nil {
 		t.Fatalf("string body request failed: %v", res.Err)
 	}
@@ -191,7 +191,7 @@ func TestSetBodyVariants(t *testing.T) {
 	capture2 := &requestCapture{}
 	srv2 := newCaptureServer(t, capture2)
 	defer srv2.Close()
-	res = Post[any, string](c, srv2.URL, nil, Body([]byte("bytes")))
+	res = Post[any, string](c, srv2.URL, nil, Opts().Body([]byte("bytes")))
 	if res.Err != nil {
 		t.Fatalf("bytes body request failed: %v", res.Err)
 	}
@@ -202,7 +202,7 @@ func TestSetBodyVariants(t *testing.T) {
 	capture3 := &requestCapture{}
 	srv3 := newCaptureServer(t, capture3)
 	defer srv3.Close()
-	res = Post[any, string](c, srv3.URL, nil, Body(bytes.NewBufferString("reader")))
+	res = Post[any, string](c, srv3.URL, nil, Opts().Body(bytes.NewBufferString("reader")))
 	if res.Err != nil {
 		t.Fatalf("reader body request failed: %v", res.Err)
 	}

@@ -9,10 +9,10 @@ import (
 )
 
 func main() {
-	// WithRetry applies a retry configuration to the client.
+	// Retry applies a custom retry configuration to the client.
 
-	// Example: set retry count
-	c := httpx.New(httpx.WithRetry(func(rc *req.Client) {
+	// Example: configure client retry
+	c := httpx.New(httpx.Retry(func(rc *req.Client) {
 		rc.SetCommonRetryCount(2)
 	}))
 	_ = c

@@ -23,29 +23,97 @@ type Result[T any] struct {
 	Err      error
 }
 
-// Option configures a request before it is sent.
-//
-// Example: custom header
-//
-//	c := httpx.New()
-//	res := httpx.Get[string](c, "https://example.com", httpx.Header("X-Trace", "1"))
-//	_ = res
-type Option func(*req.Request)
+// Option applies configuration to a client or a request.
+type Option interface {
+	applyClient(*Client)
+	applyRequest(*req.Request)
+}
 
-// ClientOption configures a client instance.
-//
-// Example: configure client
-//
-//	c := httpx.New(httpx.WithTimeout(3 * time.Second))
-//	_ = c
-type ClientOption func(*Client)
+type option struct {
+	clientFn  func(*Client)
+	requestFn func(*req.Request)
+}
 
-// ErrorMapper customizes error creation for non-2xx responses.
+func (o option) applyClient(c *Client) {
+	if o.clientFn == nil {
+		return
+	}
+	o.clientFn(c)
+}
+
+func (o option) applyRequest(r *req.Request) {
+	if o.requestFn == nil {
+		return
+	}
+	o.requestFn(r)
+}
+
+func clientOnly(fn func(*Client)) Option {
+	return option{clientFn: fn}
+}
+
+func requestOnly(fn func(*req.Request)) Option {
+	return option{requestFn: fn}
+}
+
+func bothOption(clientFn func(*Client), requestFn func(*req.Request)) Option {
+	return option{
+		clientFn:  clientFn,
+		requestFn: requestFn,
+	}
+}
+
+// OptionBuilder chains request and client options.
+// @group Options
+//
+// Example: build options
+//
+//	opt := httpx.Opts().Header("X-Trace", "1").Query("q", "go")
+//	_ = opt
+type OptionBuilder struct {
+	ops []Option
+}
+
+// Opts creates a chainable option builder.
+// @group Options
+//
+// Example: chain options
+//
+//	opt := httpx.Opts().Header("X-Trace", "1").Query("q", "go")
+//	_ = opt
+func Opts() OptionBuilder {
+	return OptionBuilder{}
+}
+
+func (b OptionBuilder) add(opt Option) OptionBuilder {
+	b.ops = append(b.ops, opt)
+	return b
+}
+
+func (b OptionBuilder) applyClient(c *Client) {
+	for _, opt := range b.ops {
+		if opt == nil {
+			continue
+		}
+		opt.applyClient(c)
+	}
+}
+
+func (b OptionBuilder) applyRequest(r *req.Request) {
+	for _, opt := range b.ops {
+		if opt == nil {
+			continue
+		}
+		opt.applyRequest(r)
+	}
+}
+
+// ErrorMapperFunc customizes error creation for non-2xx responses.
 //
 // Example: map error responses
 //
-//	c := httpx.New(httpx.WithErrorMapper(func(resp *req.Response) error {
+//	c := httpx.New(httpx.Opts().ErrorMapper(func(resp *req.Response) error {
 //		return fmt.Errorf("status %d", resp.StatusCode)
 //	}))
 //	_ = c
-type ErrorMapper func(*req.Response) error
+type ErrorMapperFunc func(*req.Response) error
