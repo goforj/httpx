@@ -9,6 +9,7 @@ import (
 // RetryCount enables retry for a request and sets the maximum retry count.
 // @group Retry
 //
+// Applies to both client defaults and individual requests.
 // Example: request retry count
 //
 //	c := httpx.New()
@@ -31,6 +32,7 @@ func (b OptionBuilder) RetryCount(count int) OptionBuilder {
 // RetryFixedInterval sets a fixed retry interval for a request.
 // @group Retry
 //
+// Applies to both client defaults and individual requests.
 // Example: request retry interval
 //
 //	c := httpx.New()
@@ -53,6 +55,7 @@ func (b OptionBuilder) RetryFixedInterval(interval time.Duration) OptionBuilder 
 // RetryBackoff sets a capped exponential backoff retry interval for a request.
 // @group Retry
 //
+// Applies to both client defaults and individual requests.
 // Example: request retry backoff
 //
 //	c := httpx.New()
@@ -75,6 +78,7 @@ func (b OptionBuilder) RetryBackoff(min, max time.Duration) OptionBuilder {
 // RetryInterval sets a custom retry interval function for a request.
 // @group Retry
 //
+// Applies to both client defaults and individual requests.
 // Example: custom retry interval
 //
 //	c := httpx.New()
@@ -99,6 +103,7 @@ func (b OptionBuilder) RetryInterval(fn req.GetRetryIntervalFunc) OptionBuilder 
 // RetryCondition sets the retry condition for a request.
 // @group Retry
 //
+// Applies to both client defaults and individual requests.
 // Example: retry on 503
 //
 //	c := httpx.New()
@@ -123,6 +128,7 @@ func (b OptionBuilder) RetryCondition(condition req.RetryConditionFunc) OptionBu
 // RetryHook registers a retry hook for a request.
 // @group Retry
 //
+// Applies to both client defaults and individual requests.
 // Example: hook on retry
 //
 //	c := httpx.New()
@@ -145,6 +151,7 @@ func (b OptionBuilder) RetryHook(hook req.RetryHookFunc) OptionBuilder {
 // Retry applies a custom retry configuration to the client.
 // @group Retry (Client)
 //
+// Applies only to client configuration.
 // Example: configure client retry
 //
 //	c := httpx.New(httpx.Retry(func(rc *req.Client) {

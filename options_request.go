@@ -12,6 +12,7 @@ import (
 // Header sets a header on a request or client.
 // @group Request Options
 //
+// Applies to both client defaults and request-time headers.
 // Example: apply a header
 //
 //	c := httpx.New()
@@ -34,6 +35,7 @@ func (b OptionBuilder) Header(key, value string) OptionBuilder {
 // Headers sets multiple headers on a request or client.
 // @group Request Options
 //
+// Applies to both client defaults and request-time headers.
 // Example: apply headers
 //
 //	c := httpx.New()
@@ -59,6 +61,7 @@ func (b OptionBuilder) Headers(values map[string]string) OptionBuilder {
 // Query adds query parameters as key/value pairs.
 // @group Request Options
 //
+// Applies to individual requests only.
 // Example: add query params
 //
 //	c := httpx.New()
@@ -81,6 +84,7 @@ func (b OptionBuilder) Query(kv ...string) OptionBuilder {
 // Queries adds multiple query parameters.
 // @group Request Options
 //
+// Applies to individual requests only.
 // Example: add query params
 //
 //	c := httpx.New()
@@ -101,6 +105,7 @@ func (b OptionBuilder) Queries(values map[string]string) OptionBuilder {
 // Path sets a path parameter by name.
 // @group Request Options
 //
+// Applies to individual requests only.
 // Example: path parameter
 //
 //	type User struct {
@@ -122,6 +127,7 @@ func (b OptionBuilder) Path(key string, value any) OptionBuilder {
 // Paths sets multiple path parameters.
 // @group Request Options
 //
+// Applies to individual requests only.
 // Example: multiple path parameters
 //
 //	type User struct {
@@ -150,6 +156,7 @@ func (b OptionBuilder) Paths(values map[string]any) OptionBuilder {
 // Body sets the request body and infers JSON for structs and maps.
 // @group Request Options
 //
+// Applies to individual requests only.
 // Example: send JSON body with inference
 //
 //	type Payload struct {
@@ -171,6 +178,7 @@ func (b OptionBuilder) Body(value any) OptionBuilder {
 // JSON sets the request body as JSON.
 // @group Request Options
 //
+// Applies to individual requests only.
 // Example: force JSON body
 //
 //	type Payload struct {
@@ -192,6 +200,7 @@ func (b OptionBuilder) JSON(value any) OptionBuilder {
 // Form sets form data for the request.
 // @group Request Options
 //
+// Applies to individual requests only.
 // Example: submit a form
 //
 //	c := httpx.New()
@@ -211,6 +220,7 @@ func (b OptionBuilder) Form(values map[string]string) OptionBuilder {
 // Timeout sets a per-request timeout using context cancellation.
 // @group Request Options
 //
+// Applies to both client defaults (via WithTimeout) and individual requests.
 // Example: per-request timeout
 //
 //	c := httpx.New()
@@ -239,6 +249,7 @@ func (b OptionBuilder) Timeout(d time.Duration) OptionBuilder {
 // Before runs a hook before the request is sent.
 // @group Request Options
 //
+// Applies to individual requests only.
 // Example: mutate req.Request
 //
 //	c := httpx.New()

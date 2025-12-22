@@ -9,6 +9,7 @@ import (
 // BaseURL sets a base URL on the client.
 // @group Client Options
 //
+// Applies to client configuration only.
 // Example: client base URL
 //
 //	c := httpx.New(httpx.BaseURL("https://api.example.com"))
@@ -26,6 +27,7 @@ func (b OptionBuilder) BaseURL(url string) OptionBuilder {
 // Transport wraps the underlying transport with a custom RoundTripper.
 // @group Client Options
 //
+// Applies to client configuration only.
 // Example: wrap transport
 //
 //	c := httpx.New(httpx.Transport(http.RoundTripper(http.DefaultTransport)))
@@ -48,6 +50,7 @@ func (b OptionBuilder) Transport(rt http.RoundTripper) OptionBuilder {
 // Middleware adds request middleware to the client.
 // @group Client Options
 //
+// Applies only to the client configuration.
 // Example: add request middleware
 //
 //	c := httpx.New(httpx.Middleware(func(_ *req.Client, r *req.Request) error {
@@ -70,6 +73,7 @@ func (b OptionBuilder) Middleware(mw ...req.RequestMiddleware) OptionBuilder {
 // ErrorMapper sets a custom error mapper for non-2xx responses.
 // @group Client Options
 //
+// Applies only to the client configuration.
 // Example: map error responses
 //
 //	c := httpx.New(httpx.ErrorMapper(func(resp *req.Response) error {

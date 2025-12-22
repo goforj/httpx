@@ -9,6 +9,7 @@ import (
 // Dump enables req's request-level dump output.
 // @group Debugging
 //
+// Applies to individual requests only.
 // Example: dump a single request
 //
 //	c := httpx.New()
@@ -26,6 +27,7 @@ func (b OptionBuilder) Dump() OptionBuilder {
 // DumpTo enables req's request-level dump output to a writer.
 // @group Debugging
 //
+// Applies to individual requests only.
 // Example: dump to a buffer
 //
 //	var buf bytes.Buffer
@@ -44,6 +46,7 @@ func (b OptionBuilder) DumpTo(output io.Writer) OptionBuilder {
 // DumpToFile enables req's request-level dump output to a file path.
 // @group Debugging
 //
+// Applies to individual requests only.
 // Example: dump to a file
 //
 //	c := httpx.New()
@@ -61,6 +64,7 @@ func (b OptionBuilder) DumpToFile(filename string) OptionBuilder {
 // DumpAll enables req's client-level dump output for all requests.
 // @group Debugging
 //
+// Applies to the client configuration only.
 // Example: dump every request and response
 //
 //	c := httpx.New(httpx.DumpAll())
@@ -78,6 +82,7 @@ func (b OptionBuilder) DumpAll() OptionBuilder {
 // DumpEachRequest enables request-level dumps for each request on the client.
 // @group Debugging
 //
+// Applies to the client configuration only.
 // Example: dump each request as it is sent
 //
 //	c := httpx.New(httpx.DumpEachRequest())
@@ -95,6 +100,7 @@ func (b OptionBuilder) DumpEachRequest() OptionBuilder {
 // DumpEachRequestTo enables request-level dumps for each request and writes them to the provided output.
 // @group Debugging
 //
+// Applies to the client configuration only.
 // Example: dump each request to a buffer
 //
 //	var buf bytes.Buffer

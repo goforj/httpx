@@ -8,6 +8,7 @@ import (
 
 // Auth sets the Authorization header using a scheme and token.
 // @group Auth
+// Applies to both client defaults and request-time overrides.
 //
 // Example: custom auth scheme
 //
@@ -31,6 +32,7 @@ func (b OptionBuilder) Auth(scheme, token string) OptionBuilder {
 
 // Bearer sets the Authorization header with a bearer token.
 // @group Auth
+// Applies to both client defaults and request-time overrides.
 //
 // Example: bearer auth
 //
@@ -54,6 +56,7 @@ func (b OptionBuilder) Bearer(token string) OptionBuilder {
 
 // Basic sets HTTP basic authentication headers.
 // @group Auth
+// Applies to both client defaults and request-time overrides.
 //
 // Example: basic auth
 //

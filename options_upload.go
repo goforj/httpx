@@ -14,6 +14,7 @@ import (
 // File attaches a file from disk as multipart form data.
 // @group Upload Options
 //
+// Applies to individual requests only.
 // Example: upload a file
 //
 //	c := httpx.New()
@@ -31,6 +32,7 @@ func (b OptionBuilder) File(paramName, filePath string) OptionBuilder {
 // Files attaches multiple files from disk as multipart form data.
 // @group Upload Options
 //
+// Applies to individual requests only.
 // Example: upload multiple files
 //
 //	c := httpx.New()
@@ -51,6 +53,7 @@ func (b OptionBuilder) Files(files map[string]string) OptionBuilder {
 // FileBytes attaches a file from bytes as multipart form data.
 // @group Upload Options
 //
+// Applies to individual requests only.
 // Example: upload bytes as a file
 //
 //	c := httpx.New()
@@ -75,6 +78,7 @@ func (b OptionBuilder) FileBytes(paramName, filename string, content []byte) Opt
 // FileReader attaches a file from a reader as multipart form data.
 // @group Upload Options
 //
+// Applies to individual requests only.
 // Example: upload from reader
 //
 //	c := httpx.New()
@@ -121,6 +125,7 @@ func (b OptionBuilder) FileReader(paramName, filename string, reader io.Reader) 
 // UploadCallback registers a callback for upload progress.
 // @group Upload Options
 //
+// Applies to individual requests only.
 // Example: track upload progress
 //
 //	c := httpx.New()
@@ -183,6 +188,7 @@ func (b OptionBuilder) UploadCallback(callback req.UploadCallback) OptionBuilder
 // UploadCallbackWithInterval registers a callback for upload progress with a minimum interval.
 // @group Upload Options
 //
+// Applies to individual requests only.
 // Example: throttle upload progress updates
 //
 //	c := httpx.New()
@@ -244,6 +250,7 @@ func (b OptionBuilder) UploadCallbackWithInterval(callback req.UploadCallback, m
 
 // UploadProgress enables a default progress spinner and bar for uploads.
 // @group Upload Options
+// Applies to individual requests only.
 //
 // Example: upload with automatic progress
 //
