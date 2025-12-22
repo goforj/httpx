@@ -6,7 +6,7 @@ import (
 	"errors"
 	"net/http"
 	"net/http/httptest"
-	"os"
+	"reflect"
 	"testing"
 
 	"github.com/imroc/req/v3"
@@ -285,14 +285,6 @@ func TestSendUnknownMethod(t *testing.T) {
 	}
 }
 
-func TestNewWithHTTPTrace(t *testing.T) {
-	if err := os.Setenv("HTTP_TRACE", "1"); err != nil {
-		t.Fatalf("set env: %v", err)
-	}
-	defer os.Unsetenv("HTTP_TRACE")
-	_ = New()
-}
-
 func TestDumpExample(t *testing.T) {
 	dumpExample("ok")
 }
@@ -329,5 +321,31 @@ func TestNilClientDefaults(t *testing.T) {
 	}
 	if res.Body.Name != "default" {
 		t.Fatalf("unexpected response: %s", res.Body.Name)
+	}
+}
+
+func TestNewWithHTTPTrace(t *testing.T) {
+	t.Setenv("HTTP_TRACE", "1")
+	c := New()
+	clientVal := reflect.ValueOf(c.Req()).Elem()
+	dumpField := clientVal.FieldByName("dumpOptions")
+	if !dumpField.IsValid() {
+		t.Fatalf("expected dumpOptions field")
+	}
+	if dumpField.IsNil() {
+		t.Fatalf("expected dump options to be configured")
+	}
+}
+
+func TestGetSkipsNilOption(t *testing.T) {
+	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		_, _ = w.Write([]byte(`{"name":"ok"}`))
+	}))
+	t.Cleanup(server.Close)
+
+	client := New()
+	res := Get[user](client, server.URL, nil)
+	if res.Err != nil {
+		t.Fatalf("unexpected error: %v", res.Err)
 	}
 }

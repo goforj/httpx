@@ -73,6 +73,13 @@ func TestQueryAndQueries(t *testing.T) {
 	}
 }
 
+func TestBeforeNilIsNoop(t *testing.T) {
+	b := Before(nil)
+	if len(b.ops) != 0 {
+		t.Fatalf("expected zero options, got %d", len(b.ops))
+	}
+}
+
 func TestQueriesFunctionAlone(t *testing.T) {
 	capture := &requestCapture{}
 	srv := newCaptureServer(t, capture)
