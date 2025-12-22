@@ -14,7 +14,7 @@ It keeps req's power and escape hatches, while making the 90% use case feel effo
     <a href="https://goreportcard.com/report/github.com/goforj/httpx"><img src="https://goreportcard.com/badge/github.com/goforj/httpx" alt="Go Report Card"></a>
     <a href="https://codecov.io/gh/goforj/httpx" ><img src="https://codecov.io/gh/goforj/httpx/graph/badge.svg?token=R5O7LYAD4B"/></a>
 <!-- test-count:embed:start -->
-    <img src="https://img.shields.io/badge/tests-127-brightgreen" alt="Tests">
+    <img src="https://img.shields.io/badge/tests-131-brightgreen" alt="Tests">
 <!-- test-count:embed:end -->
 </p>
 
@@ -126,7 +126,6 @@ They are compiled by `example_compile_test.go` to keep docs and code in sync.
 | **Debugging** | [Dump](#dump) [DumpAll](#dumpall) [DumpEachRequest](#dumpeachrequest) [DumpEachRequestTo](#dumpeachrequestto) [DumpTo](#dumpto) [DumpToFile](#dumptofile) |
 | **Download Options** | [OutputFile](#outputfile) |
 | **Errors** | [Error](#error) |
-| **Options** | [Opts](#opts) |
 | **Request Options** | [Before](#before) [Body](#body) [Form](#form) [Header](#header) [Headers](#headers) [JSON](#json) [Path](#path) [Paths](#paths) [Queries](#queries) [Query](#query) [Timeout](#timeout) |
 | **Requests** | [Delete](#delete) [Get](#get) [Patch](#patch) [Post](#post) [Put](#put) |
 | **Requests (Context)** | [DeleteCtx](#deletectx) [GetCtx](#getctx) [PatchCtx](#patchctx) [PostCtx](#postctx) [PutCtx](#putctx) |
@@ -181,7 +180,7 @@ New creates a client with opinionated defaults and optional overrides.
 
 ```go
 var buf bytes.Buffer
-c := httpx.New(httpx.Opts().
+c := httpx.New(httpx.
 	BaseURL("https://api.example.com").
 	Timeout(5*time.Second).
 	Header("X-Trace", "1").
@@ -309,7 +308,7 @@ _ = c
 
 ### <a id="dumpeachrequestto"></a>DumpEachRequestTo
 
-DumpEachRequestTo enables request-level dumps for each request and writes
+DumpEachRequestTo enables request-level dumps for each request and writes them to the provided output.
 
 ```go
 var buf bytes.Buffer
@@ -365,17 +364,6 @@ var httpErr *httpx.HTTPError
 if errors.As(res.Err, &httpErr) {
 	_ = httpErr.StatusCode
 }
-```
-
-## Options
-
-### <a id="opts"></a>Opts
-
-Opts creates a chainable option builder.
-
-```go
-opt := httpx.Opts().Header("X-Trace", "1").Query("q", "go")
-_ = opt
 ```
 
 ## Request Options
@@ -534,7 +522,7 @@ type PullRequest struct {
 	Title  string `json:"title"`
 }
 
-c := httpx.New(httpx.Opts().Header("Accept", "application/vnd.github+json"))
+c := httpx.New(httpx.Header("Accept", "application/vnd.github+json"))
 res := httpx.Get[[]PullRequest](c, "https://api.github.com/repos/goforj/httpx/pulls")
 if res.Err != nil {
 	return

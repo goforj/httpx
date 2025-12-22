@@ -9,7 +9,7 @@ import (
 )
 
 func main() {
-	// DumpEachRequestTo enables request-level dumps for each request and writes
+	// DumpEachRequestTo enables request-level dumps for each request and writes them to the provided output.
 
 	// Example: dump each request to a buffer
 	var buf bytes.Buffer

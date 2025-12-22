@@ -37,7 +37,7 @@ type Client struct {
 // Example: configure all client options
 //
 //	var buf bytes.Buffer
-//	c := httpx.New(httpx.Opts().
+//	c := httpx.New(httpx.
 //		BaseURL("https://api.example.com").
 //		Timeout(5*time.Second).
 //		Header("X-Trace", "1").
@@ -133,7 +133,7 @@ func (c *Client) Raw() *req.Client {
 //		Title  string `json:"title"`
 //	}
 //
-//	c := httpx.New(httpx.Opts().Header("Accept", "application/vnd.github+json"))
+//	c := httpx.New(httpx.Header("Accept", "application/vnd.github+json"))
 //	res := httpx.Get[[]PullRequest](c, "https://api.github.com/repos/goforj/httpx/pulls")
 //	if res.Err != nil {
 //		return

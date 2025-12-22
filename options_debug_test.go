@@ -24,7 +24,7 @@ func TestDumpTo(t *testing.T) {
 	defer srv.Close()
 
 	c := New()
-	res := Get[string](c, srv.URL, Opts().DumpTo(buf))
+	res := Get[string](c, srv.URL, DumpTo(buf))
 	if res.Err != nil {
 		t.Fatalf("request failed: %v", res.Err)
 	}
@@ -39,7 +39,7 @@ func TestDumpToFile(t *testing.T) {
 
 	path := t.TempDir() + "/dump.txt"
 	c := New()
-	res := Get[string](c, srv.URL, Opts().DumpToFile(path))
+	res := Get[string](c, srv.URL, DumpToFile(path))
 	if res.Err != nil {
 		t.Fatalf("request failed: %v", res.Err)
 	}
@@ -56,8 +56,8 @@ func TestDumpAndClientDump(t *testing.T) {
 	srv := debugServer()
 	defer srv.Close()
 
-	c := New(Opts().DumpAll().DumpEachRequest())
-	res := Get[string](c, srv.URL, Opts().Dump())
+	c := New(DumpAll().DumpEachRequest())
+	res := Get[string](c, srv.URL, Dump())
 	if res.Err != nil {
 		t.Fatalf("request failed: %v", res.Err)
 	}
@@ -71,7 +71,7 @@ func TestWithDumpEachRequestTo(t *testing.T) {
 	srv := debugServer()
 	defer srv.Close()
 
-	c := New(Opts().DumpEachRequestTo(buf))
+	c := New(DumpEachRequestTo(buf))
 	res := Get[string](c, srv.URL)
 	if res.Err != nil {
 		t.Fatalf("request failed: %v", res.Err)
@@ -82,9 +82,9 @@ func TestWithDumpEachRequestTo(t *testing.T) {
 }
 
 func TestWithDumpEachRequestToNilAndRespNil(t *testing.T) {
-	c := New(Opts().DumpEachRequestTo(nil))
+	c := New(DumpEachRequestTo(nil))
 	buf := &bytes.Buffer{}
-	Opts().DumpEachRequestTo(buf).applyClient(c)
+	DumpEachRequestTo(buf).applyClient(c)
 
 	clientVal := reflect.ValueOf(c.Req()).Elem()
 	afterField := clientVal.FieldByName("afterResponse")
@@ -95,5 +95,16 @@ func TestWithDumpEachRequestToNilAndRespNil(t *testing.T) {
 	mw := afterField.Index(afterField.Len() - 1).Interface().(req.ResponseMiddleware)
 	if err := mw(c.Req(), nil); err != nil {
 		t.Fatalf("unexpected error: %v", err)
+	}
+}
+
+func TestDumpEachRequestFunction(t *testing.T) {
+	srv := debugServer()
+	defer srv.Close()
+
+	c := New(DumpEachRequest())
+	res := Get[string](c, srv.URL)
+	if res.Err != nil {
+		t.Fatalf("request failed: %v", res.Err)
 	}
 }

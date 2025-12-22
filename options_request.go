@@ -11,6 +11,15 @@ import (
 
 // Header sets a header on a request or client.
 // @group Request Options
+//
+// Example: apply a header
+//
+//	c := httpx.New()
+//	_ = httpx.Get[string](c, "https://example.com", httpx.Header("X-Trace", "1"))
+func Header(key, value string) OptionBuilder {
+	return OptionBuilder{}.Header(key, value)
+}
+
 func (b OptionBuilder) Header(key, value string) OptionBuilder {
 	return b.add(bothOption(
 		func(c *Client) {
@@ -24,6 +33,18 @@ func (b OptionBuilder) Header(key, value string) OptionBuilder {
 
 // Headers sets multiple headers on a request or client.
 // @group Request Options
+//
+// Example: apply headers
+//
+//	c := httpx.New()
+//	_ = httpx.Get[string](c, "https://example.com", httpx.Headers(map[string]string{
+//		"X-Trace": "1",
+//		"Accept":  "application/json",
+//	}))
+func Headers(values map[string]string) OptionBuilder {
+	return OptionBuilder{}.Headers(values)
+}
+
 func (b OptionBuilder) Headers(values map[string]string) OptionBuilder {
 	return b.add(bothOption(
 		func(c *Client) {
@@ -37,6 +58,15 @@ func (b OptionBuilder) Headers(values map[string]string) OptionBuilder {
 
 // Query adds query parameters as key/value pairs.
 // @group Request Options
+//
+// Example: add query params
+//
+//	c := httpx.New()
+//	_ = httpx.Get[string](c, "https://example.com/search", httpx.Query("q", "go", "ok", "1"))
+func Query(kv ...string) OptionBuilder {
+	return OptionBuilder{}.Query(kv...)
+}
+
 func (b OptionBuilder) Query(kv ...string) OptionBuilder {
 	return b.add(requestOnly(func(r *req.Request) {
 		if len(kv)%2 != 0 {
@@ -50,6 +80,18 @@ func (b OptionBuilder) Query(kv ...string) OptionBuilder {
 
 // Queries adds multiple query parameters.
 // @group Request Options
+//
+// Example: add query params
+//
+//	c := httpx.New()
+//	_ = httpx.Get[string](c, "https://example.com/search", httpx.Queries(map[string]string{
+//		"q":  "go",
+//		"ok": "1",
+//	}))
+func Queries(values map[string]string) OptionBuilder {
+	return OptionBuilder{}.Queries(values)
+}
+
 func (b OptionBuilder) Queries(values map[string]string) OptionBuilder {
 	return b.add(requestOnly(func(r *req.Request) {
 		r.SetQueryParams(values)
@@ -58,6 +100,19 @@ func (b OptionBuilder) Queries(values map[string]string) OptionBuilder {
 
 // Path sets a path parameter by name.
 // @group Request Options
+//
+// Example: path parameter
+//
+//	type User struct {
+//		Name string `json:"name"`
+//	}
+//
+//	c := httpx.New()
+//	_ = httpx.Get[User](c, "https://example.com/users/{id}", httpx.Path("id", 42))
+func Path(key string, value any) OptionBuilder {
+	return OptionBuilder{}.Path(key, value)
+}
+
 func (b OptionBuilder) Path(key string, value any) OptionBuilder {
 	return b.add(requestOnly(func(r *req.Request) {
 		r.SetPathParam(key, fmt.Sprint(value))
@@ -66,6 +121,22 @@ func (b OptionBuilder) Path(key string, value any) OptionBuilder {
 
 // Paths sets multiple path parameters.
 // @group Request Options
+//
+// Example: multiple path parameters
+//
+//	type User struct {
+//		Name string `json:"name"`
+//	}
+//
+//	c := httpx.New()
+//	_ = httpx.Get[User](c, "https://example.com/orgs/{org}/users/{id}", httpx.Paths(map[string]any{
+//		"org": "goforj",
+//		"id":  42,
+//	}))
+func Paths(values map[string]any) OptionBuilder {
+	return OptionBuilder{}.Paths(values)
+}
+
 func (b OptionBuilder) Paths(values map[string]any) OptionBuilder {
 	return b.add(requestOnly(func(r *req.Request) {
 		params := make(map[string]string, len(values))
@@ -78,6 +149,19 @@ func (b OptionBuilder) Paths(values map[string]any) OptionBuilder {
 
 // Body sets the request body and infers JSON for structs and maps.
 // @group Request Options
+//
+// Example: send JSON body with inference
+//
+//	type Payload struct {
+//		Name string `json:"name"`
+//	}
+//
+//	c := httpx.New()
+//	_ = httpx.Post[any, string](c, "https://example.com", nil, httpx.Body(Payload{Name: "Ana"}))
+func Body(value any) OptionBuilder {
+	return OptionBuilder{}.Body(value)
+}
+
 func (b OptionBuilder) Body(value any) OptionBuilder {
 	return b.add(requestOnly(func(r *req.Request) {
 		setBody(r, value)
@@ -86,6 +170,19 @@ func (b OptionBuilder) Body(value any) OptionBuilder {
 
 // JSON sets the request body as JSON.
 // @group Request Options
+//
+// Example: force JSON body
+//
+//	type Payload struct {
+//		Name string `json:"name"`
+//	}
+//
+//	c := httpx.New()
+//	_ = httpx.Post[any, string](c, "https://example.com", nil, httpx.JSON(Payload{Name: "Ana"}))
+func JSON(value any) OptionBuilder {
+	return OptionBuilder{}.JSON(value)
+}
+
 func (b OptionBuilder) JSON(value any) OptionBuilder {
 	return b.add(requestOnly(func(r *req.Request) {
 		r.SetBodyJsonMarshal(value)
@@ -94,6 +191,17 @@ func (b OptionBuilder) JSON(value any) OptionBuilder {
 
 // Form sets form data for the request.
 // @group Request Options
+//
+// Example: submit a form
+//
+//	c := httpx.New()
+//	_ = httpx.Post[any, string](c, "https://example.com", nil, httpx.Form(map[string]string{
+//		"name": "Ana",
+//	}))
+func Form(values map[string]string) OptionBuilder {
+	return OptionBuilder{}.Form(values)
+}
+
 func (b OptionBuilder) Form(values map[string]string) OptionBuilder {
 	return b.add(requestOnly(func(r *req.Request) {
 		r.SetFormData(values)
@@ -102,6 +210,15 @@ func (b OptionBuilder) Form(values map[string]string) OptionBuilder {
 
 // Timeout sets a per-request timeout using context cancellation.
 // @group Request Options
+//
+// Example: per-request timeout
+//
+//	c := httpx.New()
+//	_ = httpx.Get[string](c, "https://example.com", httpx.Timeout(2*time.Second))
+func Timeout(d time.Duration) OptionBuilder {
+	return OptionBuilder{}.Timeout(d)
+}
+
 func (b OptionBuilder) Timeout(d time.Duration) OptionBuilder {
 	return b.add(bothOption(
 		func(c *Client) {
@@ -121,6 +238,17 @@ func (b OptionBuilder) Timeout(d time.Duration) OptionBuilder {
 
 // Before runs a hook before the request is sent.
 // @group Request Options
+//
+// Example: mutate req.Request
+//
+//	c := httpx.New()
+//	_ = httpx.Get[string](c, "https://example.com", httpx.Before(func(r *req.Request) {
+//		r.EnableDump()
+//	}))
+func Before(fn func(*req.Request)) OptionBuilder {
+	return OptionBuilder{}.Before(fn)
+}
+
 func (b OptionBuilder) Before(fn func(*req.Request)) OptionBuilder {
 	if fn == nil {
 		return b

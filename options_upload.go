@@ -13,6 +13,15 @@ import (
 
 // File attaches a file from disk as multipart form data.
 // @group Upload Options
+//
+// Example: upload a file
+//
+//	c := httpx.New()
+//	_ = httpx.Post[any, string](c, "https://example.com/upload", nil, httpx.File("file", "/tmp/report.txt"))
+func File(paramName, filePath string) OptionBuilder {
+	return OptionBuilder{}.File(paramName, filePath)
+}
+
 func (b OptionBuilder) File(paramName, filePath string) OptionBuilder {
 	return b.add(requestOnly(func(r *req.Request) {
 		r.SetFile(paramName, filePath)
@@ -21,6 +30,18 @@ func (b OptionBuilder) File(paramName, filePath string) OptionBuilder {
 
 // Files attaches multiple files from disk as multipart form data.
 // @group Upload Options
+//
+// Example: upload multiple files
+//
+//	c := httpx.New()
+//	_ = httpx.Post[any, string](c, "https://example.com/upload", nil, httpx.Files(map[string]string{
+//		"fileA": "/tmp/a.txt",
+//		"fileB": "/tmp/b.txt",
+//	}))
+func Files(files map[string]string) OptionBuilder {
+	return OptionBuilder{}.Files(files)
+}
+
 func (b OptionBuilder) Files(files map[string]string) OptionBuilder {
 	return b.add(requestOnly(func(r *req.Request) {
 		r.SetFiles(files)
@@ -29,6 +50,15 @@ func (b OptionBuilder) Files(files map[string]string) OptionBuilder {
 
 // FileBytes attaches a file from bytes as multipart form data.
 // @group Upload Options
+//
+// Example: upload bytes as a file
+//
+//	c := httpx.New()
+//	_ = httpx.Post[any, string](c, "https://example.com/upload", nil, httpx.FileBytes("file", "report.txt", []byte("hello")))
+func FileBytes(paramName, filename string, content []byte) OptionBuilder {
+	return OptionBuilder{}.FileBytes(paramName, filename, content)
+}
+
 func (b OptionBuilder) FileBytes(paramName, filename string, content []byte) OptionBuilder {
 	return b.add(requestOnly(func(r *req.Request) {
 		r.SetFileUpload(req.FileUpload{
@@ -44,6 +74,15 @@ func (b OptionBuilder) FileBytes(paramName, filename string, content []byte) Opt
 
 // FileReader attaches a file from a reader as multipart form data.
 // @group Upload Options
+//
+// Example: upload from reader
+//
+//	c := httpx.New()
+//	_ = httpx.Post[any, string](c, "https://example.com/upload", nil, httpx.FileReader("file", "report.txt", strings.NewReader("hello")))
+func FileReader(paramName, filename string, reader io.Reader) OptionBuilder {
+	return OptionBuilder{}.FileReader(paramName, filename, reader)
+}
+
 func (b OptionBuilder) FileReader(paramName, filename string, reader io.Reader) OptionBuilder {
 	return b.add(requestOnly(func(r *req.Request) {
 		fileSize := int64(0)
@@ -81,11 +120,29 @@ func (b OptionBuilder) FileReader(paramName, filename string, reader io.Reader) 
 
 // UploadCallback registers a callback for upload progress.
 // @group Upload Options
+//
+// Example: track upload progress
+//
+//	c := httpx.New()
+//	_ = httpx.Post[any, string](c, "https://example.com/upload", nil,
+//		httpx.File("file", "/tmp/report.bin"),
+//		httpx.UploadCallback(func(info req.UploadInfo) {
+//			percent := float64(info.UploadedSize) / float64(info.FileSize) * 100
+//			fmt.Printf("\rprogress: %.1f%%", percent)
+//			if info.FileSize > 0 && info.UploadedSize >= info.FileSize {
+//				fmt.Print("\n")
+//			}
+//		}),
+//	)
+func UploadCallback(callback req.UploadCallback) OptionBuilder {
+	return OptionBuilder{}.UploadCallback(callback)
+}
+
 func (b OptionBuilder) UploadCallback(callback req.UploadCallback) OptionBuilder {
+	if callback == nil {
+		return b
+	}
 	return b.add(requestOnly(func(r *req.Request) {
-		if callback == nil {
-			return
-		}
 		var mu sync.Mutex
 		var last req.UploadInfo
 		var seen bool
@@ -125,11 +182,29 @@ func (b OptionBuilder) UploadCallback(callback req.UploadCallback) OptionBuilder
 
 // UploadCallbackWithInterval registers a callback for upload progress with a minimum interval.
 // @group Upload Options
+//
+// Example: throttle upload progress updates
+//
+//	c := httpx.New()
+//	_ = httpx.Post[any, string](c, "https://example.com/upload", nil,
+//		httpx.File("file", "/tmp/report.bin"),
+//		httpx.UploadCallbackWithInterval(func(info req.UploadInfo) {
+//			percent := float64(info.UploadedSize) / float64(info.FileSize) * 100
+//			fmt.Printf("\rprogress: %.1f%% (%.0f bytes)", percent, float64(info.UploadedSize))
+//			if info.FileSize > 0 && info.UploadedSize >= info.FileSize {
+//				fmt.Print("\n")
+//			}
+//		}, 200*time.Millisecond),
+//	)
+func UploadCallbackWithInterval(callback req.UploadCallback, minInterval time.Duration) OptionBuilder {
+	return OptionBuilder{}.UploadCallbackWithInterval(callback, minInterval)
+}
+
 func (b OptionBuilder) UploadCallbackWithInterval(callback req.UploadCallback, minInterval time.Duration) OptionBuilder {
+	if callback == nil {
+		return b
+	}
 	return b.add(requestOnly(func(r *req.Request) {
-		if callback == nil {
-			return
-		}
 		var mu sync.Mutex
 		var last req.UploadInfo
 		var seen bool
@@ -169,6 +244,18 @@ func (b OptionBuilder) UploadCallbackWithInterval(callback req.UploadCallback, m
 
 // UploadProgress enables a default progress spinner and bar for uploads.
 // @group Upload Options
+//
+// Example: upload with automatic progress
+//
+//	c := httpx.New()
+//	_ = httpx.Post[any, string](c, "https://example.com/upload", nil,
+//		httpx.File("file", "/tmp/report.bin"),
+//		httpx.UploadProgress(),
+//	)
+func UploadProgress() OptionBuilder {
+	return OptionBuilder{}.UploadProgress()
+}
+
 func (b OptionBuilder) UploadProgress() OptionBuilder {
 	return b.add(requestOnly(func(r *req.Request) {
 		var mu sync.Mutex

@@ -56,7 +56,7 @@ func TestFileAndFiles(t *testing.T) {
 
 	c := New()
 	res := Post[any, string](c, srv.URL, nil,
-		Opts().File("file", fileA).Files(map[string]string{"fileB": fileB}),
+		File("file", fileA).Files(map[string]string{"fileB": fileB}),
 	)
 	if res.Err != nil {
 		t.Fatalf("upload failed: %v", res.Err)
@@ -66,6 +66,35 @@ func TestFileAndFiles(t *testing.T) {
 	}
 	if got["fileB"] != "bravo" {
 		t.Fatalf("fileB content = %q", got["fileB"])
+	}
+}
+
+func TestFilesFunction(t *testing.T) {
+	file := writeTempFile(t, "payload.txt", "payload")
+	defer os.Remove(file)
+
+	var got string
+	srv := uploadServer(t, func(r *http.Request) {
+		if err := r.ParseMultipartForm(10 << 20); err != nil {
+			t.Fatalf("parse multipart: %v", err)
+		}
+		f, _, err := r.FormFile("file")
+		if err != nil {
+			t.Fatalf("form file: %v", err)
+		}
+		data, _ := io.ReadAll(f)
+		_ = f.Close()
+		got = string(data)
+	})
+	defer srv.Close()
+
+	c := New()
+	res := Post[any, string](c, srv.URL, nil, Files(map[string]string{"file": file}))
+	if res.Err != nil {
+		t.Fatalf("upload failed: %v", res.Err)
+	}
+	if got != "payload" {
+		t.Fatalf("file content = %q", got)
 	}
 }
 
@@ -86,7 +115,7 @@ func TestFileBytes(t *testing.T) {
 	defer srv.Close()
 
 	c := New()
-	res := Post[any, string](c, srv.URL, nil, Opts().FileBytes("file", "report.txt", []byte("hello")))
+	res := Post[any, string](c, srv.URL, nil, FileBytes("file", "report.txt", []byte("hello")))
 	if res.Err != nil {
 		t.Fatalf("upload failed: %v", res.Err)
 	}
@@ -148,7 +177,7 @@ func TestFileReaderSizes(t *testing.T) {
 
 			c := New()
 			res := Post[any, string](c, srv.URL, nil,
-				Opts().FileReader("file", "payload.bin", tc.reader).UploadCallback(func(info req.UploadInfo) {
+				FileReader("file", "payload.bin", tc.reader).UploadCallback(func(info req.UploadInfo) {
 					if info.FileSize > 0 {
 						gotSize = info.FileSize
 					}
@@ -180,7 +209,7 @@ func TestFileReaderSeekError(t *testing.T) {
 
 	c := New()
 	res := Post[any, string](c, srv.URL, nil,
-		Opts().FileReader("file", "payload.bin", &errorSeeker{}).UploadCallback(func(info req.UploadInfo) {
+		FileReader("file", "payload.bin", &errorSeeker{}).UploadCallback(func(info req.UploadInfo) {
 			gotSize = info.FileSize
 		}),
 	)
@@ -215,7 +244,7 @@ func TestFileReaderSeekEndError(t *testing.T) {
 
 	c := New()
 	res := Post[any, string](c, srv.URL, nil,
-		Opts().FileReader("file", "payload.bin", &partialSeeker{}).UploadCallback(func(info req.UploadInfo) {
+		FileReader("file", "payload.bin", &partialSeeker{}).UploadCallback(func(info req.UploadInfo) {
 			gotSize = info.FileSize
 		}),
 	)
@@ -237,7 +266,7 @@ func TestFileReaderReadCloser(t *testing.T) {
 	reader := io.NopCloser(bytes.NewReader([]byte("abc")))
 	c := New()
 	res := Post[any, string](c, srv.URL, nil,
-		Opts().FileReader("file", "payload.bin", reader).UploadCallback(func(info req.UploadInfo) {
+		FileReader("file", "payload.bin", reader).UploadCallback(func(info req.UploadInfo) {
 			gotSize = info.FileSize
 		}),
 	)
@@ -251,7 +280,7 @@ func TestFileReaderReadCloser(t *testing.T) {
 
 func TestFileReaderGetFileContentBranches(t *testing.T) {
 	r := req.C().R()
-	Opts().FileReader("file", "payload.bin", bytes.NewReader([]byte("abc"))).applyRequest(r)
+	FileReader("file", "payload.bin", bytes.NewReader([]byte("abc"))).applyRequest(r)
 
 	reqVal := reflect.ValueOf(r).Elem()
 	uploadsField := reqVal.FieldByName("uploadFiles")
@@ -270,7 +299,7 @@ func TestFileReaderGetFileContentBranches(t *testing.T) {
 	_ = rc.Close()
 
 	r2 := req.C().R()
-	Opts().FileReader("file", "payload.bin", io.NopCloser(bytes.NewReader([]byte("abc")))).applyRequest(r2)
+	FileReader("file", "payload.bin", io.NopCloser(bytes.NewReader([]byte("abc")))).applyRequest(r2)
 	reqVal2 := reflect.ValueOf(r2).Elem()
 	uploadsField2 := reqVal2.FieldByName("uploadFiles")
 	uploadsField2 = reflect.NewAt(uploadsField2.Type(), unsafe.Pointer(uploadsField2.UnsafeAddr())).Elem()
@@ -295,7 +324,7 @@ func TestUploadCallbackFinal(t *testing.T) {
 
 	c := New()
 	res := Post[any, string](c, srv.URL, nil,
-		Opts().FileBytes("file", "report.bin", []byte("payload")).UploadCallback(func(info req.UploadInfo) {
+		FileBytes("file", "report.bin", []byte("payload")).UploadCallback(func(info req.UploadInfo) {
 			atomic.AddInt32(&calls, 1)
 			last = info
 		}),
@@ -314,7 +343,7 @@ func TestUploadCallbackFinal(t *testing.T) {
 func TestUploadCallbackForcesFinal(t *testing.T) {
 	calledFinal := false
 	request := req.C().R()
-	Opts().UploadCallback(func(info req.UploadInfo) {
+	UploadCallback(func(info req.UploadInfo) {
 		if info.FileSize == 10 && info.UploadedSize == 10 {
 			calledFinal = true
 		}
@@ -339,7 +368,7 @@ func TestUploadCallbackForcesFinal(t *testing.T) {
 func TestUploadCallbackForcesFinalZeroSize(t *testing.T) {
 	calledFinal := false
 	request := req.C().R()
-	Opts().UploadCallback(func(info req.UploadInfo) {
+	UploadCallback(func(info req.UploadInfo) {
 		if info.FileSize == 5 && info.UploadedSize == 5 {
 			calledFinal = true
 		}
@@ -369,7 +398,7 @@ func TestUploadCallbackNoFile(t *testing.T) {
 	defer srv.Close()
 
 	c := New()
-	res := Post[any, string](c, srv.URL, "ok", Opts().UploadCallback(func(info req.UploadInfo) {
+	res := Post[any, string](c, srv.URL, "ok", UploadCallback(func(info req.UploadInfo) {
 		called = true
 	}))
 	if res.Err != nil {
@@ -382,7 +411,7 @@ func TestUploadCallbackNoFile(t *testing.T) {
 
 func TestUploadCallbackNil(t *testing.T) {
 	r := req.C().R()
-	Opts().UploadCallback(nil).applyRequest(r)
+	UploadCallback(nil).applyRequest(r)
 }
 
 func TestUploadCallbackWithIntervalFinal(t *testing.T) {
@@ -394,7 +423,7 @@ func TestUploadCallbackWithIntervalFinal(t *testing.T) {
 
 	c := New()
 	res := Post[any, string](c, srv.URL, nil,
-		Opts().FileBytes("file", "report.bin", []byte("payload")).UploadCallbackWithInterval(func(info req.UploadInfo) {
+		FileBytes("file", "report.bin", []byte("payload")).UploadCallbackWithInterval(func(info req.UploadInfo) {
 			last = info
 		}, 5*time.Millisecond),
 	)
@@ -409,7 +438,7 @@ func TestUploadCallbackWithIntervalFinal(t *testing.T) {
 func TestUploadCallbackWithIntervalForcesFinal(t *testing.T) {
 	calledFinal := false
 	request := req.C().R()
-	Opts().UploadCallbackWithInterval(func(info req.UploadInfo) {
+	UploadCallbackWithInterval(func(info req.UploadInfo) {
 		if info.FileSize == 10 && info.UploadedSize == 10 {
 			calledFinal = true
 		}
@@ -439,7 +468,7 @@ func TestUploadCallbackWithIntervalNoFile(t *testing.T) {
 	defer srv.Close()
 
 	c := New()
-	res := Post[any, string](c, srv.URL, "ok", Opts().UploadCallbackWithInterval(func(info req.UploadInfo) {
+	res := Post[any, string](c, srv.URL, "ok", UploadCallbackWithInterval(func(info req.UploadInfo) {
 		called = true
 	}, 10*time.Millisecond))
 	if res.Err != nil {
@@ -453,7 +482,7 @@ func TestUploadCallbackWithIntervalNoFile(t *testing.T) {
 func TestUploadCallbackWithIntervalForcesFinalZeroSize(t *testing.T) {
 	calledFinal := false
 	request := req.C().R()
-	Opts().UploadCallbackWithInterval(func(info req.UploadInfo) {
+	UploadCallbackWithInterval(func(info req.UploadInfo) {
 		if info.FileSize == 5 && info.UploadedSize == 5 {
 			calledFinal = true
 		}
@@ -476,7 +505,7 @@ func TestUploadCallbackWithIntervalForcesFinalZeroSize(t *testing.T) {
 }
 func TestUploadCallbackWithIntervalNil(t *testing.T) {
 	r := req.C().R()
-	Opts().UploadCallbackWithInterval(nil, 10*time.Millisecond).applyRequest(r)
+	UploadCallbackWithInterval(nil, 10*time.Millisecond).applyRequest(r)
 }
 
 func TestUploadProgress(t *testing.T) {
@@ -495,7 +524,7 @@ func TestUploadProgress(t *testing.T) {
 
 	c := New()
 	res := Post[any, string](c, srv.URL, nil,
-		Opts().FileBytes("file", "report.bin", bytes.Repeat([]byte("x"), 1024)).UploadProgress(),
+		FileBytes("file", "report.bin", bytes.Repeat([]byte("x"), 1024)).UploadProgress(),
 	)
 	_ = w.Close()
 	os.Stdout = stdout
@@ -512,7 +541,7 @@ func TestUploadProgress(t *testing.T) {
 
 func TestUploadProgressNoCallback(t *testing.T) {
 	request := req.C().R()
-	Opts().UploadProgress().applyRequest(request)
+	UploadProgress().applyRequest(request)
 
 	reqVal := reflect.ValueOf(request).Elem()
 	afterField := reqVal.FieldByName("afterResponse")
@@ -532,7 +561,7 @@ func TestUploadProgressUnknownSize(t *testing.T) {
 	}
 	os.Stdout = w
 	request := req.C().R()
-	Opts().UploadProgress().applyRequest(request)
+	UploadProgress().applyRequest(request)
 
 	reqVal := reflect.ValueOf(request).Elem()
 	cbField := reqVal.FieldByName("uploadCallback")

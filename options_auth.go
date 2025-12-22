@@ -8,6 +8,15 @@ import (
 
 // Auth sets the Authorization header using a scheme and token.
 // @group Auth
+//
+// Example: custom auth scheme
+//
+//	c := httpx.New()
+//	_ = httpx.Get[string](c, "https://example.com", httpx.Auth("Token", "abc123"))
+func Auth(scheme, token string) OptionBuilder {
+	return OptionBuilder{}.Auth(scheme, token)
+}
+
 func (b OptionBuilder) Auth(scheme, token string) OptionBuilder {
 	value := scheme + " " + token
 	return b.add(bothOption(
@@ -22,6 +31,15 @@ func (b OptionBuilder) Auth(scheme, token string) OptionBuilder {
 
 // Bearer sets the Authorization header with a bearer token.
 // @group Auth
+//
+// Example: bearer auth
+//
+//	c := httpx.New()
+//	_ = httpx.Get[string](c, "https://example.com", httpx.Bearer("token"))
+func Bearer(token string) OptionBuilder {
+	return OptionBuilder{}.Bearer(token)
+}
+
 func (b OptionBuilder) Bearer(token string) OptionBuilder {
 	value := "Bearer " + token
 	return b.add(bothOption(
@@ -36,6 +54,15 @@ func (b OptionBuilder) Bearer(token string) OptionBuilder {
 
 // Basic sets HTTP basic authentication headers.
 // @group Auth
+//
+// Example: basic auth
+//
+//	c := httpx.New()
+//	_ = httpx.Get[string](c, "https://example.com", httpx.Basic("user", "pass"))
+func Basic(user, pass string) OptionBuilder {
+	return OptionBuilder{}.Basic(user, pass)
+}
+
 func (b OptionBuilder) Basic(user, pass string) OptionBuilder {
 	value := "Basic " + base64.StdEncoding.EncodeToString([]byte(user+":"+pass))
 	return b.add(bothOption(

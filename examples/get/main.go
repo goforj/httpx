@@ -17,7 +17,7 @@ func main() {
 		Title  string `json:"title"`
 	}
 
-	c := httpx.New(httpx.Opts().Header("Accept", "application/vnd.github+json"))
+	c := httpx.New(httpx.Header("Accept", "application/vnd.github+json"))
 	res := httpx.Get[[]PullRequest](c, "https://api.github.com/repos/goforj/httpx/pulls")
 	if res.Err != nil {
 		return

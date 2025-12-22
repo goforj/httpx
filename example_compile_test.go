@@ -13,6 +13,7 @@ import (
 )
 
 func TestExamplesBuild(t *testing.T) {
+	t.Parallel()
 	examplesDir := "examples"
 
 	entries, err := os.ReadDir(examplesDir)

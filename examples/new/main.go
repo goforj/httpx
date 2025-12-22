@@ -17,7 +17,7 @@ func main() {
 
 	// Example: configure all client options
 	var buf bytes.Buffer
-	c := httpx.New(httpx.Opts().
+	c := httpx.New(httpx.
 		BaseURL("https://api.example.com").
 		Timeout(5*time.Second).
 		Header("X-Trace", "1").
