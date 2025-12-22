@@ -77,6 +77,9 @@ type OptionBuilder struct {
 // Opts creates a chainable option builder.
 // @group Options
 //
+// For single options you can skip `Opts()` and call helpers like `httpx.Header` directly;
+// they simply forward to the builder internally.
+//
 // Example: chain options
 //
 //	opt := httpx.Opts().Header("X-Trace", "1").Query("q", "go")
