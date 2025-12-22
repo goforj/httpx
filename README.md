@@ -14,7 +14,7 @@ It keeps req's power and escape hatches, while making the 90% use case feel effo
     <a href="https://goreportcard.com/report/github.com/goforj/httpx"><img src="https://goreportcard.com/badge/github.com/goforj/httpx" alt="Go Report Card"></a>
     <a href="https://codecov.io/gh/goforj/httpx" ><img src="https://codecov.io/gh/goforj/httpx/graph/badge.svg?token=R5O7LYAD4B"/></a>
 <!-- test-count:embed:start -->
-    <img src="https://img.shields.io/badge/tests-134-brightgreen" alt="Tests">
+    <img src="https://img.shields.io/badge/tests-135-brightgreen" alt="Tests">
 <!-- test-count:embed:end -->
 </p>
 

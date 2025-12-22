@@ -349,3 +349,9 @@ func TestGetSkipsNilOption(t *testing.T) {
 		t.Fatalf("unexpected error: %v", res.Err)
 	}
 }
+
+func TestNewSkipsNilOption(t *testing.T) {
+	if c := New(nil); c == nil {
+		t.Fatal("expected client")
+	}
+}
