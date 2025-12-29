@@ -670,12 +670,14 @@ type DeleteResponse struct {
 
 c := httpx.New()
 res := httpx.Delete[DeleteResponse](c, "https://api.example.com/users/1")
-_, _ = res.Body, res.Err
+_, _ = res.Body, res.Err // Body is DeleteResponse
 ```
 
 ### <a id="get"></a>Get
 
 Get issues a GET request using the provided client.
+
+_Example: fetch GitHub pull requests (typed)_
 
 ```go
 type PullRequest struct {
@@ -689,6 +691,14 @@ if res.Err != nil {
 	return
 }
 godump.Dump(res.Body)
+```
+
+_Example: bind to a string body_
+
+```go
+c2 := httpx.New()
+res2 := httpx.Get[string](c2, "https://httpbin.org/uuid")
+_, _ = res2.Body, res2.Err // Body is string
 ```
 
 ### <a id="head"></a>Head
@@ -725,7 +735,7 @@ type User struct {
 
 c := httpx.New()
 res := httpx.Patch[UpdateUser, User](c, "https://api.example.com/users/1", UpdateUser{Name: "Ana"})
-_, _ = res.Body, res.Err
+_, _ = res.Body, res.Err // Body is User
 ```
 
 ### <a id="post"></a>Post
@@ -742,7 +752,7 @@ type User struct {
 
 c := httpx.New()
 res := httpx.Post[CreateUser, User](c, "https://api.example.com/users", CreateUser{Name: "Ana"})
-_, _ = res.Body, res.Err
+_, _ = res.Body, res.Err // Body is User
 ```
 
 ### <a id="put"></a>Put
@@ -759,7 +769,7 @@ type User struct {
 
 c := httpx.New()
 res := httpx.Put[UpdateUser, User](c, "https://api.example.com/users/1", UpdateUser{Name: "Ana"})
-_, _ = res.Body, res.Err
+_, _ = res.Body, res.Err // Body is User
 ```
 
 ## Requests (Context)
@@ -776,7 +786,7 @@ type DeleteResponse struct {
 c := httpx.New()
 ctx := context.Background()
 res := httpx.DeleteCtx[DeleteResponse](c, ctx, "https://api.example.com/users/1")
-_, _ = res.Body, res.Err
+_, _ = res.Body, res.Err // Body is DeleteResponse
 ```
 
 ### <a id="getctx"></a>GetCtx
@@ -791,7 +801,7 @@ type User struct {
 c := httpx.New()
 ctx := context.Background()
 res := httpx.GetCtx[User](c, ctx, "https://api.example.com/users/1")
-_, _ = res.Body, res.Err
+_, _ = res.Body, res.Err // Body is User
 ```
 
 ### <a id="headctx"></a>HeadCtx
@@ -831,7 +841,7 @@ type User struct {
 c := httpx.New()
 ctx := context.Background()
 res := httpx.PatchCtx[UpdateUser, User](c, ctx, "https://api.example.com/users/1", UpdateUser{Name: "Ana"})
-_, _ = res.Body, res.Err
+_, _ = res.Body, res.Err // Body is User
 ```
 
 ### <a id="postctx"></a>PostCtx
@@ -849,7 +859,7 @@ type User struct {
 c := httpx.New()
 ctx := context.Background()
 res := httpx.PostCtx[CreateUser, User](c, ctx, "https://api.example.com/users", CreateUser{Name: "Ana"})
-_, _ = res.Body, res.Err
+_, _ = res.Body, res.Err // Body is User
 ```
 
 ### <a id="putctx"></a>PutCtx
@@ -867,7 +877,7 @@ type User struct {
 c := httpx.New()
 ctx := context.Background()
 res := httpx.PutCtx[UpdateUser, User](c, ctx, "https://api.example.com/users/1", UpdateUser{Name: "Ana"})
-_, _ = res.Body, res.Err
+_, _ = res.Body, res.Err // Body is User
 ```
 
 ## Retry

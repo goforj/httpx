@@ -126,7 +126,7 @@ func (c *Client) Raw() *req.Client {
 // Get issues a GET request using the provided client.
 // @group Requests
 //
-// Example: fetch GitHub pull requests
+// Example: fetch GitHub pull requests (typed)
 //
 //	type PullRequest struct {
 //		Number int    `json:"number"`
@@ -139,6 +139,12 @@ func (c *Client) Raw() *req.Client {
 //		return
 //	}
 //	godump.Dump(res.Body)
+//
+// Example: bind to a string body
+//
+//	c2 := httpx.New()
+//	res2 := httpx.Get[string](c2, "https://httpbin.org/uuid")
+//	_, _ = res2.Body, res2.Err // Body is string
 func Get[T any](client *Client, url string, opts ...Option) Result[T] {
 	return do[T](client, nil, methodGet, url, nil, opts)
 }
@@ -157,7 +163,7 @@ func Get[T any](client *Client, url string, opts ...Option) Result[T] {
 //
 //	c := httpx.New()
 //	res := httpx.Post[CreateUser, User](c, "https://api.example.com/users", CreateUser{Name: "Ana"})
-//	_, _ = res.Body, res.Err
+//	_, _ = res.Body, res.Err // Body is User
 func Post[In any, Out any](client *Client, url string, body In, opts ...Option) Result[Out] {
 	return do[Out](client, nil, methodPost, url, body, opts)
 }
@@ -176,7 +182,7 @@ func Post[In any, Out any](client *Client, url string, body In, opts ...Option) 
 //
 //	c := httpx.New()
 //	res := httpx.Put[UpdateUser, User](c, "https://api.example.com/users/1", UpdateUser{Name: "Ana"})
-//	_, _ = res.Body, res.Err
+//	_, _ = res.Body, res.Err // Body is User
 func Put[In any, Out any](client *Client, url string, body In, opts ...Option) Result[Out] {
 	return do[Out](client, nil, methodPut, url, body, opts)
 }
@@ -195,7 +201,7 @@ func Put[In any, Out any](client *Client, url string, body In, opts ...Option) R
 //
 //	c := httpx.New()
 //	res := httpx.Patch[UpdateUser, User](c, "https://api.example.com/users/1", UpdateUser{Name: "Ana"})
-//	_, _ = res.Body, res.Err
+//	_, _ = res.Body, res.Err // Body is User
 func Patch[In any, Out any](client *Client, url string, body In, opts ...Option) Result[Out] {
 	return do[Out](client, nil, methodPatch, url, body, opts)
 }
@@ -211,7 +217,7 @@ func Patch[In any, Out any](client *Client, url string, body In, opts ...Option)
 //
 //	c := httpx.New()
 //	res := httpx.Delete[DeleteResponse](c, "https://api.example.com/users/1")
-//	_, _ = res.Body, res.Err
+//	_, _ = res.Body, res.Err // Body is DeleteResponse
 func Delete[T any](client *Client, url string, opts ...Option) Result[T] {
 	return do[T](client, nil, methodDelete, url, nil, opts)
 }
@@ -252,7 +258,7 @@ func Options[T any](client *Client, url string, opts ...Option) Result[T] {
 //	c := httpx.New()
 //	ctx := context.Background()
 //	res := httpx.GetCtx[User](c, ctx, "https://api.example.com/users/1")
-//	_, _ = res.Body, res.Err
+//	_, _ = res.Body, res.Err // Body is User
 func GetCtx[T any](client *Client, ctx context.Context, url string, opts ...Option) Result[T] {
 	return do[T](client, ctx, methodGet, url, nil, opts)
 }
@@ -272,7 +278,7 @@ func GetCtx[T any](client *Client, ctx context.Context, url string, opts ...Opti
 //	c := httpx.New()
 //	ctx := context.Background()
 //	res := httpx.PostCtx[CreateUser, User](c, ctx, "https://api.example.com/users", CreateUser{Name: "Ana"})
-//	_, _ = res.Body, res.Err
+//	_, _ = res.Body, res.Err // Body is User
 func PostCtx[In any, Out any](client *Client, ctx context.Context, url string, body In, opts ...Option) Result[Out] {
 	return do[Out](client, ctx, methodPost, url, body, opts)
 }
@@ -292,7 +298,7 @@ func PostCtx[In any, Out any](client *Client, ctx context.Context, url string, b
 //	c := httpx.New()
 //	ctx := context.Background()
 //	res := httpx.PutCtx[UpdateUser, User](c, ctx, "https://api.example.com/users/1", UpdateUser{Name: "Ana"})
-//	_, _ = res.Body, res.Err
+//	_, _ = res.Body, res.Err // Body is User
 func PutCtx[In any, Out any](client *Client, ctx context.Context, url string, body In, opts ...Option) Result[Out] {
 	return do[Out](client, ctx, methodPut, url, body, opts)
 }
@@ -312,7 +318,7 @@ func PutCtx[In any, Out any](client *Client, ctx context.Context, url string, bo
 //	c := httpx.New()
 //	ctx := context.Background()
 //	res := httpx.PatchCtx[UpdateUser, User](c, ctx, "https://api.example.com/users/1", UpdateUser{Name: "Ana"})
-//	_, _ = res.Body, res.Err
+//	_, _ = res.Body, res.Err // Body is User
 func PatchCtx[In any, Out any](client *Client, ctx context.Context, url string, body In, opts ...Option) Result[Out] {
 	return do[Out](client, ctx, methodPatch, url, body, opts)
 }
@@ -329,7 +335,7 @@ func PatchCtx[In any, Out any](client *Client, ctx context.Context, url string, 
 //	c := httpx.New()
 //	ctx := context.Background()
 //	res := httpx.DeleteCtx[DeleteResponse](c, ctx, "https://api.example.com/users/1")
-//	_, _ = res.Body, res.Err
+//	_, _ = res.Body, res.Err // Body is DeleteResponse
 func DeleteCtx[T any](client *Client, ctx context.Context, url string, opts ...Option) Result[T] {
 	return do[T](client, ctx, methodDelete, url, nil, opts)
 }

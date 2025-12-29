@@ -18,5 +18,5 @@ func main() {
 
 	c := httpx.New()
 	res := httpx.Patch[UpdateUser, User](c, "https://api.example.com/users/1", UpdateUser{Name: "Ana"})
-	_, _ = res.Body, res.Err
+	_, _ = res.Body, res.Err // Body is User
 }
