@@ -14,7 +14,7 @@ It keeps req's power and escape hatches, while making the 90% use case feel effo
     <a href="https://goreportcard.com/report/github.com/goforj/httpx"><img src="https://goreportcard.com/badge/github.com/goforj/httpx" alt="Go Report Card"></a>
     <a href="https://codecov.io/gh/goforj/httpx" ><img src="https://codecov.io/gh/goforj/httpx/graph/badge.svg?token=R5O7LYAD4B"/></a>
 <!-- test-count:embed:start -->
-    <img src="https://img.shields.io/badge/tests-135-brightgreen" alt="Tests">
+    <img src="https://img.shields.io/badge/tests-172-brightgreen" alt="Tests">
 <!-- test-count:embed:end -->
 </p>
 
@@ -121,16 +121,20 @@ They are compiled by `example_compile_test.go` to keep docs and code in sync.
 | Group | Functions |
 |------:|-----------|
 | **Auth** | [Auth](#auth) [Basic](#basic) [Bearer](#bearer) |
+| **Browser Profiles** | [AsChrome](#aschrome) [AsFirefox](#asfirefox) [AsMobile](#asmobile) [AsSafari](#assafari) |
 | **Client** | [Default](#default) [New](#new) [Raw](#raw) [Req](#req) |
 | **Client Options** | [BaseURL](#baseurl) [ErrorMapper](#errormapper) [Middleware](#middleware) [Transport](#transport) |
 | **Debugging** | [Dump](#dump) [DumpAll](#dumpall) [DumpEachRequest](#dumpeachrequest) [DumpEachRequestTo](#dumpeachrequestto) [DumpTo](#dumpto) [DumpToFile](#dumptofile) |
 | **Download Options** | [OutputFile](#outputfile) |
 | **Errors** | [Error](#error) |
-| **Request Options** | [Before](#before) [Body](#body) [Form](#form) [Header](#header) [Headers](#headers) [JSON](#json) [Path](#path) [Paths](#paths) [Queries](#queries) [Query](#query) [Timeout](#timeout) |
+| **HTTP2** | [HTTP2ConnectionFlow](#http2connectionflow) [HTTP2HeaderPriority](#http2headerpriority) [HTTP2PriorityFrames](#http2priorityframes) [HTTP2Settings](#http2settings) |
+| **Impersonation** | [HeaderOrder](#headerorder) [MultipartBoundary](#multipartboundary) [PseudoHeaderOrder](#pseudoheaderorder) |
+| **Request Options** | [Before](#before) [Body](#body) [Form](#form) [Header](#header) [Headers](#headers) [JSON](#json) [Path](#path) [Paths](#paths) [Queries](#queries) [Query](#query) [Timeout](#timeout) [UserAgent](#useragent) |
 | **Requests** | [Delete](#delete) [Get](#get) [Patch](#patch) [Post](#post) [Put](#put) |
 | **Requests (Context)** | [DeleteCtx](#deletectx) [GetCtx](#getctx) [PatchCtx](#patchctx) [PostCtx](#postctx) [PutCtx](#putctx) |
 | **Retry** | [RetryBackoff](#retrybackoff) [RetryCondition](#retrycondition) [RetryCount](#retrycount) [RetryFixedInterval](#retryfixedinterval) [RetryHook](#retryhook) [RetryInterval](#retryinterval) |
 | **Retry (Client)** | [Retry](#retry) |
+| **TLS Fingerprints** | [TLSFingerprint](#tlsfingerprint) [TLSFingerprintAndroid](#tlsfingerprintandroid) [TLSFingerprintChrome](#tlsfingerprintchrome) [TLSFingerprintEdge](#tlsfingerprintedge) [TLSFingerprintFirefox](#tlsfingerprintfirefox) [TLSFingerprintIOS](#tlsfingerprintios) [TLSFingerprintRandomized](#tlsfingerprintrandomized) [TLSFingerprintSafari](#tlsfingerprintsafari) |
 | **Upload Options** | [File](#file) [FileBytes](#filebytes) [FileReader](#filereader) [Files](#files) [UploadCallback](#uploadcallback) [UploadCallbackWithInterval](#uploadcallbackwithinterval) [UploadProgress](#uploadprogress) |
 
 
@@ -161,6 +165,44 @@ Bearer sets the Authorization header with a bearer token.
 ```go
 c := httpx.New()
 _ = httpx.Get[string](c, "https://example.com", httpx.Bearer("token"))
+```
+
+## Browser Profiles
+
+### <a id="aschrome"></a>AsChrome
+
+AsChrome applies the Chrome browser profile (headers, TLS, and HTTP/2 behavior).
+
+```go
+c := httpx.New(httpx.AsChrome())
+_ = c
+```
+
+### <a id="asfirefox"></a>AsFirefox
+
+AsFirefox applies the Firefox browser profile (headers, TLS, and HTTP/2 behavior).
+
+```go
+c := httpx.New(httpx.AsFirefox())
+_ = c
+```
+
+### <a id="asmobile"></a>AsMobile
+
+AsMobile applies a mobile Chrome-like profile (headers, TLS, and HTTP/2 behavior).
+
+```go
+c := httpx.New(httpx.AsMobile())
+_ = c
+```
+
+### <a id="assafari"></a>AsSafari
+
+AsSafari applies the Safari browser profile (headers, TLS, and HTTP/2 behavior).
+
+```go
+c := httpx.New(httpx.AsSafari())
+_ = c
 ```
 
 ## Client
@@ -366,6 +408,73 @@ if errors.As(res.Err, &httpErr) {
 }
 ```
 
+## HTTP2
+
+### <a id="http2connectionflow"></a>HTTP2ConnectionFlow
+
+HTTP2ConnectionFlow sets the HTTP/2 connection flow control window increment.
+
+```go
+c := httpx.New(httpx.HTTP2ConnectionFlow(1_048_576))
+_ = c
+```
+
+### <a id="http2headerpriority"></a>HTTP2HeaderPriority
+
+HTTP2HeaderPriority sets the HTTP/2 header priority.
+
+```go
+c := httpx.New(httpx.HTTP2HeaderPriority(http2.PriorityParam{Weight: 255}))
+_ = c
+```
+
+### <a id="http2priorityframes"></a>HTTP2PriorityFrames
+
+HTTP2PriorityFrames sets HTTP/2 priority frames for the client.
+
+```go
+c := httpx.New(httpx.HTTP2PriorityFrames(http2.PriorityFrame{StreamID: 3}))
+_ = c
+```
+
+### <a id="http2settings"></a>HTTP2Settings
+
+HTTP2Settings sets HTTP/2 settings frames for the client.
+
+```go
+c := httpx.New(httpx.HTTP2Settings(http2.Setting{ID: http2.SettingMaxConcurrentStreams, Val: 100}))
+_ = c
+```
+
+## Impersonation
+
+### <a id="headerorder"></a>HeaderOrder
+
+HeaderOrder sets the header order for requests.
+
+```go
+c := httpx.New(httpx.HeaderOrder("host", "user-agent", "accept"))
+_ = c
+```
+
+### <a id="multipartboundary"></a>MultipartBoundary
+
+MultipartBoundary overrides the default multipart boundary generator.
+
+```go
+c := httpx.New(httpx.MultipartBoundary(func() string { return "boundary" }))
+_ = c
+```
+
+### <a id="pseudoheaderorder"></a>PseudoHeaderOrder
+
+PseudoHeaderOrder sets the HTTP/2 pseudo header order for requests.
+
+```go
+c := httpx.New(httpx.PseudoHeaderOrder(":method", ":authority", ":scheme", ":path"))
+_ = c
+```
+
 ## Request Options
 
 ### <a id="before"></a>Before
@@ -494,6 +603,15 @@ Timeout sets a per-request timeout using context cancellation.
 ```go
 c := httpx.New()
 _ = httpx.Get[string](c, "https://example.com", httpx.Timeout(2*time.Second))
+```
+
+### <a id="useragent"></a>UserAgent
+
+UserAgent sets the User-Agent header on a request or client.
+
+```go
+c := httpx.New(httpx.UserAgent("my-app/1.0"))
+_ = httpx.Get[string](c, "https://example.com")
 ```
 
 ## Requests
@@ -737,6 +855,80 @@ Retry applies a custom retry configuration to the client.
 c := httpx.New(httpx.Retry(func(rc *req.Client) {
 	rc.SetCommonRetryCount(2)
 }))
+_ = c
+```
+
+## TLS Fingerprints
+
+### <a id="tlsfingerprint"></a>TLSFingerprint
+
+TLSFingerprint applies a TLS fingerprint preset.
+
+```go
+c := httpx.New(httpx.TLSFingerprint(httpx.TLSFingerprintChromeKind))
+_ = c
+```
+
+### <a id="tlsfingerprintandroid"></a>TLSFingerprintAndroid
+
+TLSFingerprintAndroid applies the Android TLS fingerprint preset.
+
+```go
+c := httpx.New(httpx.TLSFingerprintAndroid())
+_ = c
+```
+
+### <a id="tlsfingerprintchrome"></a>TLSFingerprintChrome
+
+TLSFingerprintChrome applies the Chrome TLS fingerprint preset.
+
+```go
+c := httpx.New(httpx.TLSFingerprintChrome())
+_ = c
+```
+
+### <a id="tlsfingerprintedge"></a>TLSFingerprintEdge
+
+TLSFingerprintEdge applies the Edge TLS fingerprint preset.
+
+```go
+c := httpx.New(httpx.TLSFingerprintEdge())
+_ = c
+```
+
+### <a id="tlsfingerprintfirefox"></a>TLSFingerprintFirefox
+
+TLSFingerprintFirefox applies the Firefox TLS fingerprint preset.
+
+```go
+c := httpx.New(httpx.TLSFingerprintFirefox())
+_ = c
+```
+
+### <a id="tlsfingerprintios"></a>TLSFingerprintIOS
+
+TLSFingerprintIOS applies the iOS TLS fingerprint preset.
+
+```go
+c := httpx.New(httpx.TLSFingerprintIOS())
+_ = c
+```
+
+### <a id="tlsfingerprintrandomized"></a>TLSFingerprintRandomized
+
+TLSFingerprintRandomized applies a randomized TLS fingerprint preset.
+
+```go
+c := httpx.New(httpx.TLSFingerprintRandomized())
+_ = c
+```
+
+### <a id="tlsfingerprintsafari"></a>TLSFingerprintSafari
+
+TLSFingerprintSafari applies the Safari TLS fingerprint preset.
+
+```go
+c := httpx.New(httpx.TLSFingerprintSafari())
 _ = c
 ```
 

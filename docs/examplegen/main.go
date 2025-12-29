@@ -397,6 +397,7 @@ func writeMain(base string, fd *FuncDoc, importPath string) error {
 		"filepath.": "path/filepath",
 		"godump.":   "github.com/goforj/godump",
 		"req.":      "github.com/imroc/req/v3",
+		"http2.":    "github.com/imroc/req/v3/http2",
 		"rand.":     "crypto/rand",
 		"base64.":   "encoding/base64",
 	}

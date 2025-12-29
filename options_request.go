@@ -58,6 +58,29 @@ func (b OptionBuilder) Headers(values map[string]string) OptionBuilder {
 	))
 }
 
+// UserAgent sets the User-Agent header on a request or client.
+// @group Request Options
+//
+// Applies to both client defaults and request-time headers.
+// Example: set a User-Agent
+//
+//	c := httpx.New(httpx.UserAgent("my-app/1.0"))
+//	_ = httpx.Get[string](c, "https://example.com")
+func UserAgent(value string) OptionBuilder {
+	return OptionBuilder{}.UserAgent(value)
+}
+
+func (b OptionBuilder) UserAgent(value string) OptionBuilder {
+	return b.add(bothOption(
+		func(c *Client) {
+			c.req.SetUserAgent(value)
+		},
+		func(r *req.Request) {
+			r.SetHeader("User-Agent", value)
+		},
+	))
+}
+
 // Query adds query parameters as key/value pairs.
 // @group Request Options
 //
