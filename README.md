@@ -19,7 +19,7 @@ It keeps req's power and escape hatches, while making the 90% use case feel effo
 </p>
 
 <p align="center">
-  <img src="docs/images/goforj_httpx_example_1.png" width="600" alt="httpx Logo">
+  <img src="docs/images/goforj_httpx_example_1.png" width="600" style="border-radius: 25px;" alt="httpx Logo">
 </p>
 
 ## v2 Status
