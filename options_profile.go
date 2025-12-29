@@ -21,13 +21,13 @@ import (
 func AsChrome() OptionBuilder {
 	return mergeOptionBuilders(
 		TLSFingerprint(TLSFingerprintChromeKind),
-		HTTP2Settings(chromeHTTP2Settings...),
-		HTTP2ConnectionFlow(chromeHTTP2ConnectionFlow),
-		PseudoHeaderOrder(chromePseudoHeaderOrder...),
-		HeaderOrder(chromeHeaderOrder...),
+		http2SettingsOption(chromeHTTP2Settings...),
+		http2ConnectionFlowOption(chromeHTTP2ConnectionFlow),
+		pseudoHeaderOrder(chromePseudoHeaderOrder...),
+		headerOrder(chromeHeaderOrder...),
 		Headers(chromeHeaders),
-		HTTP2HeaderPriority(chromeHeaderPriority),
-		MultipartBoundary(webkitMultipartBoundaryFunc),
+		http2HeaderPriorityOption(chromeHeaderPriority),
+		multipartBoundary(webkitMultipartBoundaryFunc),
 	)
 }
 
@@ -46,14 +46,14 @@ func (b OptionBuilder) AsChrome() OptionBuilder {
 func AsFirefox() OptionBuilder {
 	return mergeOptionBuilders(
 		TLSFingerprint(TLSFingerprintFirefoxKind),
-		HTTP2Settings(firefoxHTTP2Settings...),
-		HTTP2ConnectionFlow(firefoxHTTP2ConnectionFlow),
-		HTTP2PriorityFrames(firefoxPriorityFrames...),
-		PseudoHeaderOrder(firefoxPseudoHeaderOrder...),
-		HeaderOrder(firefoxHeaderOrder...),
+		http2SettingsOption(firefoxHTTP2Settings...),
+		http2ConnectionFlowOption(firefoxHTTP2ConnectionFlow),
+		http2PriorityFramesOption(firefoxPriorityFrames...),
+		pseudoHeaderOrder(firefoxPseudoHeaderOrder...),
+		headerOrder(firefoxHeaderOrder...),
 		Headers(firefoxHeaders),
-		HTTP2HeaderPriority(firefoxHeaderPriority),
-		MultipartBoundary(firefoxMultipartBoundaryFunc),
+		http2HeaderPriorityOption(firefoxHeaderPriority),
+		multipartBoundary(firefoxMultipartBoundaryFunc),
 	)
 }
 
@@ -72,13 +72,13 @@ func (b OptionBuilder) AsFirefox() OptionBuilder {
 func AsSafari() OptionBuilder {
 	return mergeOptionBuilders(
 		TLSFingerprint(TLSFingerprintSafariKind),
-		HTTP2Settings(safariHTTP2Settings...),
-		HTTP2ConnectionFlow(safariHTTP2ConnectionFlow),
-		PseudoHeaderOrder(safariPseudoHeaderOrder...),
-		HeaderOrder(safariHeaderOrder...),
+		http2SettingsOption(safariHTTP2Settings...),
+		http2ConnectionFlowOption(safariHTTP2ConnectionFlow),
+		pseudoHeaderOrder(safariPseudoHeaderOrder...),
+		headerOrder(safariHeaderOrder...),
 		Headers(safariHeaders),
-		HTTP2HeaderPriority(safariHeaderPriority),
-		MultipartBoundary(webkitMultipartBoundaryFunc),
+		http2HeaderPriorityOption(safariHeaderPriority),
+		multipartBoundary(webkitMultipartBoundaryFunc),
 	)
 }
 
@@ -97,13 +97,13 @@ func (b OptionBuilder) AsSafari() OptionBuilder {
 func AsMobile() OptionBuilder {
 	return mergeOptionBuilders(
 		TLSFingerprint(TLSFingerprintAndroidKind),
-		HTTP2Settings(mobileHTTP2Settings...),
-		HTTP2ConnectionFlow(mobileHTTP2ConnectionFlow),
-		PseudoHeaderOrder(mobilePseudoHeaderOrder...),
-		HeaderOrder(mobileHeaderOrder...),
+		http2SettingsOption(mobileHTTP2Settings...),
+		http2ConnectionFlowOption(mobileHTTP2ConnectionFlow),
+		pseudoHeaderOrder(mobilePseudoHeaderOrder...),
+		headerOrder(mobileHeaderOrder...),
 		Headers(mobileHeaders),
-		HTTP2HeaderPriority(mobileHeaderPriority),
-		MultipartBoundary(webkitMultipartBoundaryFunc),
+		http2HeaderPriorityOption(mobileHeaderPriority),
+		multipartBoundary(webkitMultipartBoundaryFunc),
 	)
 }
 
@@ -117,6 +117,36 @@ func mergeOptionBuilders(builders ...OptionBuilder) OptionBuilder {
 		out.ops = append(out.ops, b.ops...)
 	}
 	return out
+}
+
+func http2SettingsOption(settings ...http2.Setting) OptionBuilder {
+	return OptionBuilder{}.add(clientOnly(func(c *Client) {
+		if len(settings) == 0 {
+			return
+		}
+		c.req.SetHTTP2SettingsFrame(settings...)
+	}))
+}
+
+func http2ConnectionFlowOption(flow uint32) OptionBuilder {
+	return OptionBuilder{}.add(clientOnly(func(c *Client) {
+		c.req.SetHTTP2ConnectionFlow(flow)
+	}))
+}
+
+func http2HeaderPriorityOption(priority http2.PriorityParam) OptionBuilder {
+	return OptionBuilder{}.add(clientOnly(func(c *Client) {
+		c.req.SetHTTP2HeaderPriority(priority)
+	}))
+}
+
+func http2PriorityFramesOption(frames ...http2.PriorityFrame) OptionBuilder {
+	return OptionBuilder{}.add(clientOnly(func(c *Client) {
+		if len(frames) == 0 {
+			return
+		}
+		c.req.SetHTTP2PriorityFrames(frames...)
+	}))
 }
 
 // Identical for both Blink-based browsers (Chrome, Chromium, etc.) and WebKit-based browsers (Safari, etc.)

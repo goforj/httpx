@@ -6,7 +6,6 @@ import (
 	"testing"
 
 	"github.com/imroc/req/v3"
-	"github.com/imroc/req/v3/http2"
 )
 
 func TestAsChrome(t *testing.T) {
@@ -106,44 +105,8 @@ func TestTLSFingerprintHelpers(t *testing.T) {
 	}
 }
 
-func TestHTTP2Settings(t *testing.T) {
-	c := New(HTTP2Settings())
-	if c == nil {
-		t.Fatalf("expected client")
-	}
-	c = New(HTTP2Settings(http2.Setting{ID: http2.SettingMaxConcurrentStreams, Val: 100}))
-	if c == nil {
-		t.Fatalf("expected client")
-	}
-}
-
-func TestHTTP2ConnectionFlow(t *testing.T) {
-	c := New(HTTP2ConnectionFlow(1))
-	if c == nil {
-		t.Fatalf("expected client")
-	}
-}
-
-func TestHTTP2HeaderPriority(t *testing.T) {
-	c := New(HTTP2HeaderPriority(http2.PriorityParam{Weight: 255}))
-	if c == nil {
-		t.Fatalf("expected client")
-	}
-}
-
-func TestHTTP2PriorityFrames(t *testing.T) {
-	c := New(HTTP2PriorityFrames())
-	if c == nil {
-		t.Fatalf("expected client")
-	}
-	c = New(HTTP2PriorityFrames(http2.PriorityFrame{StreamID: 3}))
-	if c == nil {
-		t.Fatalf("expected client")
-	}
-}
-
-func TestHeaderOrder(t *testing.T) {
-	empty := HeaderOrder()
+func TestHeaderOrderPrivate(t *testing.T) {
+	empty := headerOrder()
 	if len(empty.ops) != 1 {
 		t.Fatalf("expected option to be recorded")
 	}
@@ -155,7 +118,7 @@ func TestHeaderOrder(t *testing.T) {
 		t.Fatalf("expected no header order to be set")
 	}
 
-	b := HeaderOrder("host", "user-agent")
+	b := headerOrder("host", "user-agent")
 	c = New(b)
 	if c == nil {
 		t.Fatalf("expected client")
@@ -168,8 +131,8 @@ func TestHeaderOrder(t *testing.T) {
 	}
 }
 
-func TestPseudoHeaderOrder(t *testing.T) {
-	empty := PseudoHeaderOrder()
+func TestPseudoHeaderOrderPrivate(t *testing.T) {
+	empty := pseudoHeaderOrder()
 	if len(empty.ops) != 1 {
 		t.Fatalf("expected option to be recorded")
 	}
@@ -181,7 +144,7 @@ func TestPseudoHeaderOrder(t *testing.T) {
 		t.Fatalf("expected no pseudo header order to be set")
 	}
 
-	b := PseudoHeaderOrder(":method", ":path")
+	b := pseudoHeaderOrder(":method", ":path")
 	c = New(b)
 	if c == nil {
 		t.Fatalf("expected client")
@@ -194,11 +157,11 @@ func TestPseudoHeaderOrder(t *testing.T) {
 	}
 }
 
-func TestMultipartBoundary(t *testing.T) {
-	if got := MultipartBoundary(nil); len(got.ops) != 0 {
+func TestMultipartBoundaryPrivate(t *testing.T) {
+	if got := multipartBoundary(nil); len(got.ops) != 0 {
 		t.Fatalf("expected no options, got %d", len(got.ops))
 	}
-	c := New(MultipartBoundary(func() string { return "boundary" }))
+	c := New(multipartBoundary(func() string { return "boundary" }))
 	if !hasMultipartBoundaryFunc(c) {
 		t.Fatalf("expected multipart boundary func to be set")
 	}

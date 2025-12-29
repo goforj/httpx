@@ -14,7 +14,7 @@ It keeps req's power and escape hatches, while making the 90% use case feel effo
     <a href="https://goreportcard.com/report/github.com/goforj/httpx"><img src="https://goreportcard.com/badge/github.com/goforj/httpx" alt="Go Report Card"></a>
     <a href="https://codecov.io/gh/goforj/httpx" ><img src="https://codecov.io/gh/goforj/httpx/graph/badge.svg?token=R5O7LYAD4B"/></a>
 <!-- test-count:embed:start -->
-    <img src="https://img.shields.io/badge/tests-172-brightgreen" alt="Tests">
+    <img src="https://img.shields.io/badge/tests-165-brightgreen" alt="Tests">
 <!-- test-count:embed:end -->
 </p>
 
@@ -127,9 +127,8 @@ They are compiled by `example_compile_test.go` to keep docs and code in sync.
 | **Debugging** | [Dump](#dump) [DumpAll](#dumpall) [DumpEachRequest](#dumpeachrequest) [DumpEachRequestTo](#dumpeachrequestto) [DumpTo](#dumpto) [DumpToFile](#dumptofile) |
 | **Download Options** | [OutputFile](#outputfile) |
 | **Errors** | [Error](#error) |
-| **HTTP2** | [HTTP2ConnectionFlow](#http2connectionflow) [HTTP2HeaderPriority](#http2headerpriority) [HTTP2PriorityFrames](#http2priorityframes) [HTTP2Settings](#http2settings) |
-| **Impersonation** | [HeaderOrder](#headerorder) [MultipartBoundary](#multipartboundary) [PseudoHeaderOrder](#pseudoheaderorder) |
-| **Request Options** | [Before](#before) [Body](#body) [Form](#form) [Header](#header) [Headers](#headers) [JSON](#json) [Path](#path) [Paths](#paths) [Queries](#queries) [Query](#query) [Timeout](#timeout) [UserAgent](#useragent) |
+| **Request Composition** | [Body](#body) [Form](#form) [Header](#header) [Headers](#headers) [JSON](#json) [Path](#path) [Paths](#paths) [Queries](#queries) [Query](#query) [UserAgent](#useragent) |
+| **Request Control** | [Before](#before) [Timeout](#timeout) |
 | **Requests** | [Delete](#delete) [Get](#get) [Patch](#patch) [Post](#post) [Put](#put) |
 | **Requests (Context)** | [DeleteCtx](#deletectx) [GetCtx](#getctx) [PatchCtx](#patchctx) [PostCtx](#postctx) [PutCtx](#putctx) |
 | **Retry** | [RetryBackoff](#retrybackoff) [RetryCondition](#retrycondition) [RetryCount](#retrycount) [RetryFixedInterval](#retryfixedinterval) [RetryHook](#retryhook) [RetryInterval](#retryinterval) |
@@ -408,85 +407,7 @@ if errors.As(res.Err, &httpErr) {
 }
 ```
 
-## HTTP2
-
-### <a id="http2connectionflow"></a>HTTP2ConnectionFlow
-
-HTTP2ConnectionFlow sets the HTTP/2 connection flow control window increment.
-
-```go
-c := httpx.New(httpx.HTTP2ConnectionFlow(1_048_576))
-_ = c
-```
-
-### <a id="http2headerpriority"></a>HTTP2HeaderPriority
-
-HTTP2HeaderPriority sets the HTTP/2 header priority.
-
-```go
-c := httpx.New(httpx.HTTP2HeaderPriority(http2.PriorityParam{Weight: 255}))
-_ = c
-```
-
-### <a id="http2priorityframes"></a>HTTP2PriorityFrames
-
-HTTP2PriorityFrames sets HTTP/2 priority frames for the client.
-
-```go
-c := httpx.New(httpx.HTTP2PriorityFrames(http2.PriorityFrame{StreamID: 3}))
-_ = c
-```
-
-### <a id="http2settings"></a>HTTP2Settings
-
-HTTP2Settings sets HTTP/2 settings frames for the client.
-
-```go
-c := httpx.New(httpx.HTTP2Settings(http2.Setting{ID: http2.SettingMaxConcurrentStreams, Val: 100}))
-_ = c
-```
-
-## Impersonation
-
-### <a id="headerorder"></a>HeaderOrder
-
-HeaderOrder sets the header order for requests.
-
-```go
-c := httpx.New(httpx.HeaderOrder("host", "user-agent", "accept"))
-_ = c
-```
-
-### <a id="multipartboundary"></a>MultipartBoundary
-
-MultipartBoundary overrides the default multipart boundary generator.
-
-```go
-c := httpx.New(httpx.MultipartBoundary(func() string { return "boundary" }))
-_ = c
-```
-
-### <a id="pseudoheaderorder"></a>PseudoHeaderOrder
-
-PseudoHeaderOrder sets the HTTP/2 pseudo header order for requests.
-
-```go
-c := httpx.New(httpx.PseudoHeaderOrder(":method", ":authority", ":scheme", ":path"))
-_ = c
-```
-
-## Request Options
-
-### <a id="before"></a>Before
-
-Before runs a hook before the request is sent.
-
-```go
-c := httpx.New()
-_ = httpx.Get[string](c, "https://example.com", httpx.Before(func(r *req.Request) {
-	r.EnableDump()
-}))
-```
+## Request Composition
 
 ### <a id="body"></a>Body
 
@@ -596,15 +517,6 @@ c := httpx.New()
 _ = httpx.Get[string](c, "https://example.com/search", httpx.Query("q", "go", "ok", "1"))
 ```
 
-### <a id="timeout"></a>Timeout
-
-Timeout sets a per-request timeout using context cancellation.
-
-```go
-c := httpx.New()
-_ = httpx.Get[string](c, "https://example.com", httpx.Timeout(2*time.Second))
-```
-
 ### <a id="useragent"></a>UserAgent
 
 UserAgent sets the User-Agent header on a request or client.
@@ -612,6 +524,28 @@ UserAgent sets the User-Agent header on a request or client.
 ```go
 c := httpx.New(httpx.UserAgent("my-app/1.0"))
 _ = httpx.Get[string](c, "https://example.com")
+```
+
+## Request Control
+
+### <a id="before"></a>Before
+
+Before runs a hook before the request is sent.
+
+```go
+c := httpx.New()
+_ = httpx.Get[string](c, "https://example.com", httpx.Before(func(r *req.Request) {
+	r.EnableDump()
+}))
+```
+
+### <a id="timeout"></a>Timeout
+
+Timeout sets a per-request timeout using context cancellation.
+
+```go
+c := httpx.New()
+_ = httpx.Get[string](c, "https://example.com", httpx.Timeout(2*time.Second))
 ```
 
 ## Requests
