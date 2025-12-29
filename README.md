@@ -69,18 +69,24 @@ func main() {
 }
 ```
 
-## Escape Hatches (req is always available)
+## Use Any req Feature (and why req is incredible)
+
+**httpx** is built on top of the incredible `[req](https://github.com/imroc/req)` library, and you can always drop down to it when you need something beyond httpx’s helpers. That means every example in req’s docs is available to you with `c.Req()` or `c.Raw()`.
+
+While httpx provides ergonomic helpers for the most common use cases, req is a powerful and flexible HTTP client library with tons of features.
 
 ```go
 c := httpx.New()
 
-// Advanced req config.
-c.Req().EnableDumpEachRequest()
+// Grab the underlying req client.
+rc := c.Req()
 
-// Drop down to raw req calls.
-resp, err := c.Raw().R().Get("https://httpbin.org/uuid")
-_, _ = resp, err
+// Now you can use any req feature from their docs.
+// Example: enable trace, custom transports, cookie jars, proxies, etc.
+rc.EnableTraceAll()
 ```
+
+See the full req documentation here: https://req.cool/docs/prologue/quickstart/
 
 ## Options in Practice
 
