@@ -8,7 +8,11 @@ import "github.com/goforj/httpx"
 func main() {
 	// RetryCount enables retry for a request and sets the maximum retry count.
 
-	// Example: request retry count
-	c := httpx.New()
-	_ = httpx.Get[string](c, "https://example.com", httpx.RetryCount(2))
+	// Example: retry count
+	// Apply to all requests
+	c := httpx.New(httpx.RetryCount(2))
+	httpx.Get[string](c, "https://example.com")
+
+	// Apply to a single request
+	httpx.Get[string](httpx.Default(), "https://example.com", httpx.RetryCount(2))
 }

@@ -12,8 +12,12 @@ import (
 //
 // Example: custom auth scheme
 //
-//	c := httpx.New()
-//	_ = httpx.Get[string](c, "https://example.com", httpx.Auth("Token", "abc123"))
+//	// Apply to all requests
+//	c := httpx.New(httpx.Auth("Token", "abc123"))
+//	httpx.Get[string](c, "https://example.com")
+//
+//	// Apply to a single request
+//	httpx.Get[string](httpx.Default(), "https://example.com", httpx.Auth("Token", "abc123"))
 func Auth(scheme, token string) OptionBuilder {
 	return OptionBuilder{}.Auth(scheme, token)
 }
@@ -36,8 +40,12 @@ func (b OptionBuilder) Auth(scheme, token string) OptionBuilder {
 //
 // Example: bearer auth
 //
-//	c := httpx.New()
-//	_ = httpx.Get[string](c, "https://example.com", httpx.Bearer("token"))
+//	// Apply to all requests
+//	c := httpx.New(httpx.Bearer("token"))
+//	httpx.Get[string](c, "https://example.com")
+//
+//	// Apply to a single request
+//	httpx.Get[string](httpx.Default(), "https://example.com", httpx.Bearer("token"))
 func Bearer(token string) OptionBuilder {
 	return OptionBuilder{}.Bearer(token)
 }
@@ -60,8 +68,12 @@ func (b OptionBuilder) Bearer(token string) OptionBuilder {
 //
 // Example: basic auth
 //
-//	c := httpx.New()
-//	_ = httpx.Get[string](c, "https://example.com", httpx.Basic("user", "pass"))
+//	// Apply to all requests
+//	c := httpx.New(httpx.Basic("user", "pass"))
+//	httpx.Get[string](c, "https://example.com")
+//
+//	// Apply to a single request
+//	httpx.Get[string](httpx.Default(), "https://example.com", httpx.Basic("user", "pass"))
 func Basic(user, pass string) OptionBuilder {
 	return OptionBuilder{}.Basic(user, pass)
 }

@@ -9,6 +9,10 @@ func main() {
 	// Bearer sets the Authorization header with a bearer token.
 
 	// Example: bearer auth
-	c := httpx.New()
-	_ = httpx.Get[string](c, "https://example.com", httpx.Bearer("token"))
+	// Apply to all requests
+	c := httpx.New(httpx.Bearer("token"))
+	httpx.Get[string](c, "https://example.com")
+
+	// Apply to a single request
+	httpx.Get[string](httpx.Default(), "https://example.com", httpx.Bearer("token"))
 }

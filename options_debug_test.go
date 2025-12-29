@@ -108,3 +108,20 @@ func TestDumpEachRequestFunction(t *testing.T) {
 		t.Fatalf("request failed: %v", res.Err)
 	}
 }
+
+func TestTrace(t *testing.T) {
+	r := req.C().R()
+	Trace().applyRequest(r)
+	traceField := reflect.ValueOf(r).Elem().FieldByName("trace")
+	if traceField.IsNil() {
+		t.Fatalf("expected trace to be enabled")
+	}
+}
+
+func TestTraceAll(t *testing.T) {
+	c := New(TraceAll())
+	traceField := reflect.ValueOf(c.Req()).Elem().FieldByName("trace")
+	if !traceField.Bool() {
+		t.Fatalf("expected trace to be enabled")
+	}
+}

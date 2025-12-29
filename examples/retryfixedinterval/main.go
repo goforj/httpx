@@ -11,7 +11,11 @@ import (
 func main() {
 	// RetryFixedInterval sets a fixed retry interval for a request.
 
-	// Example: request retry interval
-	c := httpx.New()
-	_ = httpx.Get[string](c, "https://example.com", httpx.RetryFixedInterval(200*time.Millisecond))
+	// Example: retry interval
+	// Apply to all requests
+	c := httpx.New(httpx.RetryFixedInterval(200 * time.Millisecond))
+	httpx.Get[string](c, "https://example.com")
+
+	// Apply to a single request
+	httpx.Get[string](httpx.Default(), "https://example.com", httpx.RetryFixedInterval(200*time.Millisecond))
 }

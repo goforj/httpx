@@ -9,6 +9,10 @@ func main() {
 	// UserAgent sets the User-Agent header on a request or client.
 
 	// Example: set a User-Agent
+	// Apply to all requests
 	c := httpx.New(httpx.UserAgent("my-app/1.0"))
-	_ = httpx.Get[string](c, "https://example.com")
+	httpx.Get[string](c, "https://example.com")
+
+	// Apply to a single request
+	httpx.Get[string](httpx.Default(), "https://example.com", httpx.UserAgent("my-app/1.0"))
 }

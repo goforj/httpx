@@ -15,8 +15,12 @@ import (
 // Applies to both client defaults and request-time headers.
 // Example: apply a header
 //
-//	c := httpx.New()
-//	_ = httpx.Get[string](c, "https://example.com", httpx.Header("X-Trace", "1"))
+//	// Apply to all requests
+//	c := httpx.New(httpx.Header("X-Trace", "1"))
+//	httpx.Get[string](c, "https://example.com")
+//
+//	// Apply to a single request
+//	httpx.Get[string](httpx.Default(), "https://example.com", httpx.Header("X-Trace", "1"))
 func Header(key, value string) OptionBuilder {
 	return OptionBuilder{}.Header(key, value)
 }
@@ -38,8 +42,15 @@ func (b OptionBuilder) Header(key, value string) OptionBuilder {
 // Applies to both client defaults and request-time headers.
 // Example: apply headers
 //
-//	c := httpx.New()
-//	_ = httpx.Get[string](c, "https://example.com", httpx.Headers(map[string]string{
+//	// Apply to all requests
+//	c := httpx.New(httpx.Headers(map[string]string{
+//		"X-Trace": "1",
+//		"Accept":  "application/json",
+//	}))
+//	httpx.Get[string](c, "https://example.com")
+//
+//	// Apply to a single request
+//	httpx.Get[string](httpx.Default(), "https://example.com", httpx.Headers(map[string]string{
 //		"X-Trace": "1",
 //		"Accept":  "application/json",
 //	}))
@@ -64,8 +75,12 @@ func (b OptionBuilder) Headers(values map[string]string) OptionBuilder {
 // Applies to both client defaults and request-time headers.
 // Example: set a User-Agent
 //
+//	// Apply to all requests
 //	c := httpx.New(httpx.UserAgent("my-app/1.0"))
-//	_ = httpx.Get[string](c, "https://example.com")
+//	httpx.Get[string](c, "https://example.com")
+//
+//	// Apply to a single request
+//	httpx.Get[string](httpx.Default(), "https://example.com", httpx.UserAgent("my-app/1.0"))
 func UserAgent(value string) OptionBuilder {
 	return OptionBuilder{}.UserAgent(value)
 }
@@ -244,10 +259,14 @@ func (b OptionBuilder) Form(values map[string]string) OptionBuilder {
 // @group Request Control
 //
 // Applies to both client defaults (via WithTimeout) and individual requests.
-// Example: per-request timeout
+// Example: timeout
 //
-//	c := httpx.New()
-//	_ = httpx.Get[string](c, "https://example.com", httpx.Timeout(2*time.Second))
+//	// Apply to all requests
+//	c := httpx.New(httpx.Timeout(2 * time.Second))
+//	httpx.Get[string](c, "https://example.com")
+//
+//	// Apply to a single request
+//	httpx.Get[string](httpx.Default(), "https://example.com", httpx.Timeout(2*time.Second))
 func Timeout(d time.Duration) OptionBuilder {
 	return OptionBuilder{}.Timeout(d)
 }

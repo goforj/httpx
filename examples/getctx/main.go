@@ -19,5 +19,5 @@ func main() {
 	c := httpx.New()
 	ctx := context.Background()
 	res := httpx.GetCtx[User](c, ctx, "https://api.example.com/users/1")
-	_, _ = res.Body, res.Err
+	_, _ = res.Body, res.Err // Body is User
 }
