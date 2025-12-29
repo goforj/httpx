@@ -69,9 +69,9 @@ func main() {
 }
 ```
 
-## Use Any req Feature (and why req is incredible)
+## Use Any req Feature
 
-**httpx** is built on top of the incredible `[req](https://github.com/imroc/req)` library, and you can always drop down to it when you need something beyond httpx’s helpers. That means every example in req’s docs is available to you with `c.Req()` or `c.Raw()`.
+**httpx** is built on top of the incredible [req](https://github.com/imroc/req) library, and you can always drop down to it when you need something beyond httpx’s helpers. That means every example in req’s docs is available to you with `c.Req()` or `c.Raw()`.
 
 While httpx provides ergonomic helpers for the most common use cases, req is a powerful and flexible HTTP client library with tons of features.
 
