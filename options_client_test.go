@@ -139,6 +139,13 @@ func TestWithProxy(t *testing.T) {
 	}
 }
 
+func TestWithProxyEmpty(t *testing.T) {
+	c := New(Proxy(""))
+	if c.req.Transport.Options.Proxy == nil {
+		t.Fatalf("expected proxy to remain set")
+	}
+}
+
 func TestWithProxyFunc(t *testing.T) {
 	c := New(ProxyFunc(nil))
 	if c == nil {

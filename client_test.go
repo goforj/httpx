@@ -151,6 +151,39 @@ func TestOptionsRequest(t *testing.T) {
 	}
 }
 
+func TestHeadCtxRequest(t *testing.T) {
+	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		if r.Method != http.MethodHead {
+			t.Fatalf("method = %s", r.Method)
+		}
+		w.WriteHeader(http.StatusOK)
+	}))
+	t.Cleanup(server.Close)
+
+	client := New()
+	ctx := context.Background()
+	res := HeadCtx[string](client, ctx, server.URL)
+	if res.Err != nil {
+		t.Fatalf("unexpected error: %v", res.Err)
+	}
+}
+
+func TestOptionsCtxRequest(t *testing.T) {
+	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		if r.Method != http.MethodOptions {
+			t.Fatalf("method = %s", r.Method)
+		}
+		w.WriteHeader(http.StatusOK)
+	}))
+	t.Cleanup(server.Close)
+
+	client := New()
+	ctx := context.Background()
+	res := OptionsCtx[string](client, ctx, server.URL)
+	if res.Err != nil {
+		t.Fatalf("unexpected error: %v", res.Err)
+	}
+}
 func TestOptionsApplied(t *testing.T) {
 	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		if r.URL.Path != "/users/123" {
