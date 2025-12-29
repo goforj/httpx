@@ -16,7 +16,7 @@ const (
 )
 
 // TLSFingerprint applies a TLS fingerprint preset.
-// @group TLS Fingerprints
+// @group Advanced
 //
 // Applies to client configuration only.
 // Example: apply a TLS fingerprint preset
@@ -49,7 +49,7 @@ func (b OptionBuilder) TLSFingerprint(kind TLSFingerprintKind) OptionBuilder {
 }
 
 // TLSFingerprintChrome applies the Chrome TLS fingerprint preset.
-// @group TLS Fingerprints
+// @group Advanced
 //
 // Applies to client configuration only.
 // Example: apply Chrome TLS fingerprint
@@ -67,7 +67,7 @@ func (b OptionBuilder) TLSFingerprintChrome() OptionBuilder {
 }
 
 // TLSFingerprintFirefox applies the Firefox TLS fingerprint preset.
-// @group TLS Fingerprints
+// @group Advanced
 //
 // Applies to client configuration only.
 // Example: apply Firefox TLS fingerprint
@@ -85,7 +85,7 @@ func (b OptionBuilder) TLSFingerprintFirefox() OptionBuilder {
 }
 
 // TLSFingerprintSafari applies the Safari TLS fingerprint preset.
-// @group TLS Fingerprints
+// @group Advanced
 //
 // Applies to client configuration only.
 // Example: apply Safari TLS fingerprint
@@ -103,7 +103,7 @@ func (b OptionBuilder) TLSFingerprintSafari() OptionBuilder {
 }
 
 // TLSFingerprintEdge applies the Edge TLS fingerprint preset.
-// @group TLS Fingerprints
+// @group Advanced
 //
 // Applies to client configuration only.
 // Example: apply Edge TLS fingerprint
@@ -121,7 +121,7 @@ func (b OptionBuilder) TLSFingerprintEdge() OptionBuilder {
 }
 
 // TLSFingerprintAndroid applies the Android TLS fingerprint preset.
-// @group TLS Fingerprints
+// @group Advanced
 //
 // Applies to client configuration only.
 // Example: apply Android TLS fingerprint
@@ -139,7 +139,7 @@ func (b OptionBuilder) TLSFingerprintAndroid() OptionBuilder {
 }
 
 // TLSFingerprintIOS applies the iOS TLS fingerprint preset.
-// @group TLS Fingerprints
+// @group Advanced
 //
 // Applies to client configuration only.
 // Example: apply iOS TLS fingerprint
@@ -157,7 +157,7 @@ func (b OptionBuilder) TLSFingerprintIOS() OptionBuilder {
 }
 
 // TLSFingerprintRandomized applies a randomized TLS fingerprint preset.
-// @group TLS Fingerprints
+// @group Advanced
 //
 // Applies to client configuration only.
 // Example: apply randomized TLS fingerprint
