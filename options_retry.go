@@ -14,19 +14,19 @@ import (
 //
 //	// Apply to all requests
 //	c := httpx.New(httpx.RetryCount(2))
-//	res, err := httpx.Get[map[string]any](c, "https://httpbin.org/get")
+//	res, err := httpx.Get[map[string]any](c, "https://httpbin.org/uuid")
 //	_ = err
 //	httpx.Dump(res) // dumps map[string]any
 //	// #map[string]interface {} {
-//	//   url => "https://httpbin.org/get" #string
+//	//   uuid => "<uuid>" #string
 //	// }
 //
 //	// Apply to a single request
-//	res, err = httpx.Get[map[string]any](c, "https://httpbin.org/get", httpx.RetryCount(2))
+//	res, err = httpx.Get[map[string]any](c, "https://httpbin.org/uuid", httpx.RetryCount(2))
 //	_ = err
 //	httpx.Dump(res) // dumps map[string]any
 //	// #map[string]interface {} {
-//	//   url => "https://httpbin.org/get" #string
+//	//   uuid => "<uuid>" #string
 //	// }
 func RetryCount(count int) OptionBuilder {
 	return OptionBuilder{}.RetryCount(count)
@@ -51,19 +51,19 @@ func (b OptionBuilder) RetryCount(count int) OptionBuilder {
 //
 //	// Apply to all requests
 //	c := httpx.New(httpx.RetryFixedInterval(200 * time.Millisecond))
-//	res, err := httpx.Get[map[string]any](c, "https://httpbin.org/get")
+//	res, err := httpx.Get[map[string]any](c, "https://httpbin.org/uuid")
 //	_ = err
 //	httpx.Dump(res) // dumps map[string]any
 //	// #map[string]interface {} {
-//	//   url => "https://httpbin.org/get" #string
+//	//   uuid => "<uuid>" #string
 //	// }
 //
 //	// Apply to a single request
-//	res, err = httpx.Get[map[string]any](c, "https://httpbin.org/get", httpx.RetryFixedInterval(200*time.Millisecond))
+//	res, err = httpx.Get[map[string]any](c, "https://httpbin.org/uuid", httpx.RetryFixedInterval(200*time.Millisecond))
 //	_ = err
 //	httpx.Dump(res) // dumps map[string]any
 //	// #map[string]interface {} {
-//	//   url => "https://httpbin.org/get" #string
+//	//   uuid => "<uuid>" #string
 //	// }
 func RetryFixedInterval(interval time.Duration) OptionBuilder {
 	return OptionBuilder{}.RetryFixedInterval(interval)
@@ -88,19 +88,19 @@ func (b OptionBuilder) RetryFixedInterval(interval time.Duration) OptionBuilder 
 //
 //	// Apply to all requests
 //	c := httpx.New(httpx.RetryBackoff(100*time.Millisecond, 2*time.Second))
-//	res, err := httpx.Get[map[string]any](c, "https://httpbin.org/get")
+//	res, err := httpx.Get[map[string]any](c, "https://httpbin.org/uuid")
 //	_ = err
 //	httpx.Dump(res) // dumps map[string]any
 //	// #map[string]interface {} {
-//	//   url => "https://httpbin.org/get" #string
+//	//   uuid => "<uuid>" #string
 //	// }
 //
 //	// Apply to a single request
-//	res, err = httpx.Get[map[string]any](c, "https://httpbin.org/get", httpx.RetryBackoff(100*time.Millisecond, 2*time.Second))
+//	res, err = httpx.Get[map[string]any](c, "https://httpbin.org/uuid", httpx.RetryBackoff(100*time.Millisecond, 2*time.Second))
 //	_ = err
 //	httpx.Dump(res) // dumps map[string]any
 //	// #map[string]interface {} {
-//	//   url => "https://httpbin.org/get" #string
+//	//   uuid => "<uuid>" #string
 //	// }
 func RetryBackoff(min, max time.Duration) OptionBuilder {
 	return OptionBuilder{}.RetryBackoff(min, max)
@@ -127,21 +127,21 @@ func (b OptionBuilder) RetryBackoff(min, max time.Duration) OptionBuilder {
 //	c := httpx.New(httpx.RetryInterval(func(_ *req.Response, attempt int) time.Duration {
 //		return time.Duration(attempt) * 100 * time.Millisecond
 //	}))
-//	res, err := httpx.Get[map[string]any](c, "https://httpbin.org/get")
+//	res, err := httpx.Get[map[string]any](c, "https://httpbin.org/uuid")
 //	_ = err
 //	httpx.Dump(res) // dumps map[string]any
 //	// #map[string]interface {} {
-//	//   url => "https://httpbin.org/get" #string
+//	//   uuid => "<uuid>" #string
 //	// }
 //
 //	// Apply to a single request
-//	res, err = httpx.Get[map[string]any](c, "https://httpbin.org/get", httpx.RetryInterval(func(_ *req.Response, attempt int) time.Duration {
+//	res, err = httpx.Get[map[string]any](c, "https://httpbin.org/uuid", httpx.RetryInterval(func(_ *req.Response, attempt int) time.Duration {
 //		return time.Duration(attempt) * 100 * time.Millisecond
 //	}))
 //	_ = err
 //	httpx.Dump(res) // dumps map[string]any
 //	// #map[string]interface {} {
-//	//   url => "https://httpbin.org/get" #string
+//	//   uuid => "<uuid>" #string
 //	// }
 func RetryInterval(fn req.GetRetryIntervalFunc) OptionBuilder {
 	return OptionBuilder{}.RetryInterval(fn)
@@ -171,7 +171,7 @@ func (b OptionBuilder) RetryInterval(fn req.GetRetryIntervalFunc) OptionBuilder 
 //	res, err := httpx.Get[map[string]any](c, "https://httpbin.org/status/503")
 //	_ = err
 //	httpx.Dump(res) // dumps map[string]any
-//	// #map[string]interface {} {}
+//	// map[string]interface {}(nil)
 //
 //	// Apply to a single request
 //	res, err = httpx.Get[map[string]any](c, "https://httpbin.org/status/503", httpx.RetryCondition(func(resp *req.Response, _ error) bool {
@@ -179,7 +179,7 @@ func (b OptionBuilder) RetryInterval(fn req.GetRetryIntervalFunc) OptionBuilder 
 //	}))
 //	_ = err
 //	httpx.Dump(res) // dumps map[string]any
-//	// #map[string]interface {} {}
+//	// map[string]interface {}(nil)
 func RetryCondition(condition req.RetryConditionFunc) OptionBuilder {
 	return OptionBuilder{}.RetryCondition(condition)
 }
@@ -203,19 +203,19 @@ func (b OptionBuilder) RetryCondition(condition req.RetryConditionFunc) OptionBu
 //
 //	// Apply to all requests
 //	c := httpx.New(httpx.RetryHook(func(_ *req.Response, _ error) {}))
-//	res, err := httpx.Get[map[string]any](c, "https://httpbin.org/get")
+//	res, err := httpx.Get[map[string]any](c, "https://httpbin.org/uuid")
 //	_ = err
 //	httpx.Dump(res) // dumps map[string]any
 //	// #map[string]interface {} {
-//	//   url => "https://httpbin.org/get" #string
+//	//   uuid => "<uuid>" #string
 //	// }
 //
 //	// Apply to a single request
-//	res, err = httpx.Get[map[string]any](c, "https://httpbin.org/get", httpx.RetryHook(func(_ *req.Response, _ error) {}))
+//	res, err = httpx.Get[map[string]any](c, "https://httpbin.org/uuid", httpx.RetryHook(func(_ *req.Response, _ error) {}))
 //	_ = err
 //	httpx.Dump(res) // dumps map[string]any
 //	// #map[string]interface {} {
-//	//   url => "https://httpbin.org/get" #string
+//	//   uuid => "<uuid>" #string
 //	// }
 func RetryHook(hook req.RetryHookFunc) OptionBuilder {
 	return OptionBuilder{}.RetryHook(hook)

@@ -10,10 +10,10 @@ func main() {
 
 	// Example: dump to a file
 	c := httpx.New()
-	res, err := httpx.Get[map[string]any](c, "https://httpbin.org/get", httpx.DumpToFile("httpx.dump"))
+	res, err := httpx.Get[map[string]any](c, "https://httpbin.org/uuid", httpx.DumpToFile("httpx.dump"))
 	_ = err
 	httpx.Dump(res) // dumps map[string]any
 	// #map[string]interface {} {
-	//   url => "https://httpbin.org/get" #string
+	//   uuid => "<uuid>" #string
 	// }
 }

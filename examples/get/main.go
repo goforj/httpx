@@ -8,21 +8,28 @@ import "github.com/goforj/httpx"
 func main() {
 	// Get issues a GET request using the provided client.
 
-	// Example: basic GET
+	// Example: bind to a struct
+	type GetResponse struct {
+		URL string `json:"url"`
+	}
+
 	c := httpx.New()
-	res, err := httpx.Get[map[string]any](c, "https://httpbin.org/get")
+	res, err := httpx.Get[GetResponse](c, "https://httpbin.org/get")
 	if err != nil {
 		return
 	}
 	httpx.Dump(res)
-	// #map[string]interface {} {
-	//   url => "https://httpbin.org/get" #string
+	// #GetResponse {
+	//   URL => "https://httpbin.org/get" #string
 	// }
 
 	// Example: bind to a string body
-	resText, err := httpx.Get[string](c, "https://httpbin.org/get")
+	resText, err := httpx.Get[string](c, "https://httpbin.org/uuid")
 	if err != nil {
 		return
 	}
-	_ = resText // resText is string
+	println(resText) // dumps string
+	// {
+	//   "uuid": "becbda6d-9950-4966-ae23-0369617ba065"
+	// }
 }

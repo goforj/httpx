@@ -255,17 +255,13 @@ func (b OptionBuilder) Form(values map[string]string) OptionBuilder {
 //	res, err := httpx.Get[map[string]any](c, "https://httpbin.org/delay/2")
 //	_ = err
 //	httpx.Dump(res) // dumps map[string]any
-//	// #map[string]interface {} {
-//	//   url => "https://httpbin.org/delay/2" #string
-//	// }
+//	// map[string]interface {}(nil)
 //
 //	// Apply to a single request
 //	res, err = httpx.Get[map[string]any](c, "https://httpbin.org/delay/2", httpx.Timeout(2*time.Second))
 //	_ = err
 //	httpx.Dump(res) // dumps map[string]any
-//	// #map[string]interface {} {
-//	//   url => "https://httpbin.org/delay/2" #string
-//	// }
+//	// map[string]interface {}(nil)
 func Timeout(d time.Duration) OptionBuilder {
 	return OptionBuilder{}.Timeout(d)
 }

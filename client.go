@@ -112,25 +112,32 @@ func (c *Client) clone() *Client {
 // Get issues a GET request using the provided client.
 // @group Requests
 //
-// Example: basic GET
+// Example: bind to a struct
+//
+//	type GetResponse struct {
+//		URL string `json:"url"`
+//	}
 //
 //	c := httpx.New()
-//	res, err := httpx.Get[map[string]any](c, "https://httpbin.org/get")
+//	res, err := httpx.Get[GetResponse](c, "https://httpbin.org/get")
 //	if err != nil {
 //		return
 //	}
 //	httpx.Dump(res)
-//	// #map[string]interface {} {
-//	//   url => "https://httpbin.org/get" #string
+//	// #GetResponse {
+//	//   URL => "https://httpbin.org/get" #string
 //	// }
 //
 // Example: bind to a string body
 //
-//	resText, err := httpx.Get[string](c, "https://httpbin.org/get")
+//	resText, err := httpx.Get[string](c, "https://httpbin.org/uuid")
 //	if err != nil {
 //		return
 //	}
-//	_ = resText // resText is string
+//	println(resText) // dumps string
+//	// {
+//	//   "uuid": "becbda6d-9950-4966-ae23-0369617ba065"
+//	// }
 func Get[T any](client *Client, url string, opts ...Option) (T, error) {
 	body, _, err := do[T](client, nil, methodGet, url, nil, opts)
 	return body, err
@@ -144,18 +151,20 @@ func Get[T any](client *Client, url string, opts ...Option) (T, error) {
 //	type CreateUser struct {
 //		Name string `json:"name"`
 //	}
-//	type User struct {
-//		Name string `json:"name"`
+//	type CreateUserResponse struct {
+//		JSON CreateUser `json:"json"`
 //	}
 //
 //	c := httpx.New()
-//	res, err := httpx.Post[CreateUser, User](c, "https://httpbin.org/post", CreateUser{Name: "Ana"})
+//	res, err := httpx.Post[CreateUser, CreateUserResponse](c, "https://httpbin.org/post", CreateUser{Name: "Ana"})
 //	if err != nil {
 //		return
 //	}
-//	httpx.Dump(res) // dumps User
-//	// #User {
-//	//   Name => "Ana" #string
+//	httpx.Dump(res) // dumps CreateUserResponse
+//	// #CreateUserResponse {
+//	//   JSON => #CreateUser {
+//	//     Name => "Ana" #string
+//	//   }
 //	// }
 func Post[In any, Out any](client *Client, url string, body In, opts ...Option) (Out, error) {
 	out, _, err := do[Out](client, nil, methodPost, url, body, opts)
@@ -170,18 +179,20 @@ func Post[In any, Out any](client *Client, url string, body In, opts ...Option) 
 //	type UpdateUser struct {
 //		Name string `json:"name"`
 //	}
-//	type User struct {
-//		Name string `json:"name"`
+//	type UpdateUserResponse struct {
+//		JSON UpdateUser `json:"json"`
 //	}
 //
 //	c := httpx.New()
-//	res, err := httpx.Put[UpdateUser, User](c, "https://httpbin.org/put", UpdateUser{Name: "Ana"})
+//	res, err := httpx.Put[UpdateUser, UpdateUserResponse](c, "https://httpbin.org/put", UpdateUser{Name: "Ana"})
 //	if err != nil {
 //		return
 //	}
-//	httpx.Dump(res) // dumps User
-//	// #User {
-//	//   Name => "Ana" #string
+//	httpx.Dump(res) // dumps UpdateUserResponse
+//	// #UpdateUserResponse {
+//	//   JSON => #UpdateUser {
+//	//     Name => "Ana" #string
+//	//   }
 //	// }
 func Put[In any, Out any](client *Client, url string, body In, opts ...Option) (Out, error) {
 	out, _, err := do[Out](client, nil, methodPut, url, body, opts)
@@ -196,18 +207,20 @@ func Put[In any, Out any](client *Client, url string, body In, opts ...Option) (
 //	type UpdateUser struct {
 //		Name string `json:"name"`
 //	}
-//	type User struct {
-//		Name string `json:"name"`
+//	type UpdateUserResponse struct {
+//		JSON UpdateUser `json:"json"`
 //	}
 //
 //	c := httpx.New()
-//	res, err := httpx.Patch[UpdateUser, User](c, "https://httpbin.org/patch", UpdateUser{Name: "Ana"})
+//	res, err := httpx.Patch[UpdateUser, UpdateUserResponse](c, "https://httpbin.org/patch", UpdateUser{Name: "Ana"})
 //	if err != nil {
 //		return
 //	}
-//	httpx.Dump(res) // dumps User
-//	// #User {
-//	//   Name => "Ana" #string
+//	httpx.Dump(res) // dumps UpdateUserResponse
+//	// #UpdateUserResponse {
+//	//   JSON => #UpdateUser {
+//	//     Name => "Ana" #string
+//	//   }
 //	// }
 func Patch[In any, Out any](client *Client, url string, body In, opts ...Option) (Out, error) {
 	out, _, err := do[Out](client, nil, methodPatch, url, body, opts)
@@ -220,7 +233,7 @@ func Patch[In any, Out any](client *Client, url string, body In, opts ...Option)
 // Example: typed DELETE
 //
 //	type DeleteResponse struct {
-//		OK bool `json:"ok"`
+//		URL string `json:"url"`
 //	}
 //
 //	c := httpx.New()
@@ -230,7 +243,7 @@ func Patch[In any, Out any](client *Client, url string, body In, opts ...Option)
 //	}
 //	httpx.Dump(res) // dumps DeleteResponse
 //	// #DeleteResponse {
-//	//   OK => true #bool
+//	//   URL => "https://httpbin.org/delete" #string
 //	// }
 func Delete[T any](client *Client, url string, opts ...Option) (T, error) {
 	body, _, err := do[T](client, nil, methodDelete, url, nil, opts)
@@ -272,19 +285,19 @@ func Options[T any](client *Client, url string, opts ...Option) (T, error) {
 //
 // Example: context-aware GET
 //
-//	type User struct {
-//		Name string `json:"name"`
+//	type GetResponse struct {
+//		URL string `json:"url"`
 //	}
 //
 //	ctx := context.Background()
 //	c := httpx.New()
-//	res, err := httpx.GetCtx[User](c, ctx, "https://httpbin.org/get")
+//	res, err := httpx.GetCtx[GetResponse](c, ctx, "https://httpbin.org/get")
 //	if err != nil {
 //		return
 //	}
-//	httpx.Dump(res) // dumps User
-//	// #User {
-//	//   Name => "Ana" #string
+//	httpx.Dump(res) // dumps GetResponse
+//	// #GetResponse {
+//	//   URL => "https://httpbin.org/get" #string
 //	// }
 func GetCtx[T any](client *Client, ctx context.Context, url string, opts ...Option) (T, error) {
 	body, _, err := do[T](client, ctx, methodGet, url, nil, opts)
@@ -299,19 +312,21 @@ func GetCtx[T any](client *Client, ctx context.Context, url string, opts ...Opti
 //	type CreateUser struct {
 //		Name string `json:"name"`
 //	}
-//	type User struct {
-//		Name string `json:"name"`
+//	type CreateUserResponse struct {
+//		JSON CreateUser `json:"json"`
 //	}
 //
 //	ctx := context.Background()
 //	c := httpx.New()
-//	res, err := httpx.PostCtx[CreateUser, User](c, ctx, "https://httpbin.org/post", CreateUser{Name: "Ana"})
+//	res, err := httpx.PostCtx[CreateUser, CreateUserResponse](c, ctx, "https://httpbin.org/post", CreateUser{Name: "Ana"})
 //	if err != nil {
 //		return
 //	}
-//	httpx.Dump(res) // dumps User
-//	// #User {
-//	//   Name => "Ana" #string
+//	httpx.Dump(res) // dumps CreateUserResponse
+//	// #CreateUserResponse {
+//	//   JSON => #CreateUser {
+//	//     Name => "Ana" #string
+//	//   }
 //	// }
 func PostCtx[In any, Out any](client *Client, ctx context.Context, url string, body In, opts ...Option) (Out, error) {
 	out, _, err := do[Out](client, ctx, methodPost, url, body, opts)
@@ -326,19 +341,21 @@ func PostCtx[In any, Out any](client *Client, ctx context.Context, url string, b
 //	type UpdateUser struct {
 //		Name string `json:"name"`
 //	}
-//	type User struct {
-//		Name string `json:"name"`
+//	type UpdateUserResponse struct {
+//		JSON UpdateUser `json:"json"`
 //	}
 //
 //	ctx := context.Background()
 //	c := httpx.New()
-//	res, err := httpx.PutCtx[UpdateUser, User](c, ctx, "https://httpbin.org/put", UpdateUser{Name: "Ana"})
+//	res, err := httpx.PutCtx[UpdateUser, UpdateUserResponse](c, ctx, "https://httpbin.org/put", UpdateUser{Name: "Ana"})
 //	if err != nil {
 //		return
 //	}
-//	httpx.Dump(res) // dumps User
-//	// #User {
-//	//   Name => "Ana" #string
+//	httpx.Dump(res) // dumps UpdateUserResponse
+//	// #UpdateUserResponse {
+//	//   JSON => #UpdateUser {
+//	//     Name => "Ana" #string
+//	//   }
 //	// }
 func PutCtx[In any, Out any](client *Client, ctx context.Context, url string, body In, opts ...Option) (Out, error) {
 	out, _, err := do[Out](client, ctx, methodPut, url, body, opts)
@@ -353,19 +370,21 @@ func PutCtx[In any, Out any](client *Client, ctx context.Context, url string, bo
 //	type UpdateUser struct {
 //		Name string `json:"name"`
 //	}
-//	type User struct {
-//		Name string `json:"name"`
+//	type UpdateUserResponse struct {
+//		JSON UpdateUser `json:"json"`
 //	}
 //
 //	ctx := context.Background()
 //	c := httpx.New()
-//	res, err := httpx.PatchCtx[UpdateUser, User](c, ctx, "https://httpbin.org/patch", UpdateUser{Name: "Ana"})
+//	res, err := httpx.PatchCtx[UpdateUser, UpdateUserResponse](c, ctx, "https://httpbin.org/patch", UpdateUser{Name: "Ana"})
 //	if err != nil {
 //		return
 //	}
-//	httpx.Dump(res) // dumps User
-//	// #User {
-//	//   Name => "Ana" #string
+//	httpx.Dump(res) // dumps UpdateUserResponse
+//	// #UpdateUserResponse {
+//	//   JSON => #UpdateUser {
+//	//     Name => "Ana" #string
+//	//   }
 //	// }
 func PatchCtx[In any, Out any](client *Client, ctx context.Context, url string, body In, opts ...Option) (Out, error) {
 	out, _, err := do[Out](client, ctx, methodPatch, url, body, opts)
@@ -378,7 +397,7 @@ func PatchCtx[In any, Out any](client *Client, ctx context.Context, url string, 
 // Example: context-aware DELETE
 //
 //	type DeleteResponse struct {
-//		OK bool `json:"ok"`
+//		URL string `json:"url"`
 //	}
 //
 //	ctx := context.Background()
@@ -389,7 +408,7 @@ func PatchCtx[In any, Out any](client *Client, ctx context.Context, url string, 
 //	}
 //	httpx.Dump(res) // dumps DeleteResponse
 //	// #DeleteResponse {
-//	//   OK => true #bool
+//	//   URL => "https://httpbin.org/delete" #string
 //	// }
 func DeleteCtx[T any](client *Client, ctx context.Context, url string, opts ...Option) (T, error) {
 	body, _, err := do[T](client, ctx, methodDelete, url, nil, opts)
@@ -434,13 +453,15 @@ func OptionsCtx[T any](client *Client, ctx context.Context, url string, opts ...
 // Example: advanced request with response access
 //
 //	r := req.C().R().SetHeader("X-Trace", "1")
-//	r.SetURL("https://httpbin.org/get")
+//	r.SetURL("https://httpbin.org/headers")
 //	r.Method = http.MethodGet
 //
 //	res, rawResp, err := httpx.Do[map[string]any](r)
 //	httpx.Dump(res) // dumps map[string]any
 //	// #map[string]interface {} {
-//	//   url => "https://httpbin.org/get" #string
+//	//   headers => #map[string]interface {} {
+//	//     X-Trace => "1" #string
+//	//   }
 //	// }
 //	_ = rawResp
 //	_ = err

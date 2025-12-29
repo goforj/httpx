@@ -15,18 +15,20 @@ func main() {
 	type UpdateUser struct {
 		Name string `json:"name"`
 	}
-	type User struct {
-		Name string `json:"name"`
+	type UpdateUserResponse struct {
+		JSON UpdateUser `json:"json"`
 	}
 
 	ctx := context.Background()
 	c := httpx.New()
-	res, err := httpx.PutCtx[UpdateUser, User](c, ctx, "https://httpbin.org/put", UpdateUser{Name: "Ana"})
+	res, err := httpx.PutCtx[UpdateUser, UpdateUserResponse](c, ctx, "https://httpbin.org/put", UpdateUser{Name: "Ana"})
 	if err != nil {
 		return
 	}
-	httpx.Dump(res) // dumps User
-	// #User {
-	//   Name => "Ana" #string
+	httpx.Dump(res) // dumps UpdateUserResponse
+	// #UpdateUserResponse {
+	//   JSON => #UpdateUser {
+	//     Name => "Ana" #string
+	//   }
 	// }
 }

@@ -18,8 +18,8 @@ func main() {
 	httpx.Dump(res) // dumps map[string]any
 	// #map[string]interface {} {
 	//   files => #map[string]interface {} {
-	//     fileA => "<file contents>" #string
-	//     fileB => "<file contents>" #string
+	//     fileA => "hello" #string
+	//     fileB => "world" #string
 	//   }
 	// }
 }

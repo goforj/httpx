@@ -23,7 +23,7 @@ import (
 //	httpx.Dump(res) // dumps map[string]any
 //	// #map[string]interface {} {
 //	//   files => #map[string]interface {} {
-//	//     file => "<file contents>" #string
+//	//     file => "hello" #string
 //	//   }
 //	// }
 func File(paramName, filePath string) OptionBuilder {
@@ -51,8 +51,8 @@ func (b OptionBuilder) File(paramName, filePath string) OptionBuilder {
 //	httpx.Dump(res) // dumps map[string]any
 //	// #map[string]interface {} {
 //	//   files => #map[string]interface {} {
-//	//     fileA => "<file contents>" #string
-//	//     fileB => "<file contents>" #string
+//	//     fileA => "hello" #string
+//	//     fileB => "world" #string
 //	//   }
 //	// }
 func Files(files map[string]string) OptionBuilder {
@@ -172,7 +172,7 @@ func (b OptionBuilder) FileReader(paramName, filename string, reader io.Reader) 
 //	httpx.Dump(res) // dumps map[string]any
 //	// #map[string]interface {} {
 //	//   files => #map[string]interface {} {
-//	//     file => "<file contents>" #string
+//	//     file => "<file>" #string
 //	//   }
 //	// }
 func UploadCallback(callback req.UploadCallback) OptionBuilder {
@@ -242,7 +242,7 @@ func (b OptionBuilder) UploadCallback(callback req.UploadCallback) OptionBuilder
 //	httpx.Dump(res) // dumps map[string]any
 //	// #map[string]interface {} {
 //	//   files => #map[string]interface {} {
-//	//     file => "<file contents>" #string
+//	//     file => "<file>" #string
 //	//   }
 //	// }
 func UploadCallbackWithInterval(callback req.UploadCallback, minInterval time.Duration) OptionBuilder {
@@ -306,7 +306,7 @@ func (b OptionBuilder) UploadCallbackWithInterval(callback req.UploadCallback, m
 //	httpx.Dump(res) // dumps map[string]any
 //	// #map[string]interface {} {
 //	//   files => #map[string]interface {} {
-//	//     file => "<file contents>" #string
+//	//     file => "<file>" #string
 //	//   }
 //	// }
 func UploadProgress() OptionBuilder {

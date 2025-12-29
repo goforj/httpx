@@ -14,11 +14,11 @@ import (
 // Example: client base URL
 //
 //	c := httpx.New(httpx.BaseURL("https://httpbin.org"))
-//	res, err := httpx.Get[map[string]any](c, "/get")
+//	res, err := httpx.Get[map[string]any](c, "/uuid")
 //	_ = err
 //	httpx.Dump(res) // dumps map[string]any
 //	// #map[string]interface {} {
-//	//   url => "https://httpbin.org/get" #string
+//	//   uuid => "<uuid>" #string
 //	// }
 func BaseURL(url string) OptionBuilder {
 	return OptionBuilder{}.BaseURL(url)
@@ -37,11 +37,11 @@ func (b OptionBuilder) BaseURL(url string) OptionBuilder {
 // Example: wrap transport
 //
 //	c := httpx.New(httpx.Transport(http.RoundTripper(http.DefaultTransport)))
-//	res, err := httpx.Get[map[string]any](c, "https://httpbin.org/get")
+//	res, err := httpx.Get[map[string]any](c, "https://httpbin.org/uuid")
 //	_ = err
 //	httpx.Dump(res) // dumps map[string]any
 //	// #map[string]interface {} {
-//	//   url => "https://httpbin.org/get" #string
+//	//   uuid => "<uuid>" #string
 //	// }
 func Transport(rt http.RoundTripper) OptionBuilder {
 	return OptionBuilder{}.Transport(rt)
@@ -100,7 +100,7 @@ func (b OptionBuilder) Middleware(mw ...req.RequestMiddleware) OptionBuilder {
 //	res, err := httpx.Get[map[string]any](c, "https://httpbin.org/status/500")
 //	_ = err
 //	httpx.Dump(res) // dumps map[string]any
-//	// #map[string]interface {} {}
+//	// map[string]interface {}(nil)
 func ErrorMapper(fn ErrorMapperFunc) OptionBuilder {
 	return OptionBuilder{}.ErrorMapper(fn)
 }
@@ -121,9 +121,7 @@ func (b OptionBuilder) ErrorMapper(fn ErrorMapperFunc) OptionBuilder {
 //	res, err := httpx.Get[map[string]any](c, "https://httpbin.org/get")
 //	_ = err
 //	httpx.Dump(res) // dumps map[string]any
-//	// #map[string]interface {} {
-//	//   url => "https://httpbin.org/get" #string
-//	// }
+//	// map[string]interface {}(nil)
 func Proxy(proxyURL string) OptionBuilder {
 	return OptionBuilder{}.Proxy(proxyURL)
 }
@@ -144,11 +142,11 @@ func (b OptionBuilder) Proxy(proxyURL string) OptionBuilder {
 // Example: set proxy function
 //
 //	c := httpx.New(httpx.ProxyFunc(http.ProxyFromEnvironment))
-//	res, err := httpx.Get[map[string]any](c, "https://httpbin.org/get")
+//	res, err := httpx.Get[map[string]any](c, "https://httpbin.org/uuid")
 //	_ = err
 //	httpx.Dump(res) // dumps map[string]any
 //	// #map[string]interface {} {
-//	//   url => "https://httpbin.org/get" #string
+//	//   uuid => "<uuid>" #string
 //	// }
 func ProxyFunc(fn func(*http.Request) (*url.URL, error)) OptionBuilder {
 	return OptionBuilder{}.ProxyFunc(fn)
@@ -203,9 +201,7 @@ func (b OptionBuilder) CookieJar(jar http.CookieJar) OptionBuilder {
 //	res, err := httpx.Get[map[string]any](c, "https://httpbin.org/redirect/1")
 //	_ = err
 //	httpx.Dump(res) // dumps map[string]any
-//	// #map[string]interface {} {
-//	//   url => "https://httpbin.org/redirect/1" #string
-//	// }
+//	// map[string]interface {}(nil)
 func Redirect(policies ...req.RedirectPolicy) OptionBuilder {
 	return OptionBuilder{}.Redirect(policies...)
 }

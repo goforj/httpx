@@ -29,7 +29,7 @@ func main() {
 	httpx.Dump(res) // dumps map[string]any
 	// #map[string]interface {} {
 	//   files => #map[string]interface {} {
-	//     file => "<file contents>" #string
+	//     file => "<file>" #string
 	//   }
 	// }
 }

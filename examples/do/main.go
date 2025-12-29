@@ -14,13 +14,15 @@ func main() {
 
 	// Example: advanced request with response access
 	r := req.C().R().SetHeader("X-Trace", "1")
-	r.SetURL("https://httpbin.org/get")
+	r.SetURL("https://httpbin.org/headers")
 	r.Method = http.MethodGet
 
 	res, rawResp, err := httpx.Do[map[string]any](r)
 	httpx.Dump(res) // dumps map[string]any
 	// #map[string]interface {} {
-	//   url => "https://httpbin.org/get" #string
+	//   headers => #map[string]interface {} {
+	//     X-Trace => "1" #string
+	//   }
 	// }
 	_ = rawResp
 	_ = err

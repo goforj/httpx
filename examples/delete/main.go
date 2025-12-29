@@ -10,7 +10,7 @@ func main() {
 
 	// Example: typed DELETE
 	type DeleteResponse struct {
-		OK bool `json:"ok"`
+		URL string `json:"url"`
 	}
 
 	c := httpx.New()
@@ -20,6 +20,6 @@ func main() {
 	}
 	httpx.Dump(res) // dumps DeleteResponse
 	// #DeleteResponse {
-	//   OK => true #bool
+	//   URL => "https://httpbin.org/delete" #string
 	// }
 }

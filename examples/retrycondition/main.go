@@ -19,7 +19,7 @@ func main() {
 	res, err := httpx.Get[map[string]any](c, "https://httpbin.org/status/503")
 	_ = err
 	httpx.Dump(res) // dumps map[string]any
-	// #map[string]interface {} {}
+	// map[string]interface {}(nil)
 
 	// Apply to a single request
 	res, err = httpx.Get[map[string]any](c, "https://httpbin.org/status/503", httpx.RetryCondition(func(resp *req.Response, _ error) bool {
@@ -27,5 +27,5 @@ func main() {
 	}))
 	_ = err
 	httpx.Dump(res) // dumps map[string]any
-	// #map[string]interface {} {}
+	// map[string]interface {}(nil)
 }

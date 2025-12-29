@@ -360,11 +360,11 @@ BaseURL sets a base URL on the client.
 
 ```go
 c := httpx.New(httpx.BaseURL("https://httpbin.org"))
-res, err := httpx.Get[map[string]any](c, "/get")
+res, err := httpx.Get[map[string]any](c, "/uuid")
 _ = err
 httpx.Dump(res) // dumps map[string]any
 // #map[string]interface {} {
-//   url => "https://httpbin.org/get" #string
+//   uuid => "<uuid>" #string
 // }
 ```
 
@@ -400,7 +400,7 @@ c := httpx.New(httpx.ErrorMapper(func(resp *req.Response) error {
 res, err := httpx.Get[map[string]any](c, "https://httpbin.org/status/500")
 _ = err
 httpx.Dump(res) // dumps map[string]any
-// #map[string]interface {} {}
+// map[string]interface {}(nil)
 ```
 
 ### <a id="middleware"></a>Middleware
@@ -431,9 +431,7 @@ c := httpx.New(httpx.Proxy("http://localhost:8080"))
 res, err := httpx.Get[map[string]any](c, "https://httpbin.org/get")
 _ = err
 httpx.Dump(res) // dumps map[string]any
-// #map[string]interface {} {
-//   url => "https://httpbin.org/get" #string
-// }
+// map[string]interface {}(nil)
 ```
 
 ### <a id="proxyfunc"></a>ProxyFunc
@@ -442,11 +440,11 @@ ProxyFunc sets a proxy function for the client.
 
 ```go
 c := httpx.New(httpx.ProxyFunc(http.ProxyFromEnvironment))
-res, err := httpx.Get[map[string]any](c, "https://httpbin.org/get")
+res, err := httpx.Get[map[string]any](c, "https://httpbin.org/uuid")
 _ = err
 httpx.Dump(res) // dumps map[string]any
 // #map[string]interface {} {
-//   url => "https://httpbin.org/get" #string
+//   uuid => "<uuid>" #string
 // }
 ```
 
@@ -459,9 +457,7 @@ c := httpx.New(httpx.Redirect(req.NoRedirectPolicy()))
 res, err := httpx.Get[map[string]any](c, "https://httpbin.org/redirect/1")
 _ = err
 httpx.Dump(res) // dumps map[string]any
-// #map[string]interface {} {
-//   url => "https://httpbin.org/redirect/1" #string
-// }
+// map[string]interface {}(nil)
 ```
 
 ### <a id="transport"></a>Transport
@@ -470,11 +466,11 @@ Transport wraps the underlying transport with a custom RoundTripper.
 
 ```go
 c := httpx.New(httpx.Transport(http.RoundTripper(http.DefaultTransport)))
-res, err := httpx.Get[map[string]any](c, "https://httpbin.org/get")
+res, err := httpx.Get[map[string]any](c, "https://httpbin.org/uuid")
 _ = err
 httpx.Dump(res) // dumps map[string]any
 // #map[string]interface {} {
-//   url => "https://httpbin.org/get" #string
+//   uuid => "<uuid>" #string
 // }
 ```
 
@@ -485,9 +481,12 @@ httpx.Dump(res) // dumps map[string]any
 Dump prints values using the bundled godump formatter.
 
 ```go
-res, err := httpx.Get[map[string]any](httpx.Default(), "https://httpbin.org/get")
+res, err := httpx.Get[map[string]any](httpx.Default(), "https://httpbin.org/uuid")
 _ = err
 httpx.Dump(res)
+// #map[string]interface {} {
+//   uuid => "<uuid>" #string
+// }
 ```
 
 ### <a id="dumpall"></a>DumpAll
@@ -496,11 +495,11 @@ DumpAll enables req's client-level dump output for all requests.
 
 ```go
 c := httpx.New(httpx.DumpAll())
-res, err := httpx.Get[map[string]any](c, "https://httpbin.org/get")
+res, err := httpx.Get[map[string]any](c, "https://httpbin.org/uuid")
 _ = err
 httpx.Dump(res) // dumps map[string]any
 // #map[string]interface {} {
-//   url => "https://httpbin.org/get" #string
+//   uuid => "<uuid>" #string
 // }
 ```
 
@@ -510,11 +509,11 @@ DumpEachRequest enables request-level dumps for each request on the client.
 
 ```go
 c := httpx.New(httpx.DumpEachRequest())
-res, err := httpx.Get[map[string]any](c, "https://httpbin.org/get")
+res, err := httpx.Get[map[string]any](c, "https://httpbin.org/uuid")
 _ = err
 httpx.Dump(res) // dumps map[string]any
 // #map[string]interface {} {
-//   url => "https://httpbin.org/get" #string
+//   uuid => "<uuid>" #string
 // }
 ```
 
@@ -525,11 +524,11 @@ DumpEachRequestTo enables request-level dumps for each request and writes them t
 ```go
 var buf bytes.Buffer
 c := httpx.New(httpx.DumpEachRequestTo(&buf))
-res, err := httpx.Get[map[string]any](c, "https://httpbin.org/get")
+res, err := httpx.Get[map[string]any](c, "https://httpbin.org/uuid")
 _ = err
 httpx.Dump(res) // dumps map[string]any
 // #map[string]interface {} {
-//   url => "https://httpbin.org/get" #string
+//   uuid => "<uuid>" #string
 // }
 _ = buf.String()
 ```
@@ -541,11 +540,11 @@ DumpTo enables req's request-level dump output to a writer.
 ```go
 var buf bytes.Buffer
 c := httpx.New()
-res, err := httpx.Get[map[string]any](c, "https://httpbin.org/get", httpx.DumpTo(&buf))
+res, err := httpx.Get[map[string]any](c, "https://httpbin.org/uuid", httpx.DumpTo(&buf))
 _ = err
 httpx.Dump(res) // dumps map[string]any
 // #map[string]interface {} {
-//   url => "https://httpbin.org/get" #string
+//   uuid => "<uuid>" #string
 // }
 ```
 
@@ -555,11 +554,11 @@ DumpToFile enables req's request-level dump output to a file path.
 
 ```go
 c := httpx.New()
-res, err := httpx.Get[map[string]any](c, "https://httpbin.org/get", httpx.DumpToFile("httpx.dump"))
+res, err := httpx.Get[map[string]any](c, "https://httpbin.org/uuid", httpx.DumpToFile("httpx.dump"))
 _ = err
 httpx.Dump(res) // dumps map[string]any
 // #map[string]interface {} {
-//   url => "https://httpbin.org/get" #string
+//   uuid => "<uuid>" #string
 // }
 ```
 
@@ -569,11 +568,11 @@ EnableDump enables req's request-level dump output.
 
 ```go
 c := httpx.New()
-res, err := httpx.Get[map[string]any](c, "https://httpbin.org/get", httpx.EnableDump())
+res, err := httpx.Get[map[string]any](c, "https://httpbin.org/uuid", httpx.EnableDump())
 _ = err
 httpx.Dump(res) // dumps map[string]any
 // #map[string]interface {} {
-//   url => "https://httpbin.org/get" #string
+//   uuid => "<uuid>" #string
 // }
 ```
 
@@ -583,11 +582,11 @@ Trace enables req's request-level trace output.
 
 ```go
 c := httpx.New()
-res, err := httpx.Get[map[string]any](c, "https://httpbin.org/get", httpx.Trace())
+res, err := httpx.Get[map[string]any](c, "https://httpbin.org/uuid", httpx.Trace())
 _ = err
 httpx.Dump(res) // dumps map[string]any
 // #map[string]interface {} {
-//   url => "https://httpbin.org/get" #string
+//   uuid => "<uuid>" #string
 // }
 ```
 
@@ -597,11 +596,11 @@ TraceAll enables req's client-level trace output for all requests.
 
 ```go
 c := httpx.New(httpx.TraceAll())
-res, err := httpx.Get[map[string]any](c, "https://httpbin.org/get")
+res, err := httpx.Get[map[string]any](c, "https://httpbin.org/uuid")
 _ = err
 httpx.Dump(res) // dumps map[string]any
 // #map[string]interface {} {
-//   url => "https://httpbin.org/get" #string
+//   uuid => "<uuid>" #string
 // }
 ```
 
@@ -616,7 +615,7 @@ c := httpx.New()
 res, err := httpx.Get[map[string]any](c, "https://httpbin.org/bytes/1024", httpx.OutputFile("/tmp/file.bin"))
 _ = err
 httpx.Dump(res) // dumps map[string]any
-// #map[string]interface {} {}
+// map[string]interface {}(nil)
 ```
 
 ## Errors
@@ -633,7 +632,7 @@ type User struct {
 c := httpx.New()
 res, err := httpx.Get[map[string]any](c, "https://httpbin.org/status/404")
 httpx.Dump(res) // dumps map[string]any
-// #map[string]interface {} {}
+// map[string]interface {}(nil)
 var httpErr *httpx.HTTPError
 if errors.As(err, &httpErr) {
 	_ = httpErr.StatusCode
@@ -816,17 +815,13 @@ c := httpx.New(httpx.Timeout(2 * time.Second))
 res, err := httpx.Get[map[string]any](c, "https://httpbin.org/delay/2")
 _ = err
 httpx.Dump(res) // dumps map[string]any
-// #map[string]interface {} {
-//   url => "https://httpbin.org/delay/2" #string
-// }
+// map[string]interface {}(nil)
 
 // Apply to a single request
 res, err = httpx.Get[map[string]any](c, "https://httpbin.org/delay/2", httpx.Timeout(2*time.Second))
 _ = err
 httpx.Dump(res) // dumps map[string]any
-// #map[string]interface {} {
-//   url => "https://httpbin.org/delay/2" #string
-// }
+// map[string]interface {}(nil)
 ```
 
 ## Requests
@@ -837,7 +832,7 @@ Delete issues a DELETE request using the provided client.
 
 ```go
 type DeleteResponse struct {
-	OK bool `json:"ok"`
+	URL string `json:"url"`
 }
 
 c := httpx.New()
@@ -847,7 +842,7 @@ if err != nil {
 }
 httpx.Dump(res) // dumps DeleteResponse
 // #DeleteResponse {
-//   OK => true #bool
+//   URL => "https://httpbin.org/delete" #string
 // }
 ```
 
@@ -857,13 +852,15 @@ Do executes a pre-configured req request and returns the decoded body and respon
 
 ```go
 r := req.C().R().SetHeader("X-Trace", "1")
-r.SetURL("https://httpbin.org/get")
+r.SetURL("https://httpbin.org/headers")
 r.Method = http.MethodGet
 
 res, rawResp, err := httpx.Do[map[string]any](r)
 httpx.Dump(res) // dumps map[string]any
 // #map[string]interface {} {
-//   url => "https://httpbin.org/get" #string
+//   headers => #map[string]interface {} {
+//     X-Trace => "1" #string
+//   }
 // }
 _ = rawResp
 _ = err
@@ -873,28 +870,35 @@ _ = err
 
 Get issues a GET request using the provided client.
 
-_Example: basic GET_
+_Example: bind to a struct_
 
 ```go
+type GetResponse struct {
+	URL string `json:"url"`
+}
+
 c := httpx.New()
-res, err := httpx.Get[map[string]any](c, "https://httpbin.org/get")
+res, err := httpx.Get[GetResponse](c, "https://httpbin.org/get")
 if err != nil {
 	return
 }
 httpx.Dump(res)
-// #map[string]interface {} {
-//   url => "https://httpbin.org/get" #string
+// #GetResponse {
+//   URL => "https://httpbin.org/get" #string
 // }
 ```
 
 _Example: bind to a string body_
 
 ```go
-resText, err := httpx.Get[string](c, "https://httpbin.org/get")
+resText, err := httpx.Get[string](c, "https://httpbin.org/uuid")
 if err != nil {
 	return
 }
-_ = resText // resText is string
+println(resText) // dumps string
+// {
+//   "uuid": "becbda6d-9950-4966-ae23-0369617ba065"
+// }
 ```
 
 ### <a id="head"></a>Head
@@ -929,18 +933,20 @@ Patch issues a PATCH request using the provided client.
 type UpdateUser struct {
 	Name string `json:"name"`
 }
-type User struct {
-	Name string `json:"name"`
+type UpdateUserResponse struct {
+	JSON UpdateUser `json:"json"`
 }
 
 c := httpx.New()
-res, err := httpx.Patch[UpdateUser, User](c, "https://httpbin.org/patch", UpdateUser{Name: "Ana"})
+res, err := httpx.Patch[UpdateUser, UpdateUserResponse](c, "https://httpbin.org/patch", UpdateUser{Name: "Ana"})
 if err != nil {
 	return
 }
-httpx.Dump(res) // dumps User
-// #User {
-//   Name => "Ana" #string
+httpx.Dump(res) // dumps UpdateUserResponse
+// #UpdateUserResponse {
+//   JSON => #UpdateUser {
+//     Name => "Ana" #string
+//   }
 // }
 ```
 
@@ -952,18 +958,20 @@ Post issues a POST request using the provided client.
 type CreateUser struct {
 	Name string `json:"name"`
 }
-type User struct {
-	Name string `json:"name"`
+type CreateUserResponse struct {
+	JSON CreateUser `json:"json"`
 }
 
 c := httpx.New()
-res, err := httpx.Post[CreateUser, User](c, "https://httpbin.org/post", CreateUser{Name: "Ana"})
+res, err := httpx.Post[CreateUser, CreateUserResponse](c, "https://httpbin.org/post", CreateUser{Name: "Ana"})
 if err != nil {
 	return
 }
-httpx.Dump(res) // dumps User
-// #User {
-//   Name => "Ana" #string
+httpx.Dump(res) // dumps CreateUserResponse
+// #CreateUserResponse {
+//   JSON => #CreateUser {
+//     Name => "Ana" #string
+//   }
 // }
 ```
 
@@ -975,18 +983,20 @@ Put issues a PUT request using the provided client.
 type UpdateUser struct {
 	Name string `json:"name"`
 }
-type User struct {
-	Name string `json:"name"`
+type UpdateUserResponse struct {
+	JSON UpdateUser `json:"json"`
 }
 
 c := httpx.New()
-res, err := httpx.Put[UpdateUser, User](c, "https://httpbin.org/put", UpdateUser{Name: "Ana"})
+res, err := httpx.Put[UpdateUser, UpdateUserResponse](c, "https://httpbin.org/put", UpdateUser{Name: "Ana"})
 if err != nil {
 	return
 }
-httpx.Dump(res) // dumps User
-// #User {
-//   Name => "Ana" #string
+httpx.Dump(res) // dumps UpdateUserResponse
+// #UpdateUserResponse {
+//   JSON => #UpdateUser {
+//     Name => "Ana" #string
+//   }
 // }
 ```
 
@@ -998,7 +1008,7 @@ DeleteCtx issues a DELETE request using the provided client and context.
 
 ```go
 type DeleteResponse struct {
-	OK bool `json:"ok"`
+	URL string `json:"url"`
 }
 
 ctx := context.Background()
@@ -1009,7 +1019,7 @@ if err != nil {
 }
 httpx.Dump(res) // dumps DeleteResponse
 // #DeleteResponse {
-//   OK => true #bool
+//   URL => "https://httpbin.org/delete" #string
 // }
 ```
 
@@ -1018,19 +1028,19 @@ httpx.Dump(res) // dumps DeleteResponse
 GetCtx issues a GET request using the provided client and context.
 
 ```go
-type User struct {
-	Name string `json:"name"`
+type GetResponse struct {
+	URL string `json:"url"`
 }
 
 ctx := context.Background()
 c := httpx.New()
-res, err := httpx.GetCtx[User](c, ctx, "https://httpbin.org/get")
+res, err := httpx.GetCtx[GetResponse](c, ctx, "https://httpbin.org/get")
 if err != nil {
 	return
 }
-httpx.Dump(res) // dumps User
-// #User {
-//   Name => "Ana" #string
+httpx.Dump(res) // dumps GetResponse
+// #GetResponse {
+//   URL => "https://httpbin.org/get" #string
 // }
 ```
 
@@ -1068,19 +1078,21 @@ PatchCtx issues a PATCH request using the provided client and context.
 type UpdateUser struct {
 	Name string `json:"name"`
 }
-type User struct {
-	Name string `json:"name"`
+type UpdateUserResponse struct {
+	JSON UpdateUser `json:"json"`
 }
 
 ctx := context.Background()
 c := httpx.New()
-res, err := httpx.PatchCtx[UpdateUser, User](c, ctx, "https://httpbin.org/patch", UpdateUser{Name: "Ana"})
+res, err := httpx.PatchCtx[UpdateUser, UpdateUserResponse](c, ctx, "https://httpbin.org/patch", UpdateUser{Name: "Ana"})
 if err != nil {
 	return
 }
-httpx.Dump(res) // dumps User
-// #User {
-//   Name => "Ana" #string
+httpx.Dump(res) // dumps UpdateUserResponse
+// #UpdateUserResponse {
+//   JSON => #UpdateUser {
+//     Name => "Ana" #string
+//   }
 // }
 ```
 
@@ -1092,19 +1104,21 @@ PostCtx issues a POST request using the provided client and context.
 type CreateUser struct {
 	Name string `json:"name"`
 }
-type User struct {
-	Name string `json:"name"`
+type CreateUserResponse struct {
+	JSON CreateUser `json:"json"`
 }
 
 ctx := context.Background()
 c := httpx.New()
-res, err := httpx.PostCtx[CreateUser, User](c, ctx, "https://httpbin.org/post", CreateUser{Name: "Ana"})
+res, err := httpx.PostCtx[CreateUser, CreateUserResponse](c, ctx, "https://httpbin.org/post", CreateUser{Name: "Ana"})
 if err != nil {
 	return
 }
-httpx.Dump(res) // dumps User
-// #User {
-//   Name => "Ana" #string
+httpx.Dump(res) // dumps CreateUserResponse
+// #CreateUserResponse {
+//   JSON => #CreateUser {
+//     Name => "Ana" #string
+//   }
 // }
 ```
 
@@ -1116,19 +1130,21 @@ PutCtx issues a PUT request using the provided client and context.
 type UpdateUser struct {
 	Name string `json:"name"`
 }
-type User struct {
-	Name string `json:"name"`
+type UpdateUserResponse struct {
+	JSON UpdateUser `json:"json"`
 }
 
 ctx := context.Background()
 c := httpx.New()
-res, err := httpx.PutCtx[UpdateUser, User](c, ctx, "https://httpbin.org/put", UpdateUser{Name: "Ana"})
+res, err := httpx.PutCtx[UpdateUser, UpdateUserResponse](c, ctx, "https://httpbin.org/put", UpdateUser{Name: "Ana"})
 if err != nil {
 	return
 }
-httpx.Dump(res) // dumps User
-// #User {
-//   Name => "Ana" #string
+httpx.Dump(res) // dumps UpdateUserResponse
+// #UpdateUserResponse {
+//   JSON => #UpdateUser {
+//     Name => "Ana" #string
+//   }
 // }
 ```
 
@@ -1141,19 +1157,19 @@ RetryBackoff sets a capped exponential backoff retry interval for a request.
 ```go
 // Apply to all requests
 c := httpx.New(httpx.RetryBackoff(100*time.Millisecond, 2*time.Second))
-res, err := httpx.Get[map[string]any](c, "https://httpbin.org/get")
+res, err := httpx.Get[map[string]any](c, "https://httpbin.org/uuid")
 _ = err
 httpx.Dump(res) // dumps map[string]any
 // #map[string]interface {} {
-//   url => "https://httpbin.org/get" #string
+//   uuid => "<uuid>" #string
 // }
 
 // Apply to a single request
-res, err = httpx.Get[map[string]any](c, "https://httpbin.org/get", httpx.RetryBackoff(100*time.Millisecond, 2*time.Second))
+res, err = httpx.Get[map[string]any](c, "https://httpbin.org/uuid", httpx.RetryBackoff(100*time.Millisecond, 2*time.Second))
 _ = err
 httpx.Dump(res) // dumps map[string]any
 // #map[string]interface {} {
-//   url => "https://httpbin.org/get" #string
+//   uuid => "<uuid>" #string
 // }
 ```
 
@@ -1169,7 +1185,7 @@ c := httpx.New(httpx.RetryCondition(func(resp *req.Response, _ error) bool {
 res, err := httpx.Get[map[string]any](c, "https://httpbin.org/status/503")
 _ = err
 httpx.Dump(res) // dumps map[string]any
-// #map[string]interface {} {}
+// map[string]interface {}(nil)
 
 // Apply to a single request
 res, err = httpx.Get[map[string]any](c, "https://httpbin.org/status/503", httpx.RetryCondition(func(resp *req.Response, _ error) bool {
@@ -1177,7 +1193,7 @@ res, err = httpx.Get[map[string]any](c, "https://httpbin.org/status/503", httpx.
 }))
 _ = err
 httpx.Dump(res) // dumps map[string]any
-// #map[string]interface {} {}
+// map[string]interface {}(nil)
 ```
 
 ### <a id="retrycount"></a>RetryCount
@@ -1187,19 +1203,19 @@ RetryCount enables retry for a request and sets the maximum retry count.
 ```go
 // Apply to all requests
 c := httpx.New(httpx.RetryCount(2))
-res, err := httpx.Get[map[string]any](c, "https://httpbin.org/get")
+res, err := httpx.Get[map[string]any](c, "https://httpbin.org/uuid")
 _ = err
 httpx.Dump(res) // dumps map[string]any
 // #map[string]interface {} {
-//   url => "https://httpbin.org/get" #string
+//   uuid => "<uuid>" #string
 // }
 
 // Apply to a single request
-res, err = httpx.Get[map[string]any](c, "https://httpbin.org/get", httpx.RetryCount(2))
+res, err = httpx.Get[map[string]any](c, "https://httpbin.org/uuid", httpx.RetryCount(2))
 _ = err
 httpx.Dump(res) // dumps map[string]any
 // #map[string]interface {} {
-//   url => "https://httpbin.org/get" #string
+//   uuid => "<uuid>" #string
 // }
 ```
 
@@ -1210,19 +1226,19 @@ RetryFixedInterval sets a fixed retry interval for a request.
 ```go
 // Apply to all requests
 c := httpx.New(httpx.RetryFixedInterval(200 * time.Millisecond))
-res, err := httpx.Get[map[string]any](c, "https://httpbin.org/get")
+res, err := httpx.Get[map[string]any](c, "https://httpbin.org/uuid")
 _ = err
 httpx.Dump(res) // dumps map[string]any
 // #map[string]interface {} {
-//   url => "https://httpbin.org/get" #string
+//   uuid => "<uuid>" #string
 // }
 
 // Apply to a single request
-res, err = httpx.Get[map[string]any](c, "https://httpbin.org/get", httpx.RetryFixedInterval(200*time.Millisecond))
+res, err = httpx.Get[map[string]any](c, "https://httpbin.org/uuid", httpx.RetryFixedInterval(200*time.Millisecond))
 _ = err
 httpx.Dump(res) // dumps map[string]any
 // #map[string]interface {} {
-//   url => "https://httpbin.org/get" #string
+//   uuid => "<uuid>" #string
 // }
 ```
 
@@ -1233,19 +1249,19 @@ RetryHook registers a retry hook for a request.
 ```go
 // Apply to all requests
 c := httpx.New(httpx.RetryHook(func(_ *req.Response, _ error) {}))
-res, err := httpx.Get[map[string]any](c, "https://httpbin.org/get")
+res, err := httpx.Get[map[string]any](c, "https://httpbin.org/uuid")
 _ = err
 httpx.Dump(res) // dumps map[string]any
 // #map[string]interface {} {
-//   url => "https://httpbin.org/get" #string
+//   uuid => "<uuid>" #string
 // }
 
 // Apply to a single request
-res, err = httpx.Get[map[string]any](c, "https://httpbin.org/get", httpx.RetryHook(func(_ *req.Response, _ error) {}))
+res, err = httpx.Get[map[string]any](c, "https://httpbin.org/uuid", httpx.RetryHook(func(_ *req.Response, _ error) {}))
 _ = err
 httpx.Dump(res) // dumps map[string]any
 // #map[string]interface {} {
-//   url => "https://httpbin.org/get" #string
+//   uuid => "<uuid>" #string
 // }
 ```
 
@@ -1258,21 +1274,21 @@ RetryInterval sets a custom retry interval function for a request.
 c := httpx.New(httpx.RetryInterval(func(_ *req.Response, attempt int) time.Duration {
 	return time.Duration(attempt) * 100 * time.Millisecond
 }))
-res, err := httpx.Get[map[string]any](c, "https://httpbin.org/get")
+res, err := httpx.Get[map[string]any](c, "https://httpbin.org/uuid")
 _ = err
 httpx.Dump(res) // dumps map[string]any
 // #map[string]interface {} {
-//   url => "https://httpbin.org/get" #string
+//   uuid => "<uuid>" #string
 // }
 
 // Apply to a single request
-res, err = httpx.Get[map[string]any](c, "https://httpbin.org/get", httpx.RetryInterval(func(_ *req.Response, attempt int) time.Duration {
+res, err = httpx.Get[map[string]any](c, "https://httpbin.org/uuid", httpx.RetryInterval(func(_ *req.Response, attempt int) time.Duration {
 	return time.Duration(attempt) * 100 * time.Millisecond
 }))
 _ = err
 httpx.Dump(res) // dumps map[string]any
 // #map[string]interface {} {
-//   url => "https://httpbin.org/get" #string
+//   uuid => "<uuid>" #string
 // }
 ```
 
@@ -1302,7 +1318,7 @@ _ = err
 httpx.Dump(res) // dumps map[string]any
 // #map[string]interface {} {
 //   files => #map[string]interface {} {
-//     file => "<file contents>" #string
+//     file => "hello" #string
 //   }
 // }
 ```
@@ -1353,8 +1369,8 @@ _ = err
 httpx.Dump(res) // dumps map[string]any
 // #map[string]interface {} {
 //   files => #map[string]interface {} {
-//     fileA => "<file contents>" #string
-//     fileB => "<file contents>" #string
+//     fileA => "hello" #string
+//     fileB => "world" #string
 //   }
 // }
 ```
@@ -1379,7 +1395,7 @@ _ = err
 httpx.Dump(res) // dumps map[string]any
 // #map[string]interface {} {
 //   files => #map[string]interface {} {
-//     file => "<file contents>" #string
+//     file => "<file>" #string
 //   }
 // }
 ```
@@ -1404,7 +1420,7 @@ _ = err
 httpx.Dump(res) // dumps map[string]any
 // #map[string]interface {} {
 //   files => #map[string]interface {} {
-//     file => "<file contents>" #string
+//     file => "<file>" #string
 //   }
 // }
 ```
@@ -1423,7 +1439,7 @@ _ = err
 httpx.Dump(res) // dumps map[string]any
 // #map[string]interface {} {
 //   files => #map[string]interface {} {
-//     file => "<file contents>" #string
+//     file => "<file>" #string
 //   }
 // }
 ```

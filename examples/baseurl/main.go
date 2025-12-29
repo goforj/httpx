@@ -10,10 +10,10 @@ func main() {
 
 	// Example: client base URL
 	c := httpx.New(httpx.BaseURL("https://httpbin.org"))
-	res, err := httpx.Get[map[string]any](c, "/get")
+	res, err := httpx.Get[map[string]any](c, "/uuid")
 	_ = err
 	httpx.Dump(res) // dumps map[string]any
 	// #map[string]interface {} {
-	//   url => "https://httpbin.org/get" #string
+	//   uuid => "<uuid>" #string
 	// }
 }

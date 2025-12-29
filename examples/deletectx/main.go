@@ -13,7 +13,7 @@ func main() {
 
 	// Example: context-aware DELETE
 	type DeleteResponse struct {
-		OK bool `json:"ok"`
+		URL string `json:"url"`
 	}
 
 	ctx := context.Background()
@@ -24,6 +24,6 @@ func main() {
 	}
 	httpx.Dump(res) // dumps DeleteResponse
 	// #DeleteResponse {
-	//   OK => true #bool
+	//   URL => "https://httpbin.org/delete" #string
 	// }
 }
