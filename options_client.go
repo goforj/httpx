@@ -137,9 +137,13 @@ func (b OptionBuilder) ProxyFunc(fn func(*http.Request) (*url.URL, error)) Optio
 // @group Client Options
 //
 // Applies to client configuration only.
-// Example: set cookie jar
+// Example: set cookie jar and seed cookies
 //
 //	jar, _ := cookiejar.New(nil)
+//	u, _ := url.Parse("https://example.com")
+//	jar.SetCookies(u, []*http.Cookie{
+//		{Name: "session", Value: "abc123"},
+//	})
 //	c := httpx.New(httpx.CookieJar(jar))
 //	_ = c
 func CookieJar(jar http.CookieJar) OptionBuilder {

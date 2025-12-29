@@ -391,6 +391,7 @@ func writeMain(base string, fd *FuncDoc, importPath string) error {
 		"context.":  "context",
 		"regexp.":   "regexp",
 		"cookiejar.": "net/http/cookiejar",
+		"url.":      "net/url",
 		"redis.":    "github.com/redis/go-redis/v9",
 		"time.":     "time",
 		"gocron":    "github.com/go-co-op/gocron/v2",
