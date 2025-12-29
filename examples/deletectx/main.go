@@ -16,8 +16,14 @@ func main() {
 		OK bool `json:"ok"`
 	}
 
-	c := httpx.New()
 	ctx := context.Background()
-	res := httpx.DeleteCtx[DeleteResponse](c, ctx, "https://api.example.com/users/1")
-	_, _ = res.Body, res.Err // Body is DeleteResponse
+	c := httpx.New()
+	res, err := httpx.DeleteCtx[DeleteResponse](c, ctx, "https://httpbin.org/delete")
+	if err != nil {
+		return
+	}
+	httpx.Dump(res) // dumps DeleteResponse
+	// #DeleteResponse {
+	//   OK => true #bool
+	// }
 }

@@ -10,5 +10,10 @@ func main() {
 
 	// Example: dump each request as it is sent
 	c := httpx.New(httpx.DumpEachRequest())
-	_ = c
+	res, err := httpx.Get[map[string]any](c, "https://httpbin.org/get")
+	_ = err
+	httpx.Dump(res) // dumps map[string]any
+	// #map[string]interface {} {
+	//   url => "https://httpbin.org/get" #string
+	// }
 }

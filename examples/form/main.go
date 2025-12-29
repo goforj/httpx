@@ -10,7 +10,14 @@ func main() {
 
 	// Example: submit a form
 	c := httpx.New()
-	_ = httpx.Post[any, string](c, "https://example.com", nil, httpx.Form(map[string]string{
-		"name": "Ana",
+	res, err := httpx.Post[any, map[string]any](c, "https://httpbin.org/post", nil, httpx.Form(map[string]string{
+		"name": "alice",
 	}))
+	_ = err
+	httpx.Dump(res) // dumps map[string]any
+	// #map[string]interface {} {
+	//   form => #map[string]interface {} {
+	//     name => "alice" #string
+	//   }
+	// }
 }

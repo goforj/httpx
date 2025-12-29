@@ -14,10 +14,24 @@ import (
 //
 //	// Apply to all requests
 //	c := httpx.New(httpx.Auth("Token", "abc123"))
-//	httpx.Get[string](c, "https://example.com")
+//	res, err := httpx.Get[map[string]any](c, "https://httpbin.org/headers")
+//	_ = err
+//	httpx.Dump(res) // dumps map[string]any
+//	// #map[string]interface {} {
+//	//   headers => #map[string]interface {} {
+//	//     Authorization => "Token abc123" #string
+//	//   }
+//	// }
 //
 //	// Apply to a single request
-//	httpx.Get[string](httpx.Default(), "https://example.com", httpx.Auth("Token", "abc123"))
+//	res, err = httpx.Get[map[string]any](c, "https://httpbin.org/headers", httpx.Auth("Token", "abc123"))
+//	_ = err
+//	httpx.Dump(res) // dumps map[string]any
+//	// #map[string]interface {} {
+//	//   headers => #map[string]interface {} {
+//	//     Authorization => "Token abc123" #string
+//	//   }
+//	// }
 func Auth(scheme, token string) OptionBuilder {
 	return OptionBuilder{}.Auth(scheme, token)
 }
@@ -42,10 +56,24 @@ func (b OptionBuilder) Auth(scheme, token string) OptionBuilder {
 //
 //	// Apply to all requests
 //	c := httpx.New(httpx.Bearer("token"))
-//	httpx.Get[string](c, "https://example.com")
+//	res, err := httpx.Get[map[string]any](c, "https://httpbin.org/headers")
+//	_ = err
+//	httpx.Dump(res) // dumps map[string]any
+//	// #map[string]interface {} {
+//	//   headers => #map[string]interface {} {
+//	//     Authorization => "Bearer token" #string
+//	//   }
+//	// }
 //
 //	// Apply to a single request
-//	httpx.Get[string](httpx.Default(), "https://example.com", httpx.Bearer("token"))
+//	res, err = httpx.Get[map[string]any](c, "https://httpbin.org/headers", httpx.Bearer("token"))
+//	_ = err
+//	httpx.Dump(res) // dumps map[string]any
+//	// #map[string]interface {} {
+//	//   headers => #map[string]interface {} {
+//	//     Authorization => "Bearer token" #string
+//	//   }
+//	// }
 func Bearer(token string) OptionBuilder {
 	return OptionBuilder{}.Bearer(token)
 }
@@ -70,10 +98,24 @@ func (b OptionBuilder) Bearer(token string) OptionBuilder {
 //
 //	// Apply to all requests
 //	c := httpx.New(httpx.Basic("user", "pass"))
-//	httpx.Get[string](c, "https://example.com")
+//	res, err := httpx.Get[map[string]any](c, "https://httpbin.org/headers")
+//	_ = err
+//	httpx.Dump(res) // dumps map[string]any
+//	// #map[string]interface {} {
+//	//   headers => #map[string]interface {} {
+//	//     Authorization => "Basic dXNlcjpwYXNz" #string
+//	//   }
+//	// }
 //
 //	// Apply to a single request
-//	httpx.Get[string](httpx.Default(), "https://example.com", httpx.Basic("user", "pass"))
+//	res, err = httpx.Get[map[string]any](c, "https://httpbin.org/headers", httpx.Basic("user", "pass"))
+//	_ = err
+//	httpx.Dump(res) // dumps map[string]any
+//	// #map[string]interface {} {
+//	//   headers => #map[string]interface {} {
+//	//     Authorization => "Basic dXNlcjpwYXNz" #string
+//	//   }
+//	// }
 func Basic(user, pass string) OptionBuilder {
 	return OptionBuilder{}.Basic(user, pass)
 }

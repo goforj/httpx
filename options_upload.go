@@ -18,7 +18,14 @@ import (
 // Example: upload a file
 //
 //	c := httpx.New()
-//	_ = httpx.Post[any, string](c, "https://example.com/upload", nil, httpx.File("file", "/tmp/report.txt"))
+//	res, err := httpx.Post[any, map[string]any](c, "https://httpbin.org/post", nil, httpx.File("file", "/tmp/report.txt"))
+//	_ = err
+//	httpx.Dump(res) // dumps map[string]any
+//	// #map[string]interface {} {
+//	//   files => #map[string]interface {} {
+//	//     file => "<file contents>" #string
+//	//   }
+//	// }
 func File(paramName, filePath string) OptionBuilder {
 	return OptionBuilder{}.File(paramName, filePath)
 }
@@ -36,10 +43,18 @@ func (b OptionBuilder) File(paramName, filePath string) OptionBuilder {
 // Example: upload multiple files
 //
 //	c := httpx.New()
-//	_ = httpx.Post[any, string](c, "https://example.com/upload", nil, httpx.Files(map[string]string{
+//	res, err := httpx.Post[any, map[string]any](c, "https://httpbin.org/post", nil, httpx.Files(map[string]string{
 //		"fileA": "/tmp/a.txt",
 //		"fileB": "/tmp/b.txt",
 //	}))
+//	_ = err
+//	httpx.Dump(res) // dumps map[string]any
+//	// #map[string]interface {} {
+//	//   files => #map[string]interface {} {
+//	//     fileA => "<file contents>" #string
+//	//     fileB => "<file contents>" #string
+//	//   }
+//	// }
 func Files(files map[string]string) OptionBuilder {
 	return OptionBuilder{}.Files(files)
 }
@@ -57,7 +72,14 @@ func (b OptionBuilder) Files(files map[string]string) OptionBuilder {
 // Example: upload bytes as a file
 //
 //	c := httpx.New()
-//	_ = httpx.Post[any, string](c, "https://example.com/upload", nil, httpx.FileBytes("file", "report.txt", []byte("hello")))
+//	res, err := httpx.Post[any, map[string]any](c, "https://httpbin.org/post", nil, httpx.FileBytes("file", "report.txt", []byte("hello")))
+//	_ = err
+//	httpx.Dump(res) // dumps map[string]any
+//	// #map[string]interface {} {
+//	//   files => #map[string]interface {} {
+//	//     file => "hello" #string
+//	//   }
+//	// }
 func FileBytes(paramName, filename string, content []byte) OptionBuilder {
 	return OptionBuilder{}.FileBytes(paramName, filename, content)
 }
@@ -82,7 +104,14 @@ func (b OptionBuilder) FileBytes(paramName, filename string, content []byte) Opt
 // Example: upload from reader
 //
 //	c := httpx.New()
-//	_ = httpx.Post[any, string](c, "https://example.com/upload", nil, httpx.FileReader("file", "report.txt", strings.NewReader("hello")))
+//	res, err := httpx.Post[any, map[string]any](c, "https://httpbin.org/post", nil, httpx.FileReader("file", "report.txt", strings.NewReader("hello")))
+//	_ = err
+//	httpx.Dump(res) // dumps map[string]any
+//	// #map[string]interface {} {
+//	//   files => #map[string]interface {} {
+//	//     file => "hello" #string
+//	//   }
+//	// }
 func FileReader(paramName, filename string, reader io.Reader) OptionBuilder {
 	return OptionBuilder{}.FileReader(paramName, filename, reader)
 }
@@ -129,7 +158,7 @@ func (b OptionBuilder) FileReader(paramName, filename string, reader io.Reader) 
 // Example: track upload progress
 //
 //	c := httpx.New()
-//	_ = httpx.Post[any, string](c, "https://example.com/upload", nil,
+//	res, err := httpx.Post[any, map[string]any](c, "https://httpbin.org/post", nil,
 //		httpx.File("file", "/tmp/report.bin"),
 //		httpx.UploadCallback(func(info req.UploadInfo) {
 //			percent := float64(info.UploadedSize) / float64(info.FileSize) * 100
@@ -139,6 +168,13 @@ func (b OptionBuilder) FileReader(paramName, filename string, reader io.Reader) 
 //			}
 //		}),
 //	)
+//	_ = err
+//	httpx.Dump(res) // dumps map[string]any
+//	// #map[string]interface {} {
+//	//   files => #map[string]interface {} {
+//	//     file => "<file contents>" #string
+//	//   }
+//	// }
 func UploadCallback(callback req.UploadCallback) OptionBuilder {
 	return OptionBuilder{}.UploadCallback(callback)
 }
@@ -192,7 +228,7 @@ func (b OptionBuilder) UploadCallback(callback req.UploadCallback) OptionBuilder
 // Example: throttle upload progress updates
 //
 //	c := httpx.New()
-//	_ = httpx.Post[any, string](c, "https://example.com/upload", nil,
+//	res, err := httpx.Post[any, map[string]any](c, "https://httpbin.org/post", nil,
 //		httpx.File("file", "/tmp/report.bin"),
 //		httpx.UploadCallbackWithInterval(func(info req.UploadInfo) {
 //			percent := float64(info.UploadedSize) / float64(info.FileSize) * 100
@@ -202,6 +238,13 @@ func (b OptionBuilder) UploadCallback(callback req.UploadCallback) OptionBuilder
 //			}
 //		}, 200*time.Millisecond),
 //	)
+//	_ = err
+//	httpx.Dump(res) // dumps map[string]any
+//	// #map[string]interface {} {
+//	//   files => #map[string]interface {} {
+//	//     file => "<file contents>" #string
+//	//   }
+//	// }
 func UploadCallbackWithInterval(callback req.UploadCallback, minInterval time.Duration) OptionBuilder {
 	return OptionBuilder{}.UploadCallbackWithInterval(callback, minInterval)
 }
@@ -255,10 +298,17 @@ func (b OptionBuilder) UploadCallbackWithInterval(callback req.UploadCallback, m
 // Example: upload with automatic progress
 //
 //	c := httpx.New()
-//	_ = httpx.Post[any, string](c, "https://example.com/upload", nil,
+//	res, err := httpx.Post[any, map[string]any](c, "https://httpbin.org/post", nil,
 //		httpx.File("file", "/tmp/report.bin"),
 //		httpx.UploadProgress(),
 //	)
+//	_ = err
+//	httpx.Dump(res) // dumps map[string]any
+//	// #map[string]interface {} {
+//	//   files => #map[string]interface {} {
+//	//     file => "<file contents>" #string
+//	//   }
+//	// }
 func UploadProgress() OptionBuilder {
 	return OptionBuilder{}.UploadProgress()
 }

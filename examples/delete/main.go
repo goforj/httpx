@@ -14,6 +14,12 @@ func main() {
 	}
 
 	c := httpx.New()
-	res := httpx.Delete[DeleteResponse](c, "https://api.example.com/users/1")
-	_, _ = res.Body, res.Err // Body is DeleteResponse
+	res, err := httpx.Delete[DeleteResponse](c, "https://httpbin.org/delete")
+	if err != nil {
+		return
+	}
+	httpx.Dump(res) // dumps DeleteResponse
+	// #DeleteResponse {
+	//   OK => true #bool
+	// }
 }

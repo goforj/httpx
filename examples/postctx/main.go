@@ -19,8 +19,14 @@ func main() {
 		Name string `json:"name"`
 	}
 
-	c := httpx.New()
 	ctx := context.Background()
-	res := httpx.PostCtx[CreateUser, User](c, ctx, "https://api.example.com/users", CreateUser{Name: "Ana"})
-	_, _ = res.Body, res.Err // Body is User
+	c := httpx.New()
+	res, err := httpx.PostCtx[CreateUser, User](c, ctx, "https://httpbin.org/post", CreateUser{Name: "Ana"})
+	if err != nil {
+		return
+	}
+	httpx.Dump(res) // dumps User
+	// #User {
+	//   Name => "Ana" #string
+	// }
 }

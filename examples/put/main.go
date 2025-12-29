@@ -17,6 +17,12 @@ func main() {
 	}
 
 	c := httpx.New()
-	res := httpx.Put[UpdateUser, User](c, "https://api.example.com/users/1", UpdateUser{Name: "Ana"})
-	_, _ = res.Body, res.Err // Body is User
+	res, err := httpx.Put[UpdateUser, User](c, "https://httpbin.org/put", UpdateUser{Name: "Ana"})
+	if err != nil {
+		return
+	}
+	httpx.Dump(res) // dumps User
+	// #User {
+	//   Name => "Ana" #string
+	// }
 }

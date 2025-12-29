@@ -26,9 +26,9 @@ func TestWithBaseURLAndHeaders(t *testing.T) {
 	defer srv.Close()
 
 	c := New(BaseURL(srv.URL).Header("X-Trace", "1"))
-	res := Get[string](c, "/users/1")
-	if res.Err != nil {
-		t.Fatalf("request failed: %v", res.Err)
+	_, err := Get[string](c, "/users/1")
+	if err != nil {
+		t.Fatalf("request failed: %v", err)
 	}
 	if gotPath != "/users/1" {
 		t.Fatalf("path = %q", gotPath)
@@ -46,10 +46,10 @@ func TestWithHeaders(t *testing.T) {
 	}))
 	defer srv.Close()
 
-	c := New(Headers(map[string]string{"Accept": "application/json"}))
-	res := Get[string](c, srv.URL)
-	if res.Err != nil {
-		t.Fatalf("request failed: %v", res.Err)
+	c := New(Header("Accept", "application/json"))
+	_, err := Get[string](c, srv.URL)
+	if err != nil {
+		t.Fatalf("request failed: %v", err)
 	}
 	if gotAccept != "application/json" {
 		t.Fatalf("accept = %q", gotAccept)
@@ -64,8 +64,8 @@ func TestWithTimeout(t *testing.T) {
 	defer srv.Close()
 
 	c := New(Timeout(10 * time.Millisecond))
-	res := Get[string](c, srv.URL)
-	if res.Err == nil {
+	_, err := Get[string](c, srv.URL)
+	if err == nil {
 		t.Fatalf("expected timeout error")
 	}
 }
@@ -79,9 +79,9 @@ func TestWithTransport(t *testing.T) {
 	})
 
 	c := New(Transport(custom))
-	res := Get[string](c, "https://example.com")
-	if res.Err != nil {
-		t.Fatalf("request failed: %v", res.Err)
+	_, err := Get[string](c, "https://example.com")
+	if err != nil {
+		t.Fatalf("request failed: %v", err)
 	}
 	if !called {
 		t.Fatalf("expected custom transport")
@@ -89,9 +89,14 @@ func TestWithTransport(t *testing.T) {
 }
 
 func TestWithTransportNil(t *testing.T) {
+	srv := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		w.WriteHeader(http.StatusOK)
+	}))
+	defer srv.Close()
+
 	c := New(Transport(nil))
-	if c == nil {
-		t.Fatalf("expected client")
+	if _, err := Get[string](c, srv.URL); err != nil {
+		t.Fatalf("request failed: %v", err)
 	}
 }
 
@@ -107,9 +112,9 @@ func TestWithMiddleware(t *testing.T) {
 		r.SetHeader("X-Trace", "1")
 		return nil
 	}))
-	res := Get[string](c, srv.URL)
-	if res.Err != nil {
-		t.Fatalf("request failed: %v", res.Err)
+	_, err := Get[string](c, srv.URL)
+	if err != nil {
+		t.Fatalf("request failed: %v", err)
 	}
 	if got != "1" {
 		t.Fatalf("header = %q", got)
@@ -126,8 +131,8 @@ func TestWithErrorMapper(t *testing.T) {
 	c := New(ErrorMapper(func(_ *req.Response) error {
 		return want
 	}))
-	res := Get[string](c, srv.URL)
-	if !errors.Is(res.Err, want) {
+	_, err := Get[string](c, srv.URL)
+	if !errors.Is(err, want) {
 		t.Fatalf("expected mapped error")
 	}
 }

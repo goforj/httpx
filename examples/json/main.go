@@ -14,5 +14,12 @@ func main() {
 	}
 
 	c := httpx.New()
-	_ = httpx.Post[any, string](c, "https://example.com", nil, httpx.JSON(Payload{Name: "Ana"}))
+	res, err := httpx.Post[any, map[string]any](c, "https://httpbin.org/post", nil, httpx.JSON(Payload{Name: "Ana"}))
+	_ = err
+	httpx.Dump(res) // dumps map[string]any
+	// #map[string]interface {} {
+	//   json => #map[string]interface {} {
+	//     name => "Ana" #string
+	//   }
+	// }
 }

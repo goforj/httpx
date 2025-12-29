@@ -16,8 +16,14 @@ func main() {
 		Name string `json:"name"`
 	}
 
-	c := httpx.New()
 	ctx := context.Background()
-	res := httpx.GetCtx[User](c, ctx, "https://api.example.com/users/1")
-	_, _ = res.Body, res.Err // Body is User
+	c := httpx.New()
+	res, err := httpx.GetCtx[User](c, ctx, "https://httpbin.org/get")
+	if err != nil {
+		return
+	}
+	httpx.Dump(res) // dumps User
+	// #User {
+	//   Name => "Ana" #string
+	// }
 }

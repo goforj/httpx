@@ -10,6 +10,8 @@ func main() {
 
 	// Example: HEAD request
 	c := httpx.New()
-	res := httpx.Head[string](c, "https://example.com")
-	_ = res
+	_, err := httpx.Head[string](c, "https://httpbin.org/get")
+	if err != nil {
+		return
+	}
 }

@@ -9,7 +9,10 @@ import "github.com/imroc/req/v3"
 // Example: download to file
 //
 //	c := httpx.New()
-//	_ = httpx.Get[string](c, "https://example.com/file", httpx.OutputFile("/tmp/file.bin"))
+//	res, err := httpx.Get[map[string]any](c, "https://httpbin.org/bytes/1024", httpx.OutputFile("/tmp/file.bin"))
+//	_ = err
+//	httpx.Dump(res) // dumps map[string]any
+//	// #map[string]interface {} {}
 func OutputFile(path string) OptionBuilder {
 	return OptionBuilder{}.OutputFile(path)
 }

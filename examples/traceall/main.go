@@ -10,5 +10,10 @@ func main() {
 
 	// Example: trace all requests
 	c := httpx.New(httpx.TraceAll())
-	_ = c
+	res, err := httpx.Get[map[string]any](c, "https://httpbin.org/get")
+	_ = err
+	httpx.Dump(res) // dumps map[string]any
+	// #map[string]interface {} {
+	//   url => "https://httpbin.org/get" #string
+	// }
 }

@@ -19,8 +19,14 @@ func main() {
 		Name string `json:"name"`
 	}
 
-	c := httpx.New()
 	ctx := context.Background()
-	res := httpx.PutCtx[UpdateUser, User](c, ctx, "https://api.example.com/users/1", UpdateUser{Name: "Ana"})
-	_, _ = res.Body, res.Err // Body is User
+	c := httpx.New()
+	res, err := httpx.PutCtx[UpdateUser, User](c, ctx, "https://httpbin.org/put", UpdateUser{Name: "Ana"})
+	if err != nil {
+		return
+	}
+	httpx.Dump(res) // dumps User
+	// #User {
+	//   Name => "Ana" #string
+	// }
 }

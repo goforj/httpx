@@ -10,8 +10,15 @@ func main() {
 
 	// Example: upload with automatic progress
 	c := httpx.New()
-	_ = httpx.Post[any, string](c, "https://example.com/upload", nil,
+	res, err := httpx.Post[any, map[string]any](c, "https://httpbin.org/post", nil,
 		httpx.File("file", "/tmp/report.bin"),
 		httpx.UploadProgress(),
 	)
+	_ = err
+	httpx.Dump(res) // dumps map[string]any
+	// #map[string]interface {} {
+	//   files => #map[string]interface {} {
+	//     file => "<file contents>" #string
+	//   }
+	// }
 }

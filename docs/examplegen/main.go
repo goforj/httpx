@@ -83,7 +83,7 @@ func run() error {
 		}
 
 		// Debug / inspection hook (optional)
-		//env.Dump(fd)
+		//env.EnableDump(fd)
 	}
 
 	return nil
@@ -380,28 +380,28 @@ func writeMain(base string, fd *FuncDoc, importPath string) error {
 	}
 
 	patternImports := map[string]string{
-		"fmt.":      "fmt",
-		"bytes.":    "bytes",
-		"errors.":   "errors",
-		"strings.":  "strings",
-		"io.":       "io",
-		"os.":       "os",
-		"http.":     "net/http",
-		"httptest.": "net/http/httptest",
-		"context.":  "context",
-		"regexp.":   "regexp",
+		"fmt.":       "fmt",
+		"bytes.":     "bytes",
+		"errors.":    "errors",
+		"strings.":   "strings",
+		"io.":        "io",
+		"os.":        "os",
+		"http.":      "net/http",
+		"httptest.":  "net/http/httptest",
+		"context.":   "context",
+		"regexp.":    "regexp",
 		"cookiejar.": "net/http/cookiejar",
-		"url.":      "net/url",
-		"redis.":    "github.com/redis/go-redis/v9",
-		"time.":     "time",
-		"gocron":    "github.com/go-co-op/gocron/v2",
-		"scheduler": "github.com/goforj/scheduler",
-		"filepath.": "path/filepath",
-		"godump.":   "github.com/goforj/godump",
-		"req.":      "github.com/imroc/req/v3",
-		"http2.":    "github.com/imroc/req/v3/http2",
-		"rand.":     "crypto/rand",
-		"base64.":   "encoding/base64",
+		"url.":       "net/url",
+		"redis.":     "github.com/redis/go-redis/v9",
+		"time.":      "time",
+		"gocron":     "github.com/go-co-op/gocron/v2",
+		"scheduler":  "github.com/goforj/scheduler",
+		"filepath.":  "path/filepath",
+		"godump.":    "github.com/goforj/godump",
+		"req.":       "github.com/imroc/req/v3",
+		"http2.":     "github.com/imroc/req/v3/http2",
+		"rand.":      "crypto/rand",
+		"base64.":    "encoding/base64",
 	}
 
 	for _, ex := range fd.Examples {

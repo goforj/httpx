@@ -11,8 +11,18 @@ func main() {
 	// Example: retry count
 	// Apply to all requests
 	c := httpx.New(httpx.RetryCount(2))
-	httpx.Get[string](c, "https://example.com")
+	res, err := httpx.Get[map[string]any](c, "https://httpbin.org/get")
+	_ = err
+	httpx.Dump(res) // dumps map[string]any
+	// #map[string]interface {} {
+	//   url => "https://httpbin.org/get" #string
+	// }
 
 	// Apply to a single request
-	httpx.Get[string](httpx.Default(), "https://example.com", httpx.RetryCount(2))
+	res, err = httpx.Get[map[string]any](c, "https://httpbin.org/get", httpx.RetryCount(2))
+	_ = err
+	httpx.Dump(res) // dumps map[string]any
+	// #map[string]interface {} {
+	//   url => "https://httpbin.org/get" #string
+	// }
 }

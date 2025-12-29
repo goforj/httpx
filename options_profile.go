@@ -11,7 +11,7 @@ import (
 	"github.com/imroc/req/v3/http2"
 )
 
-// AsChrome applies the Chrome browser profile (headers, TLS, and HTTP/2 behavior).
+// AsChrome applies the Chrome browser profile (headers including User-Agent, TLS, and HTTP/2 behavior).
 // @group Browser Profiles
 //
 // Applies to client configuration only.
@@ -26,7 +26,7 @@ func AsChrome() OptionBuilder {
 		http2ConnectionFlowOption(chromeHTTP2ConnectionFlow),
 		pseudoHeaderOrder(chromePseudoHeaderOrder...),
 		headerOrder(chromeHeaderOrder...),
-		Headers(chromeHeaders),
+		headers(chromeHeaders),
 		http2HeaderPriorityOption(chromeHeaderPriority),
 		multipartBoundary(webkitMultipartBoundaryFunc),
 	)
@@ -36,7 +36,7 @@ func (b OptionBuilder) AsChrome() OptionBuilder {
 	return mergeOptionBuilders(b, AsChrome())
 }
 
-// AsFirefox applies the Firefox browser profile (headers, TLS, and HTTP/2 behavior).
+// AsFirefox applies the Firefox browser profile (headers including User-Agent, TLS, and HTTP/2 behavior).
 // @group Browser Profiles
 //
 // Applies to client configuration only.
@@ -52,7 +52,7 @@ func AsFirefox() OptionBuilder {
 		http2PriorityFramesOption(firefoxPriorityFrames...),
 		pseudoHeaderOrder(firefoxPseudoHeaderOrder...),
 		headerOrder(firefoxHeaderOrder...),
-		Headers(firefoxHeaders),
+		headers(firefoxHeaders),
 		http2HeaderPriorityOption(firefoxHeaderPriority),
 		multipartBoundary(firefoxMultipartBoundaryFunc),
 	)
@@ -62,7 +62,7 @@ func (b OptionBuilder) AsFirefox() OptionBuilder {
 	return mergeOptionBuilders(b, AsFirefox())
 }
 
-// AsSafari applies the Safari browser profile (headers, TLS, and HTTP/2 behavior).
+// AsSafari applies the Safari browser profile (headers including User-Agent, TLS, and HTTP/2 behavior).
 // @group Browser Profiles
 //
 // Applies to client configuration only.
@@ -77,7 +77,7 @@ func AsSafari() OptionBuilder {
 		http2ConnectionFlowOption(safariHTTP2ConnectionFlow),
 		pseudoHeaderOrder(safariPseudoHeaderOrder...),
 		headerOrder(safariHeaderOrder...),
-		Headers(safariHeaders),
+		headers(safariHeaders),
 		http2HeaderPriorityOption(safariHeaderPriority),
 		multipartBoundary(webkitMultipartBoundaryFunc),
 	)
@@ -87,7 +87,7 @@ func (b OptionBuilder) AsSafari() OptionBuilder {
 	return mergeOptionBuilders(b, AsSafari())
 }
 
-// AsMobile applies a mobile Chrome-like profile (headers, TLS, and HTTP/2 behavior).
+// AsMobile applies a mobile Chrome-like profile (headers including User-Agent, TLS, and HTTP/2 behavior).
 // @group Browser Profiles
 //
 // Applies to client configuration only.
@@ -102,7 +102,7 @@ func AsMobile() OptionBuilder {
 		http2ConnectionFlowOption(mobileHTTP2ConnectionFlow),
 		pseudoHeaderOrder(mobilePseudoHeaderOrder...),
 		headerOrder(mobileHeaderOrder...),
-		Headers(mobileHeaders),
+		headers(mobileHeaders),
 		http2HeaderPriorityOption(mobileHeaderPriority),
 		multipartBoundary(webkitMultipartBoundaryFunc),
 	)

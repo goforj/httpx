@@ -33,6 +33,14 @@ func TestExamplesBuild(t *testing.T) {
 		t.Run(name, func(t *testing.T) {
 			t.Parallel()
 
+			src, err := os.ReadFile(filepath.Join(path, "main.go"))
+			if err != nil {
+				t.Fatalf("read example: %v", err)
+			}
+			if !strings.Contains(string(src), "httpx.") {
+				t.Skipf("example %q does not use httpx", name)
+			}
+
 			if err := buildExampleWithoutTags(path); err != nil {
 				t.Fatalf("example %q failed to build:\n%s", name, err)
 			}

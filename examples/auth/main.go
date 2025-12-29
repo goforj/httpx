@@ -11,8 +11,22 @@ func main() {
 	// Example: custom auth scheme
 	// Apply to all requests
 	c := httpx.New(httpx.Auth("Token", "abc123"))
-	httpx.Get[string](c, "https://example.com")
+	res, err := httpx.Get[map[string]any](c, "https://httpbin.org/headers")
+	_ = err
+	httpx.Dump(res) // dumps map[string]any
+	// #map[string]interface {} {
+	//   headers => #map[string]interface {} {
+	//     Authorization => "Token abc123" #string
+	//   }
+	// }
 
 	// Apply to a single request
-	httpx.Get[string](httpx.Default(), "https://example.com", httpx.Auth("Token", "abc123"))
+	res, err = httpx.Get[map[string]any](c, "https://httpbin.org/headers", httpx.Auth("Token", "abc123"))
+	_ = err
+	httpx.Dump(res) // dumps map[string]any
+	// #map[string]interface {} {
+	//   headers => #map[string]interface {} {
+	//     Authorization => "Token abc123" #string
+	//   }
+	// }
 }

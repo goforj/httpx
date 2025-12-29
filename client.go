@@ -3,7 +3,6 @@ package httpx
 import (
 	"context"
 	"fmt"
-	"github.com/goforj/godump"
 	"os"
 	"sync"
 	"time"
@@ -21,11 +20,6 @@ var (
 
 // Client wraps a req client with typed helpers and defaults.
 // @group Client
-//
-// Example: create a client
-//
-//	c := httpx.New()
-//	_ = c
 type Client struct {
 	req         *req.Client
 	errorMapper ErrorMapperFunc
@@ -38,12 +32,10 @@ type Client struct {
 //
 //	var buf bytes.Buffer
 //	c := httpx.New(httpx.
-//		BaseURL("https://api.example.com").
+//		BaseURL("https://httpbin.org").
 //		Timeout(5*time.Second).
 //		Header("X-Trace", "1").
-//		Headers(map[string]string{
-//			"Accept": "application/json",
-//		}).
+//		Header("Accept", "application/json").
 //		Transport(http.RoundTripper(http.DefaultTransport)).
 //		Middleware(func(_ *req.Client, r *req.Request) error {
 //			r.SetHeader("X-Middleware", "1")
@@ -59,7 +51,7 @@ type Client struct {
 //			rc.SetCommonRetryCount(2)
 //		}).
 //		RetryCount(2).
-//		RetryFixedInterval(200 * time.Millisecond).
+//		RetryFixedInterval(200*time.Millisecond).
 //		RetryBackoff(100*time.Millisecond, 2*time.Second).
 //		RetryInterval(func(_ *req.Response, attempt int) time.Duration {
 //			return time.Duration(attempt) * 100 * time.Millisecond
@@ -88,11 +80,6 @@ func New(opts ...Option) *Client {
 
 // Default returns the shared default client.
 // @group Client
-//
-// Example: use default client for quick calls
-//
-//	c := httpx.Default()
-//	_ = c
 func Default() *Client {
 	defaultOnce.Do(func() {
 		defaultClient = New()
@@ -102,51 +89,51 @@ func Default() *Client {
 
 // Req returns the underlying req client for advanced usage.
 // @group Client
-//
-// Example: enable req debugging
-//
-//	c := httpx.New()
-//	c.Req().EnableDumpEachRequest()
 func (c *Client) Req() *req.Client {
 	return c.req
 }
 
 // Raw returns the underlying req client for chaining raw requests.
 // @group Client
-//
-// Example: drop down to req
-//
-//	c := httpx.New()
-//	resp, err := c.Raw().R().Get("https://httpbin.org/uuid")
-//	_, _ = resp, err
 func (c *Client) Raw() *req.Client {
 	return c.req
+}
+
+func (c *Client) clone() *Client {
+	if c == nil {
+		return New()
+	}
+	return &Client{
+		req:         c.req.Clone(),
+		errorMapper: c.errorMapper,
+	}
 }
 
 // Get issues a GET request using the provided client.
 // @group Requests
 //
-// Example: fetch GitHub pull requests (typed)
+// Example: basic GET
 //
-//	type PullRequest struct {
-//		Number int    `json:"number"`
-//		Title  string `json:"title"`
-//	}
-//
-//	c := httpx.New(httpx.Header("Accept", "application/vnd.github+json"))
-//	res := httpx.Get[[]PullRequest](c, "https://api.github.com/repos/goforj/httpx/pulls")
-//	if res.Err != nil {
+//	c := httpx.New()
+//	res, err := httpx.Get[map[string]any](c, "https://httpbin.org/get")
+//	if err != nil {
 //		return
 //	}
-//	godump.Dump(res.Body)
+//	httpx.Dump(res)
+//	// #map[string]interface {} {
+//	//   url => "https://httpbin.org/get" #string
+//	// }
 //
 // Example: bind to a string body
 //
-//	c2 := httpx.New()
-//	res2 := httpx.Get[string](c2, "https://httpbin.org/uuid")
-//	_, _ = res2.Body, res2.Err // Body is string
-func Get[T any](client *Client, url string, opts ...Option) Result[T] {
-	return do[T](client, nil, methodGet, url, nil, opts)
+//	resText, err := httpx.Get[string](c, "https://httpbin.org/get")
+//	if err != nil {
+//		return
+//	}
+//	_ = resText // resText is string
+func Get[T any](client *Client, url string, opts ...Option) (T, error) {
+	body, _, err := do[T](client, nil, methodGet, url, nil, opts)
+	return body, err
 }
 
 // Post issues a POST request using the provided client.
@@ -162,10 +149,17 @@ func Get[T any](client *Client, url string, opts ...Option) Result[T] {
 //	}
 //
 //	c := httpx.New()
-//	res := httpx.Post[CreateUser, User](c, "https://api.example.com/users", CreateUser{Name: "Ana"})
-//	_, _ = res.Body, res.Err // Body is User
-func Post[In any, Out any](client *Client, url string, body In, opts ...Option) Result[Out] {
-	return do[Out](client, nil, methodPost, url, body, opts)
+//	res, err := httpx.Post[CreateUser, User](c, "https://httpbin.org/post", CreateUser{Name: "Ana"})
+//	if err != nil {
+//		return
+//	}
+//	httpx.Dump(res) // dumps User
+//	// #User {
+//	//   Name => "Ana" #string
+//	// }
+func Post[In any, Out any](client *Client, url string, body In, opts ...Option) (Out, error) {
+	out, _, err := do[Out](client, nil, methodPost, url, body, opts)
+	return out, err
 }
 
 // Put issues a PUT request using the provided client.
@@ -181,10 +175,17 @@ func Post[In any, Out any](client *Client, url string, body In, opts ...Option) 
 //	}
 //
 //	c := httpx.New()
-//	res := httpx.Put[UpdateUser, User](c, "https://api.example.com/users/1", UpdateUser{Name: "Ana"})
-//	_, _ = res.Body, res.Err // Body is User
-func Put[In any, Out any](client *Client, url string, body In, opts ...Option) Result[Out] {
-	return do[Out](client, nil, methodPut, url, body, opts)
+//	res, err := httpx.Put[UpdateUser, User](c, "https://httpbin.org/put", UpdateUser{Name: "Ana"})
+//	if err != nil {
+//		return
+//	}
+//	httpx.Dump(res) // dumps User
+//	// #User {
+//	//   Name => "Ana" #string
+//	// }
+func Put[In any, Out any](client *Client, url string, body In, opts ...Option) (Out, error) {
+	out, _, err := do[Out](client, nil, methodPut, url, body, opts)
+	return out, err
 }
 
 // Patch issues a PATCH request using the provided client.
@@ -200,10 +201,17 @@ func Put[In any, Out any](client *Client, url string, body In, opts ...Option) R
 //	}
 //
 //	c := httpx.New()
-//	res := httpx.Patch[UpdateUser, User](c, "https://api.example.com/users/1", UpdateUser{Name: "Ana"})
-//	_, _ = res.Body, res.Err // Body is User
-func Patch[In any, Out any](client *Client, url string, body In, opts ...Option) Result[Out] {
-	return do[Out](client, nil, methodPatch, url, body, opts)
+//	res, err := httpx.Patch[UpdateUser, User](c, "https://httpbin.org/patch", UpdateUser{Name: "Ana"})
+//	if err != nil {
+//		return
+//	}
+//	httpx.Dump(res) // dumps User
+//	// #User {
+//	//   Name => "Ana" #string
+//	// }
+func Patch[In any, Out any](client *Client, url string, body In, opts ...Option) (Out, error) {
+	out, _, err := do[Out](client, nil, methodPatch, url, body, opts)
+	return out, err
 }
 
 // Delete issues a DELETE request using the provided client.
@@ -216,10 +224,17 @@ func Patch[In any, Out any](client *Client, url string, body In, opts ...Option)
 //	}
 //
 //	c := httpx.New()
-//	res := httpx.Delete[DeleteResponse](c, "https://api.example.com/users/1")
-//	_, _ = res.Body, res.Err // Body is DeleteResponse
-func Delete[T any](client *Client, url string, opts ...Option) Result[T] {
-	return do[T](client, nil, methodDelete, url, nil, opts)
+//	res, err := httpx.Delete[DeleteResponse](c, "https://httpbin.org/delete")
+//	if err != nil {
+//		return
+//	}
+//	httpx.Dump(res) // dumps DeleteResponse
+//	// #DeleteResponse {
+//	//   OK => true #bool
+//	// }
+func Delete[T any](client *Client, url string, opts ...Option) (T, error) {
+	body, _, err := do[T](client, nil, methodDelete, url, nil, opts)
+	return body, err
 }
 
 // Head issues a HEAD request using the provided client.
@@ -228,10 +243,13 @@ func Delete[T any](client *Client, url string, opts ...Option) Result[T] {
 // Example: HEAD request
 //
 //	c := httpx.New()
-//	res := httpx.Head[string](c, "https://example.com")
-//	_ = res
-func Head[T any](client *Client, url string, opts ...Option) Result[T] {
-	return do[T](client, nil, methodHead, url, nil, opts)
+//	_, err := httpx.Head[string](c, "https://httpbin.org/get")
+//	if err != nil {
+//		return
+//	}
+func Head[T any](client *Client, url string, opts ...Option) (T, error) {
+	body, _, err := do[T](client, nil, methodHead, url, nil, opts)
+	return body, err
 }
 
 // Options issues an OPTIONS request using the provided client.
@@ -240,10 +258,13 @@ func Head[T any](client *Client, url string, opts ...Option) Result[T] {
 // Example: OPTIONS request
 //
 //	c := httpx.New()
-//	res := httpx.Options[string](c, "https://example.com")
-//	_ = res
-func Options[T any](client *Client, url string, opts ...Option) Result[T] {
-	return do[T](client, nil, methodOptions, url, nil, opts)
+//	_, err := httpx.Options[string](c, "https://httpbin.org/get")
+//	if err != nil {
+//		return
+//	}
+func Options[T any](client *Client, url string, opts ...Option) (T, error) {
+	body, _, err := do[T](client, nil, methodOptions, url, nil, opts)
+	return body, err
 }
 
 // GetCtx issues a GET request using the provided client and context.
@@ -255,12 +276,19 @@ func Options[T any](client *Client, url string, opts ...Option) Result[T] {
 //		Name string `json:"name"`
 //	}
 //
-//	c := httpx.New()
 //	ctx := context.Background()
-//	res := httpx.GetCtx[User](c, ctx, "https://api.example.com/users/1")
-//	_, _ = res.Body, res.Err // Body is User
-func GetCtx[T any](client *Client, ctx context.Context, url string, opts ...Option) Result[T] {
-	return do[T](client, ctx, methodGet, url, nil, opts)
+//	c := httpx.New()
+//	res, err := httpx.GetCtx[User](c, ctx, "https://httpbin.org/get")
+//	if err != nil {
+//		return
+//	}
+//	httpx.Dump(res) // dumps User
+//	// #User {
+//	//   Name => "Ana" #string
+//	// }
+func GetCtx[T any](client *Client, ctx context.Context, url string, opts ...Option) (T, error) {
+	body, _, err := do[T](client, ctx, methodGet, url, nil, opts)
+	return body, err
 }
 
 // PostCtx issues a POST request using the provided client and context.
@@ -275,12 +303,19 @@ func GetCtx[T any](client *Client, ctx context.Context, url string, opts ...Opti
 //		Name string `json:"name"`
 //	}
 //
-//	c := httpx.New()
 //	ctx := context.Background()
-//	res := httpx.PostCtx[CreateUser, User](c, ctx, "https://api.example.com/users", CreateUser{Name: "Ana"})
-//	_, _ = res.Body, res.Err // Body is User
-func PostCtx[In any, Out any](client *Client, ctx context.Context, url string, body In, opts ...Option) Result[Out] {
-	return do[Out](client, ctx, methodPost, url, body, opts)
+//	c := httpx.New()
+//	res, err := httpx.PostCtx[CreateUser, User](c, ctx, "https://httpbin.org/post", CreateUser{Name: "Ana"})
+//	if err != nil {
+//		return
+//	}
+//	httpx.Dump(res) // dumps User
+//	// #User {
+//	//   Name => "Ana" #string
+//	// }
+func PostCtx[In any, Out any](client *Client, ctx context.Context, url string, body In, opts ...Option) (Out, error) {
+	out, _, err := do[Out](client, ctx, methodPost, url, body, opts)
+	return out, err
 }
 
 // PutCtx issues a PUT request using the provided client and context.
@@ -295,12 +330,19 @@ func PostCtx[In any, Out any](client *Client, ctx context.Context, url string, b
 //		Name string `json:"name"`
 //	}
 //
-//	c := httpx.New()
 //	ctx := context.Background()
-//	res := httpx.PutCtx[UpdateUser, User](c, ctx, "https://api.example.com/users/1", UpdateUser{Name: "Ana"})
-//	_, _ = res.Body, res.Err // Body is User
-func PutCtx[In any, Out any](client *Client, ctx context.Context, url string, body In, opts ...Option) Result[Out] {
-	return do[Out](client, ctx, methodPut, url, body, opts)
+//	c := httpx.New()
+//	res, err := httpx.PutCtx[UpdateUser, User](c, ctx, "https://httpbin.org/put", UpdateUser{Name: "Ana"})
+//	if err != nil {
+//		return
+//	}
+//	httpx.Dump(res) // dumps User
+//	// #User {
+//	//   Name => "Ana" #string
+//	// }
+func PutCtx[In any, Out any](client *Client, ctx context.Context, url string, body In, opts ...Option) (Out, error) {
+	out, _, err := do[Out](client, ctx, methodPut, url, body, opts)
+	return out, err
 }
 
 // PatchCtx issues a PATCH request using the provided client and context.
@@ -315,12 +357,19 @@ func PutCtx[In any, Out any](client *Client, ctx context.Context, url string, bo
 //		Name string `json:"name"`
 //	}
 //
-//	c := httpx.New()
 //	ctx := context.Background()
-//	res := httpx.PatchCtx[UpdateUser, User](c, ctx, "https://api.example.com/users/1", UpdateUser{Name: "Ana"})
-//	_, _ = res.Body, res.Err // Body is User
-func PatchCtx[In any, Out any](client *Client, ctx context.Context, url string, body In, opts ...Option) Result[Out] {
-	return do[Out](client, ctx, methodPatch, url, body, opts)
+//	c := httpx.New()
+//	res, err := httpx.PatchCtx[UpdateUser, User](c, ctx, "https://httpbin.org/patch", UpdateUser{Name: "Ana"})
+//	if err != nil {
+//		return
+//	}
+//	httpx.Dump(res) // dumps User
+//	// #User {
+//	//   Name => "Ana" #string
+//	// }
+func PatchCtx[In any, Out any](client *Client, ctx context.Context, url string, body In, opts ...Option) (Out, error) {
+	out, _, err := do[Out](client, ctx, methodPatch, url, body, opts)
+	return out, err
 }
 
 // DeleteCtx issues a DELETE request using the provided client and context.
@@ -332,12 +381,19 @@ func PatchCtx[In any, Out any](client *Client, ctx context.Context, url string, 
 //		OK bool `json:"ok"`
 //	}
 //
-//	c := httpx.New()
 //	ctx := context.Background()
-//	res := httpx.DeleteCtx[DeleteResponse](c, ctx, "https://api.example.com/users/1")
-//	_, _ = res.Body, res.Err // Body is DeleteResponse
-func DeleteCtx[T any](client *Client, ctx context.Context, url string, opts ...Option) Result[T] {
-	return do[T](client, ctx, methodDelete, url, nil, opts)
+//	c := httpx.New()
+//	res, err := httpx.DeleteCtx[DeleteResponse](c, ctx, "https://httpbin.org/delete")
+//	if err != nil {
+//		return
+//	}
+//	httpx.Dump(res) // dumps DeleteResponse
+//	// #DeleteResponse {
+//	//   OK => true #bool
+//	// }
+func DeleteCtx[T any](client *Client, ctx context.Context, url string, opts ...Option) (T, error) {
+	body, _, err := do[T](client, ctx, methodDelete, url, nil, opts)
+	return body, err
 }
 
 // HeadCtx issues a HEAD request using the provided client and context.
@@ -345,12 +401,15 @@ func DeleteCtx[T any](client *Client, ctx context.Context, url string, opts ...O
 //
 // Example: context-aware HEAD
 //
-//	c := httpx.New()
 //	ctx := context.Background()
-//	res := httpx.HeadCtx[string](c, ctx, "https://example.com")
-//	_ = res
-func HeadCtx[T any](client *Client, ctx context.Context, url string, opts ...Option) Result[T] {
-	return do[T](client, ctx, methodHead, url, nil, opts)
+//	c := httpx.New()
+//	_, err := httpx.HeadCtx[string](c, ctx, "https://httpbin.org/get")
+//	if err != nil {
+//		return
+//	}
+func HeadCtx[T any](client *Client, ctx context.Context, url string, opts ...Option) (T, error) {
+	body, _, err := do[T](client, ctx, methodHead, url, nil, opts)
+	return body, err
 }
 
 // OptionsCtx issues an OPTIONS request using the provided client and context.
@@ -358,20 +417,77 @@ func HeadCtx[T any](client *Client, ctx context.Context, url string, opts ...Opt
 //
 // Example: context-aware OPTIONS
 //
-//	c := httpx.New()
 //	ctx := context.Background()
-//	res := httpx.OptionsCtx[string](c, ctx, "https://example.com")
-//	_ = res
-func OptionsCtx[T any](client *Client, ctx context.Context, url string, opts ...Option) Result[T] {
-	return do[T](client, ctx, methodOptions, url, nil, opts)
+//	c := httpx.New()
+//	_, err := httpx.OptionsCtx[string](c, ctx, "https://httpbin.org/get")
+//	if err != nil {
+//		return
+//	}
+func OptionsCtx[T any](client *Client, ctx context.Context, url string, opts ...Option) (T, error) {
+	body, _, err := do[T](client, ctx, methodOptions, url, nil, opts)
+	return body, err
 }
 
-func do[T any](client *Client, ctx context.Context, method, url string, body any, opts []Option) Result[T] {
-	var res Result[T]
+// Do executes a pre-configured req request and returns the decoded body and response.
+// @group Requests
+//
+// Example: advanced request with response access
+//
+//	r := req.C().R().SetHeader("X-Trace", "1")
+//	r.SetURL("https://httpbin.org/get")
+//	r.Method = http.MethodGet
+//
+//	res, rawResp, err := httpx.Do[map[string]any](r)
+//	httpx.Dump(res) // dumps map[string]any
+//	// #map[string]interface {} {
+//	//   url => "https://httpbin.org/get" #string
+//	// }
+//	_ = rawResp
+//	_ = err
+func Do[T any](r *req.Request) (T, *req.Response, error) {
+	var out T
+
+	if r == nil {
+		return out, nil, fmt.Errorf("httpx: nil request")
+	}
+	rawKind := rawKindOf[T]()
+	if rawKind == rawNone {
+		r.SetSuccessResult(&out)
+	}
+
+	resp := r.Do()
+	if resp.Err != nil {
+		return out, resp, resp.Err
+	}
+	if resp.IsSuccessState() {
+		if rawKind != rawNone {
+			out = decodeRaw[T](resp)
+		}
+		if rawKind == rawNone && isEmptyBody(resp) {
+			ensureNonNil(&out)
+		}
+		return out, resp, nil
+	}
+
+	return out, resp, newHTTPError(resp)
+}
+
+func do[T any](client *Client, ctx context.Context, method, url string, body any, opts []Option) (T, *req.Response, error) {
+	var out T
 
 	if client == nil {
 		client = Default()
 	}
+	if len(opts) != 0 {
+		client = client.clone()
+		for _, opt := range opts {
+			if opt == nil {
+				continue
+			}
+			opt.applyClient(client)
+		}
+	}
+
 	req := client.req.R()
 	if ctx != nil {
 		req.SetContext(ctx)
@@ -388,34 +504,28 @@ func do[T any](client *Client, ctx context.Context, method, url string, body any
 
 	rawKind := rawKindOf[T]()
 	if rawKind == rawNone {
-		req.SetSuccessResult(&res.Body)
+		req.SetSuccessResult(&out)
 	}
 
 	resp, err := send(req, method, url)
 	if err != nil {
 		if resp != nil && resp.IsSuccessState() && rawKind == rawNone && isEmptyBody(resp) {
-			ensureNonNil(&res.Body)
-			res.Response = resp
-			return res
+			ensureNonNil(&out)
+			return out, resp, nil
 		}
-		res.Err = err
-		res.Response = resp
-		return res
+		return out, resp, err
 	}
 	if resp.IsSuccessState() {
 		if rawKind != rawNone {
-			res.Body = decodeRaw[T](resp)
+			out = decodeRaw[T](resp)
 		}
 		if rawKind == rawNone {
-			ensureNonNil(&res.Body)
+			ensureNonNil(&out)
 		}
-		res.Response = resp
-		return res
+		return out, resp, nil
 	}
 
-	res.Response = resp
-	res.Err = client.mapError(resp)
-	return res
+	return out, resp, client.mapError(resp)
 }
 
 func (c *Client) mapError(resp *req.Response) error {
@@ -454,9 +564,4 @@ func send(r *req.Request, method, url string) (*req.Response, error) {
 	default:
 		return nil, fmt.Errorf("httpx: unsupported method %s", method)
 	}
-}
-
-// dumpExample is a no-op wrapper to keep the godump import live for doc examples.
-func dumpExample(values ...interface{}) {
-	godump.Dump(values...)
 }

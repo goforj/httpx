@@ -17,6 +17,12 @@ func main() {
 	}
 
 	c := httpx.New()
-	res := httpx.Post[CreateUser, User](c, "https://api.example.com/users", CreateUser{Name: "Ana"})
-	_, _ = res.Body, res.Err // Body is User
+	res, err := httpx.Post[CreateUser, User](c, "https://httpbin.org/post", CreateUser{Name: "Ana"})
+	if err != nil {
+		return
+	}
+	httpx.Dump(res) // dumps User
+	// #User {
+	//   Name => "Ana" #string
+	// }
 }

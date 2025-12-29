@@ -14,7 +14,7 @@ It keeps req's power and escape hatches, while making the 90% use case feel effo
     <a href="https://goreportcard.com/report/github.com/goforj/httpx"><img src="https://goreportcard.com/badge/github.com/goforj/httpx" alt="Go Report Card"></a>
     <a href="https://codecov.io/gh/goforj/httpx" ><img src="https://codecov.io/gh/goforj/httpx/graph/badge.svg?token=R5O7LYAD4B"/></a>
 <!-- test-count:embed:start -->
-    <img src="https://img.shields.io/badge/tests-191-brightgreen" alt="Tests">
+    <img src="https://img.shields.io/badge/tests-197-brightgreen" alt="Tests">
 <!-- test-count:embed:end -->
 </p>
 
@@ -39,34 +39,53 @@ package main
 import (
 	"context"
 	"fmt"
+	"net/http"
 
 	"github.com/goforj/httpx"
+	"github.com/imroc/req/v3"
 )
-
-type User struct {
-	Name string `json:"name"`
-}
 
 func main() {
 	c := httpx.New()
 
 	// Simple typed GET.
-	res := httpx.Get[User](c, "https://api.example.com/users/1")
-	if res.Err != nil {
-		panic(res.Err)
+	res, err := httpx.Get[map[string]any](c, "https://httpbin.org/get")
+	if err != nil {
+		panic(err)
 	}
-	fmt.Println(res.Body.Name)
+	fmt.Println(res)
 
 	// Context-aware GET.
 	ctx := context.Background()
-	res = httpx.GetCtx[User](c, ctx, "https://api.example.com/users/2")
-	if res.Err != nil {
-		panic(res.Err)
+	res2, err := httpx.GetCtx[map[string]any](c, ctx, "https://httpbin.org/get")
+	if err != nil {
+		panic(err)
 	}
+	fmt.Println(res2)
 
 	// Access the underlying response when you need it.
-	_ = res.Response
+	r := req.C().R()
+	r.SetURL("https://httpbin.org/get")
+	r.Method = http.MethodGet
+	res3, resp, err := httpx.Do[map[string]any](r)
+	if err != nil {
+		panic(err)
+	}
+	fmt.Println(res3)
+	fmt.Println(resp.Status)
 }
+```
+
+## v2 Error Handling
+
+httpx v2 returns errors as the second return value from request helpers.
+
+```go
+res, err := httpx.Get[map[string]any](c, "https://httpbin.org/get")
+if err != nil {
+	return err
+}
+_ = res
 ```
 
 ## Browser Profiles
@@ -104,22 +123,25 @@ When you need deep control over headers, transports, or protocol behavior, `req`
 ## Options in Practice
 
 ```go
-c := httpx.New(httpx.BaseURL("https://api.example.com"))
+c := httpx.New(httpx.BaseURL("https://httpbin.org"))
 
-res := httpx.Get[User](
+res, err := httpx.Get[map[string]any](
 	c,
-	"/users/{id}",
+	"/anything/{id}",
 	httpx.Path("id", "42"),
 	httpx.Query("include", "teams", "active", "1"),
 	httpx.Header("Accept", "application/json"),
 )
+if err != nil {
+	panic(err)
+}
 _ = res
 ```
 
 ## Debugging and Tracing
 
 - `HTTP_TRACE=1` enables request/response dumps for all requests.
-- `httpx.Dump()` enables dump for a single request.
+- `httpx.EnableDump()` enables dump for a single request.
 - `httpx.DumpEachRequest()` enables per-request dumps on a client.
 
 ## Examples
@@ -143,12 +165,12 @@ They are compiled by `example_compile_test.go` to keep docs and code in sync.
 | **Browser Profiles** | [AsChrome](#aschrome) [AsFirefox](#asfirefox) [AsMobile](#asmobile) [AsSafari](#assafari) |
 | **Client** | [Default](#default) [New](#new) [Raw](#raw) [Req](#req) |
 | **Client Options** | [BaseURL](#baseurl) [CookieJar](#cookiejar) [ErrorMapper](#errormapper) [Middleware](#middleware) [Proxy](#proxy) [ProxyFunc](#proxyfunc) [Redirect](#redirect) [Transport](#transport) |
-| **Debugging** | [Dump](#dump) [DumpAll](#dumpall) [DumpEachRequest](#dumpeachrequest) [DumpEachRequestTo](#dumpeachrequestto) [DumpTo](#dumpto) [DumpToFile](#dumptofile) [Trace](#trace) [TraceAll](#traceall) |
+| **Debugging** | [Dump](#dump) [DumpAll](#dumpall) [DumpEachRequest](#dumpeachrequest) [DumpEachRequestTo](#dumpeachrequestto) [DumpTo](#dumpto) [DumpToFile](#dumptofile) [EnableDump](#enabledump) [Trace](#trace) [TraceAll](#traceall) |
 | **Download Options** | [OutputFile](#outputfile) |
 | **Errors** | [Error](#error) |
-| **Request Composition** | [Body](#body) [Form](#form) [Header](#header) [Headers](#headers) [JSON](#json) [Path](#path) [Paths](#paths) [Queries](#queries) [Query](#query) [UserAgent](#useragent) |
+| **Request Composition** | [Body](#body) [Form](#form) [Header](#header) [JSON](#json) [Path](#path) [Query](#query) [UserAgent](#useragent) |
 | **Request Control** | [Before](#before) [Timeout](#timeout) |
-| **Requests** | [Delete](#delete) [Get](#get) [Head](#head) [Options](#options) [Patch](#patch) [Post](#post) [Put](#put) |
+| **Requests** | [Delete](#delete) [Do](#do) [Get](#get) [Head](#head) [Options](#options) [Patch](#patch) [Post](#post) [Put](#put) |
 | **Requests (Context)** | [DeleteCtx](#deletectx) [GetCtx](#getctx) [HeadCtx](#headctx) [OptionsCtx](#optionsctx) [PatchCtx](#patchctx) [PostCtx](#postctx) [PutCtx](#putctx) |
 | **Retry** | [RetryBackoff](#retrybackoff) [RetryCondition](#retrycondition) [RetryCount](#retrycount) [RetryFixedInterval](#retryfixedinterval) [RetryHook](#retryhook) [RetryInterval](#retryinterval) |
 | **Retry (Client)** | [Retry](#retry) |
@@ -165,10 +187,24 @@ Auth sets the Authorization header using a scheme and token.
 ```go
 // Apply to all requests
 c := httpx.New(httpx.Auth("Token", "abc123"))
-httpx.Get[string](c, "https://example.com")
+res, err := httpx.Get[map[string]any](c, "https://httpbin.org/headers")
+_ = err
+httpx.Dump(res) // dumps map[string]any
+// #map[string]interface {} {
+//   headers => #map[string]interface {} {
+//     Authorization => "Token abc123" #string
+//   }
+// }
 
 // Apply to a single request
-httpx.Get[string](httpx.Default(), "https://example.com", httpx.Auth("Token", "abc123"))
+res, err = httpx.Get[map[string]any](c, "https://httpbin.org/headers", httpx.Auth("Token", "abc123"))
+_ = err
+httpx.Dump(res) // dumps map[string]any
+// #map[string]interface {} {
+//   headers => #map[string]interface {} {
+//     Authorization => "Token abc123" #string
+//   }
+// }
 ```
 
 ### <a id="basic"></a>Basic
@@ -178,10 +214,24 @@ Basic sets HTTP basic authentication headers.
 ```go
 // Apply to all requests
 c := httpx.New(httpx.Basic("user", "pass"))
-httpx.Get[string](c, "https://example.com")
+res, err := httpx.Get[map[string]any](c, "https://httpbin.org/headers")
+_ = err
+httpx.Dump(res) // dumps map[string]any
+// #map[string]interface {} {
+//   headers => #map[string]interface {} {
+//     Authorization => "Basic dXNlcjpwYXNz" #string
+//   }
+// }
 
 // Apply to a single request
-httpx.Get[string](httpx.Default(), "https://example.com", httpx.Basic("user", "pass"))
+res, err = httpx.Get[map[string]any](c, "https://httpbin.org/headers", httpx.Basic("user", "pass"))
+_ = err
+httpx.Dump(res) // dumps map[string]any
+// #map[string]interface {} {
+//   headers => #map[string]interface {} {
+//     Authorization => "Basic dXNlcjpwYXNz" #string
+//   }
+// }
 ```
 
 ### <a id="bearer"></a>Bearer
@@ -191,17 +241,31 @@ Bearer sets the Authorization header with a bearer token.
 ```go
 // Apply to all requests
 c := httpx.New(httpx.Bearer("token"))
-httpx.Get[string](c, "https://example.com")
+res, err := httpx.Get[map[string]any](c, "https://httpbin.org/headers")
+_ = err
+httpx.Dump(res) // dumps map[string]any
+// #map[string]interface {} {
+//   headers => #map[string]interface {} {
+//     Authorization => "Bearer token" #string
+//   }
+// }
 
 // Apply to a single request
-httpx.Get[string](httpx.Default(), "https://example.com", httpx.Bearer("token"))
+res, err = httpx.Get[map[string]any](c, "https://httpbin.org/headers", httpx.Bearer("token"))
+_ = err
+httpx.Dump(res) // dumps map[string]any
+// #map[string]interface {} {
+//   headers => #map[string]interface {} {
+//     Authorization => "Bearer token" #string
+//   }
+// }
 ```
 
 ## Browser Profiles
 
 ### <a id="aschrome"></a>AsChrome
 
-AsChrome applies the Chrome browser profile (headers, TLS, and HTTP/2 behavior).
+AsChrome applies the Chrome browser profile (headers including User-Agent, TLS, and HTTP/2 behavior).
 
 ```go
 c := httpx.New(httpx.AsChrome())
@@ -210,7 +274,7 @@ _ = c
 
 ### <a id="asfirefox"></a>AsFirefox
 
-AsFirefox applies the Firefox browser profile (headers, TLS, and HTTP/2 behavior).
+AsFirefox applies the Firefox browser profile (headers including User-Agent, TLS, and HTTP/2 behavior).
 
 ```go
 c := httpx.New(httpx.AsFirefox())
@@ -219,7 +283,7 @@ _ = c
 
 ### <a id="asmobile"></a>AsMobile
 
-AsMobile applies a mobile Chrome-like profile (headers, TLS, and HTTP/2 behavior).
+AsMobile applies a mobile Chrome-like profile (headers including User-Agent, TLS, and HTTP/2 behavior).
 
 ```go
 c := httpx.New(httpx.AsMobile())
@@ -228,7 +292,7 @@ _ = c
 
 ### <a id="assafari"></a>AsSafari
 
-AsSafari applies the Safari browser profile (headers, TLS, and HTTP/2 behavior).
+AsSafari applies the Safari browser profile (headers including User-Agent, TLS, and HTTP/2 behavior).
 
 ```go
 c := httpx.New(httpx.AsSafari())
@@ -241,11 +305,6 @@ _ = c
 
 Default returns the shared default client.
 
-```go
-c := httpx.Default()
-_ = c
-```
-
 ### <a id="new"></a>New
 
 New creates a client with opinionated defaults and optional overrides.
@@ -253,12 +312,10 @@ New creates a client with opinionated defaults and optional overrides.
 ```go
 var buf bytes.Buffer
 c := httpx.New(httpx.
-	BaseURL("https://api.example.com").
+	BaseURL("https://httpbin.org").
 	Timeout(5*time.Second).
 	Header("X-Trace", "1").
-	Headers(map[string]string{
-		"Accept": "application/json",
-	}).
+	Header("Accept", "application/json").
 	Transport(http.RoundTripper(http.DefaultTransport)).
 	Middleware(func(_ *req.Client, r *req.Request) error {
 		r.SetHeader("X-Middleware", "1")
@@ -274,7 +331,7 @@ c := httpx.New(httpx.
 		rc.SetCommonRetryCount(2)
 	}).
 	RetryCount(2).
-	RetryFixedInterval(200 * time.Millisecond).
+	RetryFixedInterval(200*time.Millisecond).
 	RetryBackoff(100*time.Millisecond, 2*time.Second).
 	RetryInterval(func(_ *req.Response, attempt int) time.Duration {
 		return time.Duration(attempt) * 100 * time.Millisecond
@@ -291,20 +348,9 @@ _ = c
 
 Raw returns the underlying req client for chaining raw requests.
 
-```go
-c := httpx.New()
-resp, err := c.Raw().R().Get("https://httpbin.org/uuid")
-_, _ = resp, err
-```
-
 ### <a id="req"></a>Req
 
 Req returns the underlying req client for advanced usage.
-
-```go
-c := httpx.New()
-c.Req().EnableDumpEachRequest()
-```
 
 ## Client Options
 
@@ -313,8 +359,13 @@ c.Req().EnableDumpEachRequest()
 BaseURL sets a base URL on the client.
 
 ```go
-c := httpx.New(httpx.BaseURL("https://api.example.com"))
-_ = c
+c := httpx.New(httpx.BaseURL("https://httpbin.org"))
+res, err := httpx.Get[map[string]any](c, "/get")
+_ = err
+httpx.Dump(res) // dumps map[string]any
+// #map[string]interface {} {
+//   url => "https://httpbin.org/get" #string
+// }
 ```
 
 ### <a id="cookiejar"></a>CookieJar
@@ -323,12 +374,19 @@ CookieJar sets the cookie jar for the client.
 
 ```go
 jar, _ := cookiejar.New(nil)
-u, _ := url.Parse("https://example.com")
+u, _ := url.Parse("https://httpbin.org")
 jar.SetCookies(u, []*http.Cookie{
 	{Name: "session", Value: "abc123"},
 })
 c := httpx.New(httpx.CookieJar(jar))
-_ = c
+res, err := httpx.Get[map[string]any](c, "https://httpbin.org/cookies")
+_ = err
+httpx.Dump(res) // dumps map[string]any
+// #map[string]interface {} {
+//   cookies => #map[string]interface {} {
+//     session => "abc123" #string
+//   }
+// }
 ```
 
 ### <a id="errormapper"></a>ErrorMapper
@@ -339,7 +397,10 @@ ErrorMapper sets a custom error mapper for non-2xx responses.
 c := httpx.New(httpx.ErrorMapper(func(resp *req.Response) error {
 	return fmt.Errorf("status %d", resp.StatusCode)
 }))
-_ = c
+res, err := httpx.Get[map[string]any](c, "https://httpbin.org/status/500")
+_ = err
+httpx.Dump(res) // dumps map[string]any
+// #map[string]interface {} {}
 ```
 
 ### <a id="middleware"></a>Middleware
@@ -351,7 +412,14 @@ c := httpx.New(httpx.Middleware(func(_ *req.Client, r *req.Request) error {
 	r.SetHeader("X-Trace", "1")
 	return nil
 }))
-_ = c
+res, err := httpx.Get[map[string]any](c, "https://httpbin.org/headers")
+_ = err
+httpx.Dump(res) // dumps map[string]any
+// #map[string]interface {} {
+//   headers => #map[string]interface {} {
+//     X-Trace => "1" #string
+//   }
+// }
 ```
 
 ### <a id="proxy"></a>Proxy
@@ -360,7 +428,12 @@ Proxy sets a proxy URL for the client.
 
 ```go
 c := httpx.New(httpx.Proxy("http://localhost:8080"))
-_ = c
+res, err := httpx.Get[map[string]any](c, "https://httpbin.org/get")
+_ = err
+httpx.Dump(res) // dumps map[string]any
+// #map[string]interface {} {
+//   url => "https://httpbin.org/get" #string
+// }
 ```
 
 ### <a id="proxyfunc"></a>ProxyFunc
@@ -369,7 +442,12 @@ ProxyFunc sets a proxy function for the client.
 
 ```go
 c := httpx.New(httpx.ProxyFunc(http.ProxyFromEnvironment))
-_ = c
+res, err := httpx.Get[map[string]any](c, "https://httpbin.org/get")
+_ = err
+httpx.Dump(res) // dumps map[string]any
+// #map[string]interface {} {
+//   url => "https://httpbin.org/get" #string
+// }
 ```
 
 ### <a id="redirect"></a>Redirect
@@ -378,7 +456,12 @@ Redirect sets the redirect policy for the client.
 
 ```go
 c := httpx.New(httpx.Redirect(req.NoRedirectPolicy()))
-_ = c
+res, err := httpx.Get[map[string]any](c, "https://httpbin.org/redirect/1")
+_ = err
+httpx.Dump(res) // dumps map[string]any
+// #map[string]interface {} {
+//   url => "https://httpbin.org/redirect/1" #string
+// }
 ```
 
 ### <a id="transport"></a>Transport
@@ -387,18 +470,24 @@ Transport wraps the underlying transport with a custom RoundTripper.
 
 ```go
 c := httpx.New(httpx.Transport(http.RoundTripper(http.DefaultTransport)))
-_ = c
+res, err := httpx.Get[map[string]any](c, "https://httpbin.org/get")
+_ = err
+httpx.Dump(res) // dumps map[string]any
+// #map[string]interface {} {
+//   url => "https://httpbin.org/get" #string
+// }
 ```
 
 ## Debugging
 
 ### <a id="dump"></a>Dump
 
-Dump enables req's request-level dump output.
+Dump prints values using the bundled godump formatter.
 
 ```go
-c := httpx.New()
-_ = httpx.Get[string](c, "https://example.com", httpx.Dump())
+res, err := httpx.Get[map[string]any](httpx.Default(), "https://httpbin.org/get")
+_ = err
+httpx.Dump(res)
 ```
 
 ### <a id="dumpall"></a>DumpAll
@@ -407,7 +496,12 @@ DumpAll enables req's client-level dump output for all requests.
 
 ```go
 c := httpx.New(httpx.DumpAll())
-_ = c
+res, err := httpx.Get[map[string]any](c, "https://httpbin.org/get")
+_ = err
+httpx.Dump(res) // dumps map[string]any
+// #map[string]interface {} {
+//   url => "https://httpbin.org/get" #string
+// }
 ```
 
 ### <a id="dumpeachrequest"></a>DumpEachRequest
@@ -416,7 +510,12 @@ DumpEachRequest enables request-level dumps for each request on the client.
 
 ```go
 c := httpx.New(httpx.DumpEachRequest())
-_ = c
+res, err := httpx.Get[map[string]any](c, "https://httpbin.org/get")
+_ = err
+httpx.Dump(res) // dumps map[string]any
+// #map[string]interface {} {
+//   url => "https://httpbin.org/get" #string
+// }
 ```
 
 ### <a id="dumpeachrequestto"></a>DumpEachRequestTo
@@ -426,7 +525,12 @@ DumpEachRequestTo enables request-level dumps for each request and writes them t
 ```go
 var buf bytes.Buffer
 c := httpx.New(httpx.DumpEachRequestTo(&buf))
-_ = httpx.Get[string](c, "https://example.com")
+res, err := httpx.Get[map[string]any](c, "https://httpbin.org/get")
+_ = err
+httpx.Dump(res) // dumps map[string]any
+// #map[string]interface {} {
+//   url => "https://httpbin.org/get" #string
+// }
 _ = buf.String()
 ```
 
@@ -437,7 +541,12 @@ DumpTo enables req's request-level dump output to a writer.
 ```go
 var buf bytes.Buffer
 c := httpx.New()
-_ = httpx.Get[string](c, "https://example.com", httpx.DumpTo(&buf))
+res, err := httpx.Get[map[string]any](c, "https://httpbin.org/get", httpx.DumpTo(&buf))
+_ = err
+httpx.Dump(res) // dumps map[string]any
+// #map[string]interface {} {
+//   url => "https://httpbin.org/get" #string
+// }
 ```
 
 ### <a id="dumptofile"></a>DumpToFile
@@ -446,7 +555,26 @@ DumpToFile enables req's request-level dump output to a file path.
 
 ```go
 c := httpx.New()
-_ = httpx.Get[string](c, "https://example.com", httpx.DumpToFile("httpx.dump"))
+res, err := httpx.Get[map[string]any](c, "https://httpbin.org/get", httpx.DumpToFile("httpx.dump"))
+_ = err
+httpx.Dump(res) // dumps map[string]any
+// #map[string]interface {} {
+//   url => "https://httpbin.org/get" #string
+// }
+```
+
+### <a id="enabledump"></a>EnableDump
+
+EnableDump enables req's request-level dump output.
+
+```go
+c := httpx.New()
+res, err := httpx.Get[map[string]any](c, "https://httpbin.org/get", httpx.EnableDump())
+_ = err
+httpx.Dump(res) // dumps map[string]any
+// #map[string]interface {} {
+//   url => "https://httpbin.org/get" #string
+// }
 ```
 
 ### <a id="trace"></a>Trace
@@ -455,7 +583,12 @@ Trace enables req's request-level trace output.
 
 ```go
 c := httpx.New()
-_ = httpx.Get[string](c, "https://example.com", httpx.Trace())
+res, err := httpx.Get[map[string]any](c, "https://httpbin.org/get", httpx.Trace())
+_ = err
+httpx.Dump(res) // dumps map[string]any
+// #map[string]interface {} {
+//   url => "https://httpbin.org/get" #string
+// }
 ```
 
 ### <a id="traceall"></a>TraceAll
@@ -464,7 +597,12 @@ TraceAll enables req's client-level trace output for all requests.
 
 ```go
 c := httpx.New(httpx.TraceAll())
-_ = c
+res, err := httpx.Get[map[string]any](c, "https://httpbin.org/get")
+_ = err
+httpx.Dump(res) // dumps map[string]any
+// #map[string]interface {} {
+//   url => "https://httpbin.org/get" #string
+// }
 ```
 
 ## Download Options
@@ -475,7 +613,10 @@ OutputFile streams the response body to a file path.
 
 ```go
 c := httpx.New()
-_ = httpx.Get[string](c, "https://example.com/file", httpx.OutputFile("/tmp/file.bin"))
+res, err := httpx.Get[map[string]any](c, "https://httpbin.org/bytes/1024", httpx.OutputFile("/tmp/file.bin"))
+_ = err
+httpx.Dump(res) // dumps map[string]any
+// #map[string]interface {} {}
 ```
 
 ## Errors
@@ -490,9 +631,11 @@ type User struct {
 }
 
 c := httpx.New()
-res := httpx.Get[User](c, "https://example.com/users/1")
+res, err := httpx.Get[map[string]any](c, "https://httpbin.org/status/404")
+httpx.Dump(res) // dumps map[string]any
+// #map[string]interface {} {}
 var httpErr *httpx.HTTPError
-if errors.As(res.Err, &httpErr) {
+if errors.As(err, &httpErr) {
 	_ = httpErr.StatusCode
 }
 ```
@@ -509,7 +652,14 @@ type Payload struct {
 }
 
 c := httpx.New()
-_ = httpx.Post[any, string](c, "https://example.com", nil, httpx.Body(Payload{Name: "Ana"}))
+res, err := httpx.Post[any, map[string]any](c, "https://httpbin.org/post", nil, httpx.Body(Payload{Name: "Ana"}))
+_ = err
+httpx.Dump(res) // dumps map[string]any
+// #map[string]interface {} {
+//   json => #map[string]interface {} {
+//     name => "Ana" #string
+//   }
+// }
 ```
 
 ### <a id="form"></a>Form
@@ -518,9 +668,16 @@ Form sets form data for the request.
 
 ```go
 c := httpx.New()
-_ = httpx.Post[any, string](c, "https://example.com", nil, httpx.Form(map[string]string{
-	"name": "Ana",
+res, err := httpx.Post[any, map[string]any](c, "https://httpbin.org/post", nil, httpx.Form(map[string]string{
+	"name": "alice",
 }))
+_ = err
+httpx.Dump(res) // dumps map[string]any
+// #map[string]interface {} {
+//   form => #map[string]interface {} {
+//     name => "alice" #string
+//   }
+// }
 ```
 
 ### <a id="header"></a>Header
@@ -530,29 +687,24 @@ Header sets a header on a request or client.
 ```go
 // Apply to all requests
 c := httpx.New(httpx.Header("X-Trace", "1"))
-httpx.Get[string](c, "https://example.com")
+res, err := httpx.Get[map[string]any](c, "https://httpbin.org/headers")
+_ = err
+httpx.Dump(res) // dumps map[string]any
+// #map[string]interface {} {
+//   headers => #map[string]interface {} {
+//     X-Trace => "1" #string
+//   }
+// }
 
 // Apply to a single request
-httpx.Get[string](httpx.Default(), "https://example.com", httpx.Header("X-Trace", "1"))
-```
-
-### <a id="headers"></a>Headers
-
-Headers sets multiple headers on a request or client.
-
-```go
-// Apply to all requests
-c := httpx.New(httpx.Headers(map[string]string{
-	"X-Trace": "1",
-	"Accept":  "application/json",
-}))
-httpx.Get[string](c, "https://example.com")
-
-// Apply to a single request
-httpx.Get[string](httpx.Default(), "https://example.com", httpx.Headers(map[string]string{
-	"X-Trace": "1",
-	"Accept":  "application/json",
-}))
+res, err = httpx.Get[map[string]any](c, "https://httpbin.org/headers", httpx.Header("X-Trace", "1"))
+_ = err
+httpx.Dump(res) // dumps map[string]any
+// #map[string]interface {} {
+//   headers => #map[string]interface {} {
+//     X-Trace => "1" #string
+//   }
+// }
 ```
 
 ### <a id="json"></a>JSON
@@ -565,7 +717,14 @@ type Payload struct {
 }
 
 c := httpx.New()
-_ = httpx.Post[any, string](c, "https://example.com", nil, httpx.JSON(Payload{Name: "Ana"}))
+res, err := httpx.Post[any, map[string]any](c, "https://httpbin.org/post", nil, httpx.JSON(Payload{Name: "Ana"}))
+_ = err
+httpx.Dump(res) // dumps map[string]any
+// #map[string]interface {} {
+//   json => #map[string]interface {} {
+//     name => "Ana" #string
+//   }
+// }
 ```
 
 ### <a id="path"></a>Path
@@ -578,35 +737,12 @@ type User struct {
 }
 
 c := httpx.New()
-_ = httpx.Get[User](c, "https://example.com/users/{id}", httpx.Path("id", 42))
-```
-
-### <a id="paths"></a>Paths
-
-Paths sets multiple path parameters.
-
-```go
-type User struct {
-	Name string `json:"name"`
-}
-
-c := httpx.New()
-_ = httpx.Get[User](c, "https://example.com/orgs/{org}/users/{id}", httpx.Paths(map[string]any{
-	"org": "goforj",
-	"id":  42,
-}))
-```
-
-### <a id="queries"></a>Queries
-
-Queries adds multiple query parameters.
-
-```go
-c := httpx.New()
-_ = httpx.Get[string](c, "https://example.com/search", httpx.Queries(map[string]string{
-	"q":  "go",
-	"ok": "1",
-}))
+res, err := httpx.Get[map[string]any](c, "https://httpbin.org/anything/{id}", httpx.Path("id", 42))
+_ = err
+httpx.Dump(res) // dumps map[string]any
+// #map[string]interface {} {
+//   url => "https://httpbin.org/anything/42" #string
+// }
 ```
 
 ### <a id="query"></a>Query
@@ -615,7 +751,14 @@ Query adds query parameters as key/value pairs.
 
 ```go
 c := httpx.New()
-_ = httpx.Get[string](c, "https://example.com/search", httpx.Query("q", "go", "ok", "1"))
+res, err := httpx.Get[map[string]any](c, "https://httpbin.org/get", httpx.Query("q", "search"))
+_ = err
+httpx.Dump(res) // dumps map[string]any
+// #map[string]interface {} {
+//   args => #map[string]interface {} {
+//     q => "search" #string
+//   }
+// }
 ```
 
 ### <a id="useragent"></a>UserAgent
@@ -625,10 +768,24 @@ UserAgent sets the User-Agent header on a request or client.
 ```go
 // Apply to all requests
 c := httpx.New(httpx.UserAgent("my-app/1.0"))
-httpx.Get[string](c, "https://example.com")
+res, err := httpx.Get[map[string]any](c, "https://httpbin.org/headers")
+_ = err
+httpx.Dump(res) // dumps map[string]any
+// #map[string]interface {} {
+//   headers => #map[string]interface {} {
+//     User-Agent => "my-app/1.0" #string
+//   }
+// }
 
 // Apply to a single request
-httpx.Get[string](httpx.Default(), "https://example.com", httpx.UserAgent("my-app/1.0"))
+res, err = httpx.Get[map[string]any](c, "https://httpbin.org/headers", httpx.UserAgent("my-app/1.0"))
+_ = err
+httpx.Dump(res) // dumps map[string]any
+// #map[string]interface {} {
+//   headers => #map[string]interface {} {
+//     User-Agent => "my-app/1.0" #string
+//   }
+// }
 ```
 
 ## Request Control
@@ -639,9 +796,14 @@ Before runs a hook before the request is sent.
 
 ```go
 c := httpx.New()
-_ = httpx.Get[string](c, "https://example.com", httpx.Before(func(r *req.Request) {
+res, err := httpx.Get[map[string]any](c, "https://httpbin.org/get", httpx.Before(func(r *req.Request) {
 	r.EnableDump()
 }))
+_ = err
+httpx.Dump(res) // dumps map[string]any
+// #map[string]interface {} {
+//   url => "https://httpbin.org/get" #string
+// }
 ```
 
 ### <a id="timeout"></a>Timeout
@@ -651,10 +813,20 @@ Timeout sets a per-request timeout using context cancellation.
 ```go
 // Apply to all requests
 c := httpx.New(httpx.Timeout(2 * time.Second))
-httpx.Get[string](c, "https://example.com")
+res, err := httpx.Get[map[string]any](c, "https://httpbin.org/delay/2")
+_ = err
+httpx.Dump(res) // dumps map[string]any
+// #map[string]interface {} {
+//   url => "https://httpbin.org/delay/2" #string
+// }
 
 // Apply to a single request
-httpx.Get[string](httpx.Default(), "https://example.com", httpx.Timeout(2*time.Second))
+res, err = httpx.Get[map[string]any](c, "https://httpbin.org/delay/2", httpx.Timeout(2*time.Second))
+_ = err
+httpx.Dump(res) // dumps map[string]any
+// #map[string]interface {} {
+//   url => "https://httpbin.org/delay/2" #string
+// }
 ```
 
 ## Requests
@@ -669,36 +841,60 @@ type DeleteResponse struct {
 }
 
 c := httpx.New()
-res := httpx.Delete[DeleteResponse](c, "https://api.example.com/users/1")
-_, _ = res.Body, res.Err // Body is DeleteResponse
+res, err := httpx.Delete[DeleteResponse](c, "https://httpbin.org/delete")
+if err != nil {
+	return
+}
+httpx.Dump(res) // dumps DeleteResponse
+// #DeleteResponse {
+//   OK => true #bool
+// }
+```
+
+### <a id="do"></a>Do
+
+Do executes a pre-configured req request and returns the decoded body and response.
+
+```go
+r := req.C().R().SetHeader("X-Trace", "1")
+r.SetURL("https://httpbin.org/get")
+r.Method = http.MethodGet
+
+res, rawResp, err := httpx.Do[map[string]any](r)
+httpx.Dump(res) // dumps map[string]any
+// #map[string]interface {} {
+//   url => "https://httpbin.org/get" #string
+// }
+_ = rawResp
+_ = err
 ```
 
 ### <a id="get"></a>Get
 
 Get issues a GET request using the provided client.
 
-_Example: fetch GitHub pull requests (typed)_
+_Example: basic GET_
 
 ```go
-type PullRequest struct {
-	Number int    `json:"number"`
-	Title  string `json:"title"`
-}
-
-c := httpx.New(httpx.Header("Accept", "application/vnd.github+json"))
-res := httpx.Get[[]PullRequest](c, "https://api.github.com/repos/goforj/httpx/pulls")
-if res.Err != nil {
+c := httpx.New()
+res, err := httpx.Get[map[string]any](c, "https://httpbin.org/get")
+if err != nil {
 	return
 }
-godump.Dump(res.Body)
+httpx.Dump(res)
+// #map[string]interface {} {
+//   url => "https://httpbin.org/get" #string
+// }
 ```
 
 _Example: bind to a string body_
 
 ```go
-c2 := httpx.New()
-res2 := httpx.Get[string](c2, "https://httpbin.org/uuid")
-_, _ = res2.Body, res2.Err // Body is string
+resText, err := httpx.Get[string](c, "https://httpbin.org/get")
+if err != nil {
+	return
+}
+_ = resText // resText is string
 ```
 
 ### <a id="head"></a>Head
@@ -707,8 +903,10 @@ Head issues a HEAD request using the provided client.
 
 ```go
 c := httpx.New()
-res := httpx.Head[string](c, "https://example.com")
-_ = res
+_, err := httpx.Head[string](c, "https://httpbin.org/get")
+if err != nil {
+	return
+}
 ```
 
 ### <a id="options"></a>Options
@@ -717,8 +915,10 @@ Options issues an OPTIONS request using the provided client.
 
 ```go
 c := httpx.New()
-res := httpx.Options[string](c, "https://example.com")
-_ = res
+_, err := httpx.Options[string](c, "https://httpbin.org/get")
+if err != nil {
+	return
+}
 ```
 
 ### <a id="patch"></a>Patch
@@ -734,8 +934,14 @@ type User struct {
 }
 
 c := httpx.New()
-res := httpx.Patch[UpdateUser, User](c, "https://api.example.com/users/1", UpdateUser{Name: "Ana"})
-_, _ = res.Body, res.Err // Body is User
+res, err := httpx.Patch[UpdateUser, User](c, "https://httpbin.org/patch", UpdateUser{Name: "Ana"})
+if err != nil {
+	return
+}
+httpx.Dump(res) // dumps User
+// #User {
+//   Name => "Ana" #string
+// }
 ```
 
 ### <a id="post"></a>Post
@@ -751,8 +957,14 @@ type User struct {
 }
 
 c := httpx.New()
-res := httpx.Post[CreateUser, User](c, "https://api.example.com/users", CreateUser{Name: "Ana"})
-_, _ = res.Body, res.Err // Body is User
+res, err := httpx.Post[CreateUser, User](c, "https://httpbin.org/post", CreateUser{Name: "Ana"})
+if err != nil {
+	return
+}
+httpx.Dump(res) // dumps User
+// #User {
+//   Name => "Ana" #string
+// }
 ```
 
 ### <a id="put"></a>Put
@@ -768,8 +980,14 @@ type User struct {
 }
 
 c := httpx.New()
-res := httpx.Put[UpdateUser, User](c, "https://api.example.com/users/1", UpdateUser{Name: "Ana"})
-_, _ = res.Body, res.Err // Body is User
+res, err := httpx.Put[UpdateUser, User](c, "https://httpbin.org/put", UpdateUser{Name: "Ana"})
+if err != nil {
+	return
+}
+httpx.Dump(res) // dumps User
+// #User {
+//   Name => "Ana" #string
+// }
 ```
 
 ## Requests (Context)
@@ -783,10 +1001,16 @@ type DeleteResponse struct {
 	OK bool `json:"ok"`
 }
 
-c := httpx.New()
 ctx := context.Background()
-res := httpx.DeleteCtx[DeleteResponse](c, ctx, "https://api.example.com/users/1")
-_, _ = res.Body, res.Err // Body is DeleteResponse
+c := httpx.New()
+res, err := httpx.DeleteCtx[DeleteResponse](c, ctx, "https://httpbin.org/delete")
+if err != nil {
+	return
+}
+httpx.Dump(res) // dumps DeleteResponse
+// #DeleteResponse {
+//   OK => true #bool
+// }
 ```
 
 ### <a id="getctx"></a>GetCtx
@@ -798,10 +1022,16 @@ type User struct {
 	Name string `json:"name"`
 }
 
-c := httpx.New()
 ctx := context.Background()
-res := httpx.GetCtx[User](c, ctx, "https://api.example.com/users/1")
-_, _ = res.Body, res.Err // Body is User
+c := httpx.New()
+res, err := httpx.GetCtx[User](c, ctx, "https://httpbin.org/get")
+if err != nil {
+	return
+}
+httpx.Dump(res) // dumps User
+// #User {
+//   Name => "Ana" #string
+// }
 ```
 
 ### <a id="headctx"></a>HeadCtx
@@ -809,10 +1039,12 @@ _, _ = res.Body, res.Err // Body is User
 HeadCtx issues a HEAD request using the provided client and context.
 
 ```go
-c := httpx.New()
 ctx := context.Background()
-res := httpx.HeadCtx[string](c, ctx, "https://example.com")
-_ = res
+c := httpx.New()
+_, err := httpx.HeadCtx[string](c, ctx, "https://httpbin.org/get")
+if err != nil {
+	return
+}
 ```
 
 ### <a id="optionsctx"></a>OptionsCtx
@@ -820,10 +1052,12 @@ _ = res
 OptionsCtx issues an OPTIONS request using the provided client and context.
 
 ```go
-c := httpx.New()
 ctx := context.Background()
-res := httpx.OptionsCtx[string](c, ctx, "https://example.com")
-_ = res
+c := httpx.New()
+_, err := httpx.OptionsCtx[string](c, ctx, "https://httpbin.org/get")
+if err != nil {
+	return
+}
 ```
 
 ### <a id="patchctx"></a>PatchCtx
@@ -838,10 +1072,16 @@ type User struct {
 	Name string `json:"name"`
 }
 
-c := httpx.New()
 ctx := context.Background()
-res := httpx.PatchCtx[UpdateUser, User](c, ctx, "https://api.example.com/users/1", UpdateUser{Name: "Ana"})
-_, _ = res.Body, res.Err // Body is User
+c := httpx.New()
+res, err := httpx.PatchCtx[UpdateUser, User](c, ctx, "https://httpbin.org/patch", UpdateUser{Name: "Ana"})
+if err != nil {
+	return
+}
+httpx.Dump(res) // dumps User
+// #User {
+//   Name => "Ana" #string
+// }
 ```
 
 ### <a id="postctx"></a>PostCtx
@@ -856,10 +1096,16 @@ type User struct {
 	Name string `json:"name"`
 }
 
-c := httpx.New()
 ctx := context.Background()
-res := httpx.PostCtx[CreateUser, User](c, ctx, "https://api.example.com/users", CreateUser{Name: "Ana"})
-_, _ = res.Body, res.Err // Body is User
+c := httpx.New()
+res, err := httpx.PostCtx[CreateUser, User](c, ctx, "https://httpbin.org/post", CreateUser{Name: "Ana"})
+if err != nil {
+	return
+}
+httpx.Dump(res) // dumps User
+// #User {
+//   Name => "Ana" #string
+// }
 ```
 
 ### <a id="putctx"></a>PutCtx
@@ -874,10 +1120,16 @@ type User struct {
 	Name string `json:"name"`
 }
 
-c := httpx.New()
 ctx := context.Background()
-res := httpx.PutCtx[UpdateUser, User](c, ctx, "https://api.example.com/users/1", UpdateUser{Name: "Ana"})
-_, _ = res.Body, res.Err // Body is User
+c := httpx.New()
+res, err := httpx.PutCtx[UpdateUser, User](c, ctx, "https://httpbin.org/put", UpdateUser{Name: "Ana"})
+if err != nil {
+	return
+}
+httpx.Dump(res) // dumps User
+// #User {
+//   Name => "Ana" #string
+// }
 ```
 
 ## Retry
@@ -889,10 +1141,20 @@ RetryBackoff sets a capped exponential backoff retry interval for a request.
 ```go
 // Apply to all requests
 c := httpx.New(httpx.RetryBackoff(100*time.Millisecond, 2*time.Second))
-httpx.Get[string](c, "https://example.com")
+res, err := httpx.Get[map[string]any](c, "https://httpbin.org/get")
+_ = err
+httpx.Dump(res) // dumps map[string]any
+// #map[string]interface {} {
+//   url => "https://httpbin.org/get" #string
+// }
 
 // Apply to a single request
-httpx.Get[string](httpx.Default(), "https://example.com", httpx.RetryBackoff(100*time.Millisecond, 2*time.Second))
+res, err = httpx.Get[map[string]any](c, "https://httpbin.org/get", httpx.RetryBackoff(100*time.Millisecond, 2*time.Second))
+_ = err
+httpx.Dump(res) // dumps map[string]any
+// #map[string]interface {} {
+//   url => "https://httpbin.org/get" #string
+// }
 ```
 
 ### <a id="retrycondition"></a>RetryCondition
@@ -904,12 +1166,18 @@ RetryCondition sets the retry condition for a request.
 c := httpx.New(httpx.RetryCondition(func(resp *req.Response, _ error) bool {
 	return resp != nil && resp.StatusCode == 503
 }))
-httpx.Get[string](c, "https://example.com")
+res, err := httpx.Get[map[string]any](c, "https://httpbin.org/status/503")
+_ = err
+httpx.Dump(res) // dumps map[string]any
+// #map[string]interface {} {}
 
 // Apply to a single request
-httpx.Get[string](httpx.Default(), "https://example.com", httpx.RetryCondition(func(resp *req.Response, _ error) bool {
+res, err = httpx.Get[map[string]any](c, "https://httpbin.org/status/503", httpx.RetryCondition(func(resp *req.Response, _ error) bool {
 	return resp != nil && resp.StatusCode == 503
 }))
+_ = err
+httpx.Dump(res) // dumps map[string]any
+// #map[string]interface {} {}
 ```
 
 ### <a id="retrycount"></a>RetryCount
@@ -919,10 +1187,20 @@ RetryCount enables retry for a request and sets the maximum retry count.
 ```go
 // Apply to all requests
 c := httpx.New(httpx.RetryCount(2))
-httpx.Get[string](c, "https://example.com")
+res, err := httpx.Get[map[string]any](c, "https://httpbin.org/get")
+_ = err
+httpx.Dump(res) // dumps map[string]any
+// #map[string]interface {} {
+//   url => "https://httpbin.org/get" #string
+// }
 
 // Apply to a single request
-httpx.Get[string](httpx.Default(), "https://example.com", httpx.RetryCount(2))
+res, err = httpx.Get[map[string]any](c, "https://httpbin.org/get", httpx.RetryCount(2))
+_ = err
+httpx.Dump(res) // dumps map[string]any
+// #map[string]interface {} {
+//   url => "https://httpbin.org/get" #string
+// }
 ```
 
 ### <a id="retryfixedinterval"></a>RetryFixedInterval
@@ -932,10 +1210,20 @@ RetryFixedInterval sets a fixed retry interval for a request.
 ```go
 // Apply to all requests
 c := httpx.New(httpx.RetryFixedInterval(200 * time.Millisecond))
-httpx.Get[string](c, "https://example.com")
+res, err := httpx.Get[map[string]any](c, "https://httpbin.org/get")
+_ = err
+httpx.Dump(res) // dumps map[string]any
+// #map[string]interface {} {
+//   url => "https://httpbin.org/get" #string
+// }
 
 // Apply to a single request
-httpx.Get[string](httpx.Default(), "https://example.com", httpx.RetryFixedInterval(200*time.Millisecond))
+res, err = httpx.Get[map[string]any](c, "https://httpbin.org/get", httpx.RetryFixedInterval(200*time.Millisecond))
+_ = err
+httpx.Dump(res) // dumps map[string]any
+// #map[string]interface {} {
+//   url => "https://httpbin.org/get" #string
+// }
 ```
 
 ### <a id="retryhook"></a>RetryHook
@@ -945,10 +1233,20 @@ RetryHook registers a retry hook for a request.
 ```go
 // Apply to all requests
 c := httpx.New(httpx.RetryHook(func(_ *req.Response, _ error) {}))
-httpx.Get[string](c, "https://example.com")
+res, err := httpx.Get[map[string]any](c, "https://httpbin.org/get")
+_ = err
+httpx.Dump(res) // dumps map[string]any
+// #map[string]interface {} {
+//   url => "https://httpbin.org/get" #string
+// }
 
 // Apply to a single request
-httpx.Get[string](httpx.Default(), "https://example.com", httpx.RetryHook(func(_ *req.Response, _ error) {}))
+res, err = httpx.Get[map[string]any](c, "https://httpbin.org/get", httpx.RetryHook(func(_ *req.Response, _ error) {}))
+_ = err
+httpx.Dump(res) // dumps map[string]any
+// #map[string]interface {} {
+//   url => "https://httpbin.org/get" #string
+// }
 ```
 
 ### <a id="retryinterval"></a>RetryInterval
@@ -960,12 +1258,22 @@ RetryInterval sets a custom retry interval function for a request.
 c := httpx.New(httpx.RetryInterval(func(_ *req.Response, attempt int) time.Duration {
 	return time.Duration(attempt) * 100 * time.Millisecond
 }))
-httpx.Get[string](c, "https://example.com")
+res, err := httpx.Get[map[string]any](c, "https://httpbin.org/get")
+_ = err
+httpx.Dump(res) // dumps map[string]any
+// #map[string]interface {} {
+//   url => "https://httpbin.org/get" #string
+// }
 
 // Apply to a single request
-httpx.Get[string](httpx.Default(), "https://example.com", httpx.RetryInterval(func(_ *req.Response, attempt int) time.Duration {
+res, err = httpx.Get[map[string]any](c, "https://httpbin.org/get", httpx.RetryInterval(func(_ *req.Response, attempt int) time.Duration {
 	return time.Duration(attempt) * 100 * time.Millisecond
 }))
+_ = err
+httpx.Dump(res) // dumps map[string]any
+// #map[string]interface {} {
+//   url => "https://httpbin.org/get" #string
+// }
 ```
 
 ## Retry (Client)
@@ -989,7 +1297,14 @@ File attaches a file from disk as multipart form data.
 
 ```go
 c := httpx.New()
-_ = httpx.Post[any, string](c, "https://example.com/upload", nil, httpx.File("file", "/tmp/report.txt"))
+res, err := httpx.Post[any, map[string]any](c, "https://httpbin.org/post", nil, httpx.File("file", "/tmp/report.txt"))
+_ = err
+httpx.Dump(res) // dumps map[string]any
+// #map[string]interface {} {
+//   files => #map[string]interface {} {
+//     file => "<file contents>" #string
+//   }
+// }
 ```
 
 ### <a id="filebytes"></a>FileBytes
@@ -998,7 +1313,14 @@ FileBytes attaches a file from bytes as multipart form data.
 
 ```go
 c := httpx.New()
-_ = httpx.Post[any, string](c, "https://example.com/upload", nil, httpx.FileBytes("file", "report.txt", []byte("hello")))
+res, err := httpx.Post[any, map[string]any](c, "https://httpbin.org/post", nil, httpx.FileBytes("file", "report.txt", []byte("hello")))
+_ = err
+httpx.Dump(res) // dumps map[string]any
+// #map[string]interface {} {
+//   files => #map[string]interface {} {
+//     file => "hello" #string
+//   }
+// }
 ```
 
 ### <a id="filereader"></a>FileReader
@@ -1007,7 +1329,14 @@ FileReader attaches a file from a reader as multipart form data.
 
 ```go
 c := httpx.New()
-_ = httpx.Post[any, string](c, "https://example.com/upload", nil, httpx.FileReader("file", "report.txt", strings.NewReader("hello")))
+res, err := httpx.Post[any, map[string]any](c, "https://httpbin.org/post", nil, httpx.FileReader("file", "report.txt", strings.NewReader("hello")))
+_ = err
+httpx.Dump(res) // dumps map[string]any
+// #map[string]interface {} {
+//   files => #map[string]interface {} {
+//     file => "hello" #string
+//   }
+// }
 ```
 
 ### <a id="files"></a>Files
@@ -1016,10 +1345,18 @@ Files attaches multiple files from disk as multipart form data.
 
 ```go
 c := httpx.New()
-_ = httpx.Post[any, string](c, "https://example.com/upload", nil, httpx.Files(map[string]string{
+res, err := httpx.Post[any, map[string]any](c, "https://httpbin.org/post", nil, httpx.Files(map[string]string{
 	"fileA": "/tmp/a.txt",
 	"fileB": "/tmp/b.txt",
 }))
+_ = err
+httpx.Dump(res) // dumps map[string]any
+// #map[string]interface {} {
+//   files => #map[string]interface {} {
+//     fileA => "<file contents>" #string
+//     fileB => "<file contents>" #string
+//   }
+// }
 ```
 
 ### <a id="uploadcallback"></a>UploadCallback
@@ -1028,7 +1365,7 @@ UploadCallback registers a callback for upload progress.
 
 ```go
 c := httpx.New()
-_ = httpx.Post[any, string](c, "https://example.com/upload", nil,
+res, err := httpx.Post[any, map[string]any](c, "https://httpbin.org/post", nil,
 	httpx.File("file", "/tmp/report.bin"),
 	httpx.UploadCallback(func(info req.UploadInfo) {
 		percent := float64(info.UploadedSize) / float64(info.FileSize) * 100
@@ -1038,6 +1375,13 @@ _ = httpx.Post[any, string](c, "https://example.com/upload", nil,
 		}
 	}),
 )
+_ = err
+httpx.Dump(res) // dumps map[string]any
+// #map[string]interface {} {
+//   files => #map[string]interface {} {
+//     file => "<file contents>" #string
+//   }
+// }
 ```
 
 ### <a id="uploadcallbackwithinterval"></a>UploadCallbackWithInterval
@@ -1046,7 +1390,7 @@ UploadCallbackWithInterval registers a callback for upload progress with a minim
 
 ```go
 c := httpx.New()
-_ = httpx.Post[any, string](c, "https://example.com/upload", nil,
+res, err := httpx.Post[any, map[string]any](c, "https://httpbin.org/post", nil,
 	httpx.File("file", "/tmp/report.bin"),
 	httpx.UploadCallbackWithInterval(func(info req.UploadInfo) {
 		percent := float64(info.UploadedSize) / float64(info.FileSize) * 100
@@ -1056,6 +1400,13 @@ _ = httpx.Post[any, string](c, "https://example.com/upload", nil,
 		}
 	}, 200*time.Millisecond),
 )
+_ = err
+httpx.Dump(res) // dumps map[string]any
+// #map[string]interface {} {
+//   files => #map[string]interface {} {
+//     file => "<file contents>" #string
+//   }
+// }
 ```
 
 ### <a id="uploadprogress"></a>UploadProgress
@@ -1064,10 +1415,17 @@ UploadProgress enables a default progress spinner and bar for uploads.
 
 ```go
 c := httpx.New()
-_ = httpx.Post[any, string](c, "https://example.com/upload", nil,
+res, err := httpx.Post[any, map[string]any](c, "https://httpbin.org/post", nil,
 	httpx.File("file", "/tmp/report.bin"),
 	httpx.UploadProgress(),
 )
+_ = err
+httpx.Dump(res) // dumps map[string]any
+// #map[string]interface {} {
+//   files => #map[string]interface {} {
+//     file => "<file contents>" #string
+//   }
+// }
 ```
 
 ## Advanced

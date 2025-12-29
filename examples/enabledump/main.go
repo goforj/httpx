@@ -6,11 +6,11 @@ package main
 import "github.com/goforj/httpx"
 
 func main() {
-	// BaseURL sets a base URL on the client.
+	// EnableDump enables req's request-level dump output.
 
-	// Example: client base URL
-	c := httpx.New(httpx.BaseURL("https://httpbin.org"))
-	res, err := httpx.Get[map[string]any](c, "/get")
+	// Example: dump a single request
+	c := httpx.New()
+	res, err := httpx.Get[map[string]any](c, "https://httpbin.org/get", httpx.EnableDump())
 	_ = err
 	httpx.Dump(res) // dumps map[string]any
 	// #map[string]interface {} {

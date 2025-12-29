@@ -10,8 +10,16 @@ func main() {
 
 	// Example: upload multiple files
 	c := httpx.New()
-	_ = httpx.Post[any, string](c, "https://example.com/upload", nil, httpx.Files(map[string]string{
+	res, err := httpx.Post[any, map[string]any](c, "https://httpbin.org/post", nil, httpx.Files(map[string]string{
 		"fileA": "/tmp/a.txt",
 		"fileB": "/tmp/b.txt",
 	}))
+	_ = err
+	httpx.Dump(res) // dumps map[string]any
+	// #map[string]interface {} {
+	//   files => #map[string]interface {} {
+	//     fileA => "<file contents>" #string
+	//     fileB => "<file contents>" #string
+	//   }
+	// }
 }

@@ -2,13 +2,6 @@ package httpx
 
 import "github.com/imroc/req/v3"
 
-// Result contains the decoded response body and response metadata.
-type Result[T any] struct {
-	Body     T
-	Response *req.Response
-	Err      error
-}
-
 // Option applies configuration to a client or request.
 type Option interface {
 	applyClient(*Client)

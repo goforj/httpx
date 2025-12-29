@@ -14,5 +14,10 @@ func main() {
 	// Example: dump to a buffer
 	var buf bytes.Buffer
 	c := httpx.New()
-	_ = httpx.Get[string](c, "https://example.com", httpx.DumpTo(&buf))
+	res, err := httpx.Get[map[string]any](c, "https://httpbin.org/get", httpx.DumpTo(&buf))
+	_ = err
+	httpx.Dump(res) // dumps map[string]any
+	// #map[string]interface {} {
+	//   url => "https://httpbin.org/get" #string
+	// }
 }

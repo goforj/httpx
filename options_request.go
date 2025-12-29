@@ -17,10 +17,24 @@ import (
 //
 //	// Apply to all requests
 //	c := httpx.New(httpx.Header("X-Trace", "1"))
-//	httpx.Get[string](c, "https://example.com")
+//	res, err := httpx.Get[map[string]any](c, "https://httpbin.org/headers")
+//	_ = err
+//	httpx.Dump(res) // dumps map[string]any
+//	// #map[string]interface {} {
+//	//   headers => #map[string]interface {} {
+//	//     X-Trace => "1" #string
+//	//   }
+//	// }
 //
 //	// Apply to a single request
-//	httpx.Get[string](httpx.Default(), "https://example.com", httpx.Header("X-Trace", "1"))
+//	res, err = httpx.Get[map[string]any](c, "https://httpbin.org/headers", httpx.Header("X-Trace", "1"))
+//	_ = err
+//	httpx.Dump(res) // dumps map[string]any
+//	// #map[string]interface {} {
+//	//   headers => #map[string]interface {} {
+//	//     X-Trace => "1" #string
+//	//   }
+//	// }
 func Header(key, value string) OptionBuilder {
 	return OptionBuilder{}.Header(key, value)
 }
@@ -36,30 +50,8 @@ func (b OptionBuilder) Header(key, value string) OptionBuilder {
 	))
 }
 
-// Headers sets multiple headers on a request or client.
-// @group Request Composition
-//
-// Applies to both client defaults and request-time headers.
-// Example: apply headers
-//
-//	// Apply to all requests
-//	c := httpx.New(httpx.Headers(map[string]string{
-//		"X-Trace": "1",
-//		"Accept":  "application/json",
-//	}))
-//	httpx.Get[string](c, "https://example.com")
-//
-//	// Apply to a single request
-//	httpx.Get[string](httpx.Default(), "https://example.com", httpx.Headers(map[string]string{
-//		"X-Trace": "1",
-//		"Accept":  "application/json",
-//	}))
-func Headers(values map[string]string) OptionBuilder {
-	return OptionBuilder{}.Headers(values)
-}
-
-func (b OptionBuilder) Headers(values map[string]string) OptionBuilder {
-	return b.add(bothOption(
+func headers(values map[string]string) OptionBuilder {
+	return OptionBuilder{}.add(bothOption(
 		func(c *Client) {
 			c.req.SetCommonHeaders(values)
 		},
@@ -77,10 +69,24 @@ func (b OptionBuilder) Headers(values map[string]string) OptionBuilder {
 //
 //	// Apply to all requests
 //	c := httpx.New(httpx.UserAgent("my-app/1.0"))
-//	httpx.Get[string](c, "https://example.com")
+//	res, err := httpx.Get[map[string]any](c, "https://httpbin.org/headers")
+//	_ = err
+//	httpx.Dump(res) // dumps map[string]any
+//	// #map[string]interface {} {
+//	//   headers => #map[string]interface {} {
+//	//     User-Agent => "my-app/1.0" #string
+//	//   }
+//	// }
 //
 //	// Apply to a single request
-//	httpx.Get[string](httpx.Default(), "https://example.com", httpx.UserAgent("my-app/1.0"))
+//	res, err = httpx.Get[map[string]any](c, "https://httpbin.org/headers", httpx.UserAgent("my-app/1.0"))
+//	_ = err
+//	httpx.Dump(res) // dumps map[string]any
+//	// #map[string]interface {} {
+//	//   headers => #map[string]interface {} {
+//	//     User-Agent => "my-app/1.0" #string
+//	//   }
+//	// }
 func UserAgent(value string) OptionBuilder {
 	return OptionBuilder{}.UserAgent(value)
 }
@@ -103,7 +109,14 @@ func (b OptionBuilder) UserAgent(value string) OptionBuilder {
 // Example: add query params
 //
 //	c := httpx.New()
-//	_ = httpx.Get[string](c, "https://example.com/search", httpx.Query("q", "go", "ok", "1"))
+//	res, err := httpx.Get[map[string]any](c, "https://httpbin.org/get", httpx.Query("q", "search"))
+//	_ = err
+//	httpx.Dump(res) // dumps map[string]any
+//	// #map[string]interface {} {
+//	//   args => #map[string]interface {} {
+//	//     q => "search" #string
+//	//   }
+//	// }
 func Query(kv ...string) OptionBuilder {
 	return OptionBuilder{}.Query(kv...)
 }
@@ -119,27 +132,6 @@ func (b OptionBuilder) Query(kv ...string) OptionBuilder {
 	}))
 }
 
-// Queries adds multiple query parameters.
-// @group Request Composition
-//
-// Applies to individual requests only.
-// Example: add query params
-//
-//	c := httpx.New()
-//	_ = httpx.Get[string](c, "https://example.com/search", httpx.Queries(map[string]string{
-//		"q":  "go",
-//		"ok": "1",
-//	}))
-func Queries(values map[string]string) OptionBuilder {
-	return OptionBuilder{}.Queries(values)
-}
-
-func (b OptionBuilder) Queries(values map[string]string) OptionBuilder {
-	return b.add(requestOnly(func(r *req.Request) {
-		r.SetQueryParams(values)
-	}))
-}
-
 // Path sets a path parameter by name.
 // @group Request Composition
 //
@@ -151,7 +143,12 @@ func (b OptionBuilder) Queries(values map[string]string) OptionBuilder {
 //	}
 //
 //	c := httpx.New()
-//	_ = httpx.Get[User](c, "https://example.com/users/{id}", httpx.Path("id", 42))
+//	res, err := httpx.Get[map[string]any](c, "https://httpbin.org/anything/{id}", httpx.Path("id", 42))
+//	_ = err
+//	httpx.Dump(res) // dumps map[string]any
+//	// #map[string]interface {} {
+//	//   url => "https://httpbin.org/anything/42" #string
+//	// }
 func Path(key string, value any) OptionBuilder {
 	return OptionBuilder{}.Path(key, value)
 }
@@ -159,35 +156,6 @@ func Path(key string, value any) OptionBuilder {
 func (b OptionBuilder) Path(key string, value any) OptionBuilder {
 	return b.add(requestOnly(func(r *req.Request) {
 		r.SetPathParam(key, fmt.Sprint(value))
-	}))
-}
-
-// Paths sets multiple path parameters.
-// @group Request Composition
-//
-// Applies to individual requests only.
-// Example: multiple path parameters
-//
-//	type User struct {
-//		Name string `json:"name"`
-//	}
-//
-//	c := httpx.New()
-//	_ = httpx.Get[User](c, "https://example.com/orgs/{org}/users/{id}", httpx.Paths(map[string]any{
-//		"org": "goforj",
-//		"id":  42,
-//	}))
-func Paths(values map[string]any) OptionBuilder {
-	return OptionBuilder{}.Paths(values)
-}
-
-func (b OptionBuilder) Paths(values map[string]any) OptionBuilder {
-	return b.add(requestOnly(func(r *req.Request) {
-		params := make(map[string]string, len(values))
-		for key, value := range values {
-			params[key] = fmt.Sprint(value)
-		}
-		r.SetPathParams(params)
 	}))
 }
 
@@ -202,7 +170,14 @@ func (b OptionBuilder) Paths(values map[string]any) OptionBuilder {
 //	}
 //
 //	c := httpx.New()
-//	_ = httpx.Post[any, string](c, "https://example.com", nil, httpx.Body(Payload{Name: "Ana"}))
+//	res, err := httpx.Post[any, map[string]any](c, "https://httpbin.org/post", nil, httpx.Body(Payload{Name: "Ana"}))
+//	_ = err
+//	httpx.Dump(res) // dumps map[string]any
+//	// #map[string]interface {} {
+//	//   json => #map[string]interface {} {
+//	//     name => "Ana" #string
+//	//   }
+//	// }
 func Body(value any) OptionBuilder {
 	return OptionBuilder{}.Body(value)
 }
@@ -224,7 +199,14 @@ func (b OptionBuilder) Body(value any) OptionBuilder {
 //	}
 //
 //	c := httpx.New()
-//	_ = httpx.Post[any, string](c, "https://example.com", nil, httpx.JSON(Payload{Name: "Ana"}))
+//	res, err := httpx.Post[any, map[string]any](c, "https://httpbin.org/post", nil, httpx.JSON(Payload{Name: "Ana"}))
+//	_ = err
+//	httpx.Dump(res) // dumps map[string]any
+//	// #map[string]interface {} {
+//	//   json => #map[string]interface {} {
+//	//     name => "Ana" #string
+//	//   }
+//	// }
 func JSON(value any) OptionBuilder {
 	return OptionBuilder{}.JSON(value)
 }
@@ -242,9 +224,16 @@ func (b OptionBuilder) JSON(value any) OptionBuilder {
 // Example: submit a form
 //
 //	c := httpx.New()
-//	_ = httpx.Post[any, string](c, "https://example.com", nil, httpx.Form(map[string]string{
-//		"name": "Ana",
+//	res, err := httpx.Post[any, map[string]any](c, "https://httpbin.org/post", nil, httpx.Form(map[string]string{
+//		"name": "alice",
 //	}))
+//	_ = err
+//	httpx.Dump(res) // dumps map[string]any
+//	// #map[string]interface {} {
+//	//   form => #map[string]interface {} {
+//	//     name => "alice" #string
+//	//   }
+//	// }
 func Form(values map[string]string) OptionBuilder {
 	return OptionBuilder{}.Form(values)
 }
@@ -263,10 +252,20 @@ func (b OptionBuilder) Form(values map[string]string) OptionBuilder {
 //
 //	// Apply to all requests
 //	c := httpx.New(httpx.Timeout(2 * time.Second))
-//	httpx.Get[string](c, "https://example.com")
+//	res, err := httpx.Get[map[string]any](c, "https://httpbin.org/delay/2")
+//	_ = err
+//	httpx.Dump(res) // dumps map[string]any
+//	// #map[string]interface {} {
+//	//   url => "https://httpbin.org/delay/2" #string
+//	// }
 //
 //	// Apply to a single request
-//	httpx.Get[string](httpx.Default(), "https://example.com", httpx.Timeout(2*time.Second))
+//	res, err = httpx.Get[map[string]any](c, "https://httpbin.org/delay/2", httpx.Timeout(2*time.Second))
+//	_ = err
+//	httpx.Dump(res) // dumps map[string]any
+//	// #map[string]interface {} {
+//	//   url => "https://httpbin.org/delay/2" #string
+//	// }
 func Timeout(d time.Duration) OptionBuilder {
 	return OptionBuilder{}.Timeout(d)
 }
@@ -295,9 +294,14 @@ func (b OptionBuilder) Timeout(d time.Duration) OptionBuilder {
 // Example: mutate req.Request
 //
 //	c := httpx.New()
-//	_ = httpx.Get[string](c, "https://example.com", httpx.Before(func(r *req.Request) {
+//	res, err := httpx.Get[map[string]any](c, "https://httpbin.org/get", httpx.Before(func(r *req.Request) {
 //		r.EnableDump()
 //	}))
+//	_ = err
+//	httpx.Dump(res) // dumps map[string]any
+//	// #map[string]interface {} {
+//	//   url => "https://httpbin.org/get" #string
+//	// }
 func Before(fn func(*req.Request)) OptionBuilder {
 	return OptionBuilder{}.Before(fn)
 }
