@@ -163,8 +163,12 @@ They are compiled by `example_compile_test.go` to keep docs and code in sync.
 Auth sets the Authorization header using a scheme and token.
 
 ```go
-c := httpx.New()
-_ = httpx.Get[string](c, "https://example.com", httpx.Auth("Token", "abc123"))
+// Apply to all requests
+c := httpx.New(httpx.Auth("Token", "abc123"))
+httpx.Get[string](c, "https://example.com")
+
+// Apply to a single request
+httpx.Get[string](httpx.Default(), "https://example.com", httpx.Auth("Token", "abc123"))
 ```
 
 ### <a id="basic"></a>Basic
@@ -172,8 +176,12 @@ _ = httpx.Get[string](c, "https://example.com", httpx.Auth("Token", "abc123"))
 Basic sets HTTP basic authentication headers.
 
 ```go
-c := httpx.New()
-_ = httpx.Get[string](c, "https://example.com", httpx.Basic("user", "pass"))
+// Apply to all requests
+c := httpx.New(httpx.Basic("user", "pass"))
+httpx.Get[string](c, "https://example.com")
+
+// Apply to a single request
+httpx.Get[string](httpx.Default(), "https://example.com", httpx.Basic("user", "pass"))
 ```
 
 ### <a id="bearer"></a>Bearer
@@ -181,8 +189,12 @@ _ = httpx.Get[string](c, "https://example.com", httpx.Basic("user", "pass"))
 Bearer sets the Authorization header with a bearer token.
 
 ```go
-c := httpx.New()
-_ = httpx.Get[string](c, "https://example.com", httpx.Bearer("token"))
+// Apply to all requests
+c := httpx.New(httpx.Bearer("token"))
+httpx.Get[string](c, "https://example.com")
+
+// Apply to a single request
+httpx.Get[string](httpx.Default(), "https://example.com", httpx.Bearer("token"))
 ```
 
 ## Browser Profiles
@@ -516,8 +528,12 @@ _ = httpx.Post[any, string](c, "https://example.com", nil, httpx.Form(map[string
 Header sets a header on a request or client.
 
 ```go
-c := httpx.New()
-_ = httpx.Get[string](c, "https://example.com", httpx.Header("X-Trace", "1"))
+// Apply to all requests
+c := httpx.New(httpx.Header("X-Trace", "1"))
+httpx.Get[string](c, "https://example.com")
+
+// Apply to a single request
+httpx.Get[string](httpx.Default(), "https://example.com", httpx.Header("X-Trace", "1"))
 ```
 
 ### <a id="headers"></a>Headers
@@ -525,8 +541,15 @@ _ = httpx.Get[string](c, "https://example.com", httpx.Header("X-Trace", "1"))
 Headers sets multiple headers on a request or client.
 
 ```go
-c := httpx.New()
-_ = httpx.Get[string](c, "https://example.com", httpx.Headers(map[string]string{
+// Apply to all requests
+c := httpx.New(httpx.Headers(map[string]string{
+	"X-Trace": "1",
+	"Accept":  "application/json",
+}))
+httpx.Get[string](c, "https://example.com")
+
+// Apply to a single request
+httpx.Get[string](httpx.Default(), "https://example.com", httpx.Headers(map[string]string{
 	"X-Trace": "1",
 	"Accept":  "application/json",
 }))
@@ -600,8 +623,12 @@ _ = httpx.Get[string](c, "https://example.com/search", httpx.Query("q", "go", "o
 UserAgent sets the User-Agent header on a request or client.
 
 ```go
+// Apply to all requests
 c := httpx.New(httpx.UserAgent("my-app/1.0"))
-_ = httpx.Get[string](c, "https://example.com")
+httpx.Get[string](c, "https://example.com")
+
+// Apply to a single request
+httpx.Get[string](httpx.Default(), "https://example.com", httpx.UserAgent("my-app/1.0"))
 ```
 
 ## Request Control
@@ -622,8 +649,12 @@ _ = httpx.Get[string](c, "https://example.com", httpx.Before(func(r *req.Request
 Timeout sets a per-request timeout using context cancellation.
 
 ```go
-c := httpx.New()
-_ = httpx.Get[string](c, "https://example.com", httpx.Timeout(2*time.Second))
+// Apply to all requests
+c := httpx.New(httpx.Timeout(2 * time.Second))
+httpx.Get[string](c, "https://example.com")
+
+// Apply to a single request
+httpx.Get[string](httpx.Default(), "https://example.com", httpx.Timeout(2*time.Second))
 ```
 
 ## Requests
@@ -846,8 +877,12 @@ _, _ = res.Body, res.Err
 RetryBackoff sets a capped exponential backoff retry interval for a request.
 
 ```go
-c := httpx.New()
-_ = httpx.Get[string](c, "https://example.com", httpx.RetryBackoff(100*time.Millisecond, 2*time.Second))
+// Apply to all requests
+c := httpx.New(httpx.RetryBackoff(100*time.Millisecond, 2*time.Second))
+httpx.Get[string](c, "https://example.com")
+
+// Apply to a single request
+httpx.Get[string](httpx.Default(), "https://example.com", httpx.RetryBackoff(100*time.Millisecond, 2*time.Second))
 ```
 
 ### <a id="retrycondition"></a>RetryCondition
@@ -855,8 +890,14 @@ _ = httpx.Get[string](c, "https://example.com", httpx.RetryBackoff(100*time.Mill
 RetryCondition sets the retry condition for a request.
 
 ```go
-c := httpx.New()
-_ = httpx.Get[string](c, "https://example.com", httpx.RetryCondition(func(resp *req.Response, _ error) bool {
+// Apply to all requests
+c := httpx.New(httpx.RetryCondition(func(resp *req.Response, _ error) bool {
+	return resp != nil && resp.StatusCode == 503
+}))
+httpx.Get[string](c, "https://example.com")
+
+// Apply to a single request
+httpx.Get[string](httpx.Default(), "https://example.com", httpx.RetryCondition(func(resp *req.Response, _ error) bool {
 	return resp != nil && resp.StatusCode == 503
 }))
 ```
@@ -866,8 +907,12 @@ _ = httpx.Get[string](c, "https://example.com", httpx.RetryCondition(func(resp *
 RetryCount enables retry for a request and sets the maximum retry count.
 
 ```go
-c := httpx.New()
-_ = httpx.Get[string](c, "https://example.com", httpx.RetryCount(2))
+// Apply to all requests
+c := httpx.New(httpx.RetryCount(2))
+httpx.Get[string](c, "https://example.com")
+
+// Apply to a single request
+httpx.Get[string](httpx.Default(), "https://example.com", httpx.RetryCount(2))
 ```
 
 ### <a id="retryfixedinterval"></a>RetryFixedInterval
@@ -875,8 +920,12 @@ _ = httpx.Get[string](c, "https://example.com", httpx.RetryCount(2))
 RetryFixedInterval sets a fixed retry interval for a request.
 
 ```go
-c := httpx.New()
-_ = httpx.Get[string](c, "https://example.com", httpx.RetryFixedInterval(200*time.Millisecond))
+// Apply to all requests
+c := httpx.New(httpx.RetryFixedInterval(200 * time.Millisecond))
+httpx.Get[string](c, "https://example.com")
+
+// Apply to a single request
+httpx.Get[string](httpx.Default(), "https://example.com", httpx.RetryFixedInterval(200*time.Millisecond))
 ```
 
 ### <a id="retryhook"></a>RetryHook
@@ -884,8 +933,12 @@ _ = httpx.Get[string](c, "https://example.com", httpx.RetryFixedInterval(200*tim
 RetryHook registers a retry hook for a request.
 
 ```go
-c := httpx.New()
-_ = httpx.Get[string](c, "https://example.com", httpx.RetryHook(func(_ *req.Response, _ error) {}))
+// Apply to all requests
+c := httpx.New(httpx.RetryHook(func(_ *req.Response, _ error) {}))
+httpx.Get[string](c, "https://example.com")
+
+// Apply to a single request
+httpx.Get[string](httpx.Default(), "https://example.com", httpx.RetryHook(func(_ *req.Response, _ error) {}))
 ```
 
 ### <a id="retryinterval"></a>RetryInterval
@@ -893,8 +946,14 @@ _ = httpx.Get[string](c, "https://example.com", httpx.RetryHook(func(_ *req.Resp
 RetryInterval sets a custom retry interval function for a request.
 
 ```go
-c := httpx.New()
-_ = httpx.Get[string](c, "https://example.com", httpx.RetryInterval(func(_ *req.Response, attempt int) time.Duration {
+// Apply to all requests
+c := httpx.New(httpx.RetryInterval(func(_ *req.Response, attempt int) time.Duration {
+	return time.Duration(attempt) * 100 * time.Millisecond
+}))
+httpx.Get[string](c, "https://example.com")
+
+// Apply to a single request
+httpx.Get[string](httpx.Default(), "https://example.com", httpx.RetryInterval(func(_ *req.Response, attempt int) time.Duration {
 	return time.Duration(attempt) * 100 * time.Millisecond
 }))
 ```

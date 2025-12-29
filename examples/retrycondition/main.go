@@ -12,8 +12,14 @@ func main() {
 	// RetryCondition sets the retry condition for a request.
 
 	// Example: retry on 503
-	c := httpx.New()
-	_ = httpx.Get[string](c, "https://example.com", httpx.RetryCondition(func(resp *req.Response, _ error) bool {
+	// Apply to all requests
+	c := httpx.New(httpx.RetryCondition(func(resp *req.Response, _ error) bool {
+		return resp != nil && resp.StatusCode == 503
+	}))
+	httpx.Get[string](c, "https://example.com")
+
+	// Apply to a single request
+	httpx.Get[string](httpx.Default(), "https://example.com", httpx.RetryCondition(func(resp *req.Response, _ error) bool {
 		return resp != nil && resp.StatusCode == 503
 	}))
 }

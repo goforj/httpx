@@ -10,10 +10,14 @@ import (
 // @group Retry
 //
 // Applies to both client defaults and individual requests.
-// Example: request retry count
+// Example: retry count
 //
-//	c := httpx.New()
-//	_ = httpx.Get[string](c, "https://example.com", httpx.RetryCount(2))
+//	// Apply to all requests
+//	c := httpx.New(httpx.RetryCount(2))
+//	httpx.Get[string](c, "https://example.com")
+//
+//	// Apply to a single request
+//	httpx.Get[string](httpx.Default(), "https://example.com", httpx.RetryCount(2))
 func RetryCount(count int) OptionBuilder {
 	return OptionBuilder{}.RetryCount(count)
 }
@@ -33,10 +37,14 @@ func (b OptionBuilder) RetryCount(count int) OptionBuilder {
 // @group Retry
 //
 // Applies to both client defaults and individual requests.
-// Example: request retry interval
+// Example: retry interval
 //
-//	c := httpx.New()
-//	_ = httpx.Get[string](c, "https://example.com", httpx.RetryFixedInterval(200*time.Millisecond))
+//	// Apply to all requests
+//	c := httpx.New(httpx.RetryFixedInterval(200 * time.Millisecond))
+//	httpx.Get[string](c, "https://example.com")
+//
+//	// Apply to a single request
+//	httpx.Get[string](httpx.Default(), "https://example.com", httpx.RetryFixedInterval(200*time.Millisecond))
 func RetryFixedInterval(interval time.Duration) OptionBuilder {
 	return OptionBuilder{}.RetryFixedInterval(interval)
 }
@@ -56,10 +64,14 @@ func (b OptionBuilder) RetryFixedInterval(interval time.Duration) OptionBuilder 
 // @group Retry
 //
 // Applies to both client defaults and individual requests.
-// Example: request retry backoff
+// Example: retry backoff
 //
-//	c := httpx.New()
-//	_ = httpx.Get[string](c, "https://example.com", httpx.RetryBackoff(100*time.Millisecond, 2*time.Second))
+//	// Apply to all requests
+//	c := httpx.New(httpx.RetryBackoff(100*time.Millisecond, 2*time.Second))
+//	httpx.Get[string](c, "https://example.com")
+//
+//	// Apply to a single request
+//	httpx.Get[string](httpx.Default(), "https://example.com", httpx.RetryBackoff(100*time.Millisecond, 2*time.Second))
 func RetryBackoff(min, max time.Duration) OptionBuilder {
 	return OptionBuilder{}.RetryBackoff(min, max)
 }
@@ -81,8 +93,14 @@ func (b OptionBuilder) RetryBackoff(min, max time.Duration) OptionBuilder {
 // Applies to both client defaults and individual requests.
 // Example: custom retry interval
 //
-//	c := httpx.New()
-//	_ = httpx.Get[string](c, "https://example.com", httpx.RetryInterval(func(_ *req.Response, attempt int) time.Duration {
+//	// Apply to all requests
+//	c := httpx.New(httpx.RetryInterval(func(_ *req.Response, attempt int) time.Duration {
+//		return time.Duration(attempt) * 100 * time.Millisecond
+//	}))
+//	httpx.Get[string](c, "https://example.com")
+//
+//	// Apply to a single request
+//	httpx.Get[string](httpx.Default(), "https://example.com", httpx.RetryInterval(func(_ *req.Response, attempt int) time.Duration {
 //		return time.Duration(attempt) * 100 * time.Millisecond
 //	}))
 func RetryInterval(fn req.GetRetryIntervalFunc) OptionBuilder {
@@ -106,8 +124,14 @@ func (b OptionBuilder) RetryInterval(fn req.GetRetryIntervalFunc) OptionBuilder 
 // Applies to both client defaults and individual requests.
 // Example: retry on 503
 //
-//	c := httpx.New()
-//	_ = httpx.Get[string](c, "https://example.com", httpx.RetryCondition(func(resp *req.Response, _ error) bool {
+//	// Apply to all requests
+//	c := httpx.New(httpx.RetryCondition(func(resp *req.Response, _ error) bool {
+//		return resp != nil && resp.StatusCode == 503
+//	}))
+//	httpx.Get[string](c, "https://example.com")
+//
+//	// Apply to a single request
+//	httpx.Get[string](httpx.Default(), "https://example.com", httpx.RetryCondition(func(resp *req.Response, _ error) bool {
 //		return resp != nil && resp.StatusCode == 503
 //	}))
 func RetryCondition(condition req.RetryConditionFunc) OptionBuilder {
@@ -131,8 +155,12 @@ func (b OptionBuilder) RetryCondition(condition req.RetryConditionFunc) OptionBu
 // Applies to both client defaults and individual requests.
 // Example: hook on retry
 //
-//	c := httpx.New()
-//	_ = httpx.Get[string](c, "https://example.com", httpx.RetryHook(func(_ *req.Response, _ error) {}))
+//	// Apply to all requests
+//	c := httpx.New(httpx.RetryHook(func(_ *req.Response, _ error) {}))
+//	httpx.Get[string](c, "https://example.com")
+//
+//	// Apply to a single request
+//	httpx.Get[string](httpx.Default(), "https://example.com", httpx.RetryHook(func(_ *req.Response, _ error) {}))
 func RetryHook(hook req.RetryHookFunc) OptionBuilder {
 	return OptionBuilder{}.RetryHook(hook)
 }
