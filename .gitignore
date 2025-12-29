@@ -1,4 +1,5 @@
 .idea
-AGENTS.md
-SPECIFICATION.md
+/*.md
+!/README.md
 cover.out
+coverage.out
