@@ -31,7 +31,7 @@ func TestExamplesBuild(t *testing.T) {
 		path := filepath.Join(examplesDir, name)
 
 		t.Run(name, func(t *testing.T) {
-			t.Parallel() // 🔑 enable concurrency
+			t.Parallel()
 
 			if err := buildExampleWithoutTags(path); err != nil {
 				t.Fatalf("example %q failed to build:\n%s", name, err)

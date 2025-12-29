@@ -14,7 +14,7 @@ It keeps req's power and escape hatches, while making the 90% use case feel effo
     <a href="https://goreportcard.com/report/github.com/goforj/httpx"><img src="https://goreportcard.com/badge/github.com/goforj/httpx" alt="Go Report Card"></a>
     <a href="https://codecov.io/gh/goforj/httpx" ><img src="https://codecov.io/gh/goforj/httpx/graph/badge.svg?token=R5O7LYAD4B"/></a>
 <!-- test-count:embed:start -->
-    <img src="https://img.shields.io/badge/tests-135-brightgreen" alt="Tests">
+    <img src="https://img.shields.io/badge/tests-170-brightgreen" alt="Tests">
 <!-- test-count:embed:end -->
 </p>
 
@@ -119,20 +119,97 @@ They are compiled by `example_compile_test.go` to keep docs and code in sync.
 ## API Index
 
 | Group | Functions |
-|------:|-----------|
+|------:|:-----------|
+| **Advanced** | [TLSFingerprint](#tlsfingerprint) [TLSFingerprintAndroid](#tlsfingerprintandroid) [TLSFingerprintChrome](#tlsfingerprintchrome) [TLSFingerprintEdge](#tlsfingerprintedge) [TLSFingerprintFirefox](#tlsfingerprintfirefox) [TLSFingerprintIOS](#tlsfingerprintios) [TLSFingerprintRandomized](#tlsfingerprintrandomized) [TLSFingerprintSafari](#tlsfingerprintsafari) |
 | **Auth** | [Auth](#auth) [Basic](#basic) [Bearer](#bearer) |
+| **Browser Profiles** | [AsChrome](#aschrome) [AsFirefox](#asfirefox) [AsMobile](#asmobile) [AsSafari](#assafari) |
 | **Client** | [Default](#default) [New](#new) [Raw](#raw) [Req](#req) |
 | **Client Options** | [BaseURL](#baseurl) [ErrorMapper](#errormapper) [Middleware](#middleware) [Transport](#transport) |
 | **Debugging** | [Dump](#dump) [DumpAll](#dumpall) [DumpEachRequest](#dumpeachrequest) [DumpEachRequestTo](#dumpeachrequestto) [DumpTo](#dumpto) [DumpToFile](#dumptofile) |
 | **Download Options** | [OutputFile](#outputfile) |
 | **Errors** | [Error](#error) |
-| **Request Options** | [Before](#before) [Body](#body) [Form](#form) [Header](#header) [Headers](#headers) [JSON](#json) [Path](#path) [Paths](#paths) [Queries](#queries) [Query](#query) [Timeout](#timeout) |
+| **Request Composition** | [Body](#body) [Form](#form) [Header](#header) [Headers](#headers) [JSON](#json) [Path](#path) [Paths](#paths) [Queries](#queries) [Query](#query) [UserAgent](#useragent) |
+| **Request Control** | [Before](#before) [Timeout](#timeout) |
 | **Requests** | [Delete](#delete) [Get](#get) [Patch](#patch) [Post](#post) [Put](#put) |
 | **Requests (Context)** | [DeleteCtx](#deletectx) [GetCtx](#getctx) [PatchCtx](#patchctx) [PostCtx](#postctx) [PutCtx](#putctx) |
 | **Retry** | [RetryBackoff](#retrybackoff) [RetryCondition](#retrycondition) [RetryCount](#retrycount) [RetryFixedInterval](#retryfixedinterval) [RetryHook](#retryhook) [RetryInterval](#retryinterval) |
 | **Retry (Client)** | [Retry](#retry) |
 | **Upload Options** | [File](#file) [FileBytes](#filebytes) [FileReader](#filereader) [Files](#files) [UploadCallback](#uploadcallback) [UploadCallbackWithInterval](#uploadcallbackwithinterval) [UploadProgress](#uploadprogress) |
 
+
+## Advanced
+
+### <a id="tlsfingerprint"></a>TLSFingerprint
+
+TLSFingerprint applies a TLS fingerprint preset.
+
+```go
+c := httpx.New(httpx.TLSFingerprint(httpx.TLSFingerprintChromeKind))
+_ = c
+```
+
+### <a id="tlsfingerprintandroid"></a>TLSFingerprintAndroid
+
+TLSFingerprintAndroid applies the Android TLS fingerprint preset.
+
+```go
+c := httpx.New(httpx.TLSFingerprintAndroid())
+_ = c
+```
+
+### <a id="tlsfingerprintchrome"></a>TLSFingerprintChrome
+
+TLSFingerprintChrome applies the Chrome TLS fingerprint preset.
+
+```go
+c := httpx.New(httpx.TLSFingerprintChrome())
+_ = c
+```
+
+### <a id="tlsfingerprintedge"></a>TLSFingerprintEdge
+
+TLSFingerprintEdge applies the Edge TLS fingerprint preset.
+
+```go
+c := httpx.New(httpx.TLSFingerprintEdge())
+_ = c
+```
+
+### <a id="tlsfingerprintfirefox"></a>TLSFingerprintFirefox
+
+TLSFingerprintFirefox applies the Firefox TLS fingerprint preset.
+
+```go
+c := httpx.New(httpx.TLSFingerprintFirefox())
+_ = c
+```
+
+### <a id="tlsfingerprintios"></a>TLSFingerprintIOS
+
+TLSFingerprintIOS applies the iOS TLS fingerprint preset.
+
+```go
+c := httpx.New(httpx.TLSFingerprintIOS())
+_ = c
+```
+
+### <a id="tlsfingerprintrandomized"></a>TLSFingerprintRandomized
+
+TLSFingerprintRandomized applies a randomized TLS fingerprint preset.
+
+```go
+c := httpx.New(httpx.TLSFingerprintRandomized())
+_ = c
+```
+
+### <a id="tlsfingerprintsafari"></a>TLSFingerprintSafari
+
+TLSFingerprintSafari applies the Safari TLS fingerprint preset.
+
+```go
+c := httpx.New(httpx.TLSFingerprintSafari())
+_ = c
+```
 
 ## Auth
 
@@ -161,6 +238,44 @@ Bearer sets the Authorization header with a bearer token.
 ```go
 c := httpx.New()
 _ = httpx.Get[string](c, "https://example.com", httpx.Bearer("token"))
+```
+
+## Browser Profiles
+
+### <a id="aschrome"></a>AsChrome
+
+AsChrome applies the Chrome browser profile (headers, TLS, and HTTP/2 behavior).
+
+```go
+c := httpx.New(httpx.AsChrome())
+_ = c
+```
+
+### <a id="asfirefox"></a>AsFirefox
+
+AsFirefox applies the Firefox browser profile (headers, TLS, and HTTP/2 behavior).
+
+```go
+c := httpx.New(httpx.AsFirefox())
+_ = c
+```
+
+### <a id="asmobile"></a>AsMobile
+
+AsMobile applies a mobile Chrome-like profile (headers, TLS, and HTTP/2 behavior).
+
+```go
+c := httpx.New(httpx.AsMobile())
+_ = c
+```
+
+### <a id="assafari"></a>AsSafari
+
+AsSafari applies the Safari browser profile (headers, TLS, and HTTP/2 behavior).
+
+```go
+c := httpx.New(httpx.AsSafari())
+_ = c
 ```
 
 ## Client
@@ -366,18 +481,7 @@ if errors.As(res.Err, &httpErr) {
 }
 ```
 
-## Request Options
-
-### <a id="before"></a>Before
-
-Before runs a hook before the request is sent.
-
-```go
-c := httpx.New()
-_ = httpx.Get[string](c, "https://example.com", httpx.Before(func(r *req.Request) {
-	r.EnableDump()
-}))
-```
+## Request Composition
 
 ### <a id="body"></a>Body
 
@@ -485,6 +589,28 @@ Query adds query parameters as key/value pairs.
 ```go
 c := httpx.New()
 _ = httpx.Get[string](c, "https://example.com/search", httpx.Query("q", "go", "ok", "1"))
+```
+
+### <a id="useragent"></a>UserAgent
+
+UserAgent sets the User-Agent header on a request or client.
+
+```go
+c := httpx.New(httpx.UserAgent("my-app/1.0"))
+_ = httpx.Get[string](c, "https://example.com")
+```
+
+## Request Control
+
+### <a id="before"></a>Before
+
+Before runs a hook before the request is sent.
+
+```go
+c := httpx.New()
+_ = httpx.Get[string](c, "https://example.com", httpx.Before(func(r *req.Request) {
+	r.EnableDump()
+}))
 ```
 
 ### <a id="timeout"></a>Timeout

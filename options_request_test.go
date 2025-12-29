@@ -55,6 +55,36 @@ func TestHeaderAndHeaders(t *testing.T) {
 	}
 }
 
+func TestUserAgent(t *testing.T) {
+	capture := &requestCapture{}
+	srv := newCaptureServer(t, capture)
+	defer srv.Close()
+
+	c := New(UserAgent("httpx-test/1.0"))
+	res := Get[string](c, srv.URL)
+	if res.Err != nil {
+		t.Fatalf("request failed: %v", res.Err)
+	}
+	if got := capture.headers.Get("User-Agent"); got != "httpx-test/1.0" {
+		t.Fatalf("User-Agent header = %q", got)
+	}
+}
+
+func TestUserAgentRequestOverride(t *testing.T) {
+	capture := &requestCapture{}
+	srv := newCaptureServer(t, capture)
+	defer srv.Close()
+
+	c := New(UserAgent("httpx-client/1.0"))
+	res := Get[string](c, srv.URL, UserAgent("httpx-request/1.0"))
+	if res.Err != nil {
+		t.Fatalf("request failed: %v", res.Err)
+	}
+	if got := capture.headers.Get("User-Agent"); got != "httpx-request/1.0" {
+		t.Fatalf("User-Agent header = %q", got)
+	}
+}
+
 func TestQueryAndQueries(t *testing.T) {
 	capture := &requestCapture{}
 	srv := newCaptureServer(t, capture)
@@ -71,6 +101,18 @@ func TestQueryAndQueries(t *testing.T) {
 	if capture.query.Get("ok") != "1" {
 		t.Fatalf("ok = %q", capture.query.Get("ok"))
 	}
+}
+
+func TestQueryPanicsOnOddPairs(t *testing.T) {
+	defer func() {
+		if recovered := recover(); recovered == nil {
+			t.Fatalf("expected panic")
+		}
+	}()
+
+	b := Query("q")
+	r := req.C().R()
+	b.applyRequest(r)
 }
 
 func TestBeforeNilIsNoop(t *testing.T) {
