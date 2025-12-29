@@ -331,7 +331,16 @@ func renderAPI(funcs []*FuncDoc) string {
 	for g := range byGroup {
 		groupNames = append(groupNames, g)
 	}
-	sort.Strings(groupNames)
+	sort.Slice(groupNames, func(i, j int) bool {
+		gi, gj := groupNames[i], groupNames[j]
+		if gi == "Advanced" && gj != "Advanced" {
+			return false
+		}
+		if gj == "Advanced" && gi != "Advanced" {
+			return true
+		}
+		return gi < gj
+	})
 
 	var buf bytes.Buffer
 

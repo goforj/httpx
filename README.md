@@ -126,7 +126,6 @@ They are compiled by `example_compile_test.go` to keep docs and code in sync.
 
 | Group | Functions |
 |------:|:-----------|
-| **Advanced** | [TLSFingerprint](#tlsfingerprint) [TLSFingerprintAndroid](#tlsfingerprintandroid) [TLSFingerprintChrome](#tlsfingerprintchrome) [TLSFingerprintEdge](#tlsfingerprintedge) [TLSFingerprintFirefox](#tlsfingerprintfirefox) [TLSFingerprintIOS](#tlsfingerprintios) [TLSFingerprintRandomized](#tlsfingerprintrandomized) [TLSFingerprintSafari](#tlsfingerprintsafari) |
 | **Auth** | [Auth](#auth) [Basic](#basic) [Bearer](#bearer) |
 | **Browser Profiles** | [AsChrome](#aschrome) [AsFirefox](#asfirefox) [AsMobile](#asmobile) [AsSafari](#assafari) |
 | **Client** | [Default](#default) [New](#new) [Raw](#raw) [Req](#req) |
@@ -141,81 +140,8 @@ They are compiled by `example_compile_test.go` to keep docs and code in sync.
 | **Retry** | [RetryBackoff](#retrybackoff) [RetryCondition](#retrycondition) [RetryCount](#retrycount) [RetryFixedInterval](#retryfixedinterval) [RetryHook](#retryhook) [RetryInterval](#retryinterval) |
 | **Retry (Client)** | [Retry](#retry) |
 | **Upload Options** | [File](#file) [FileBytes](#filebytes) [FileReader](#filereader) [Files](#files) [UploadCallback](#uploadcallback) [UploadCallbackWithInterval](#uploadcallbackwithinterval) [UploadProgress](#uploadprogress) |
+| **Advanced** | [TLSFingerprint](#tlsfingerprint) [TLSFingerprintAndroid](#tlsfingerprintandroid) [TLSFingerprintChrome](#tlsfingerprintchrome) [TLSFingerprintEdge](#tlsfingerprintedge) [TLSFingerprintFirefox](#tlsfingerprintfirefox) [TLSFingerprintIOS](#tlsfingerprintios) [TLSFingerprintRandomized](#tlsfingerprintrandomized) [TLSFingerprintSafari](#tlsfingerprintsafari) |
 
-
-## Advanced
-
-### <a id="tlsfingerprint"></a>TLSFingerprint
-
-TLSFingerprint applies a TLS fingerprint preset.
-
-```go
-c := httpx.New(httpx.TLSFingerprint(httpx.TLSFingerprintChromeKind))
-_ = c
-```
-
-### <a id="tlsfingerprintandroid"></a>TLSFingerprintAndroid
-
-TLSFingerprintAndroid applies the Android TLS fingerprint preset.
-
-```go
-c := httpx.New(httpx.TLSFingerprintAndroid())
-_ = c
-```
-
-### <a id="tlsfingerprintchrome"></a>TLSFingerprintChrome
-
-TLSFingerprintChrome applies the Chrome TLS fingerprint preset.
-
-```go
-c := httpx.New(httpx.TLSFingerprintChrome())
-_ = c
-```
-
-### <a id="tlsfingerprintedge"></a>TLSFingerprintEdge
-
-TLSFingerprintEdge applies the Edge TLS fingerprint preset.
-
-```go
-c := httpx.New(httpx.TLSFingerprintEdge())
-_ = c
-```
-
-### <a id="tlsfingerprintfirefox"></a>TLSFingerprintFirefox
-
-TLSFingerprintFirefox applies the Firefox TLS fingerprint preset.
-
-```go
-c := httpx.New(httpx.TLSFingerprintFirefox())
-_ = c
-```
-
-### <a id="tlsfingerprintios"></a>TLSFingerprintIOS
-
-TLSFingerprintIOS applies the iOS TLS fingerprint preset.
-
-```go
-c := httpx.New(httpx.TLSFingerprintIOS())
-_ = c
-```
-
-### <a id="tlsfingerprintrandomized"></a>TLSFingerprintRandomized
-
-TLSFingerprintRandomized applies a randomized TLS fingerprint preset.
-
-```go
-c := httpx.New(httpx.TLSFingerprintRandomized())
-_ = c
-```
-
-### <a id="tlsfingerprintsafari"></a>TLSFingerprintSafari
-
-TLSFingerprintSafari applies the Safari TLS fingerprint preset.
-
-```go
-c := httpx.New(httpx.TLSFingerprintSafari())
-_ = c
-```
 
 ## Auth
 
@@ -959,5 +885,79 @@ _ = httpx.Post[any, string](c, "https://example.com/upload", nil,
 	httpx.File("file", "/tmp/report.bin"),
 	httpx.UploadProgress(),
 )
+```
+
+## Advanced
+
+### <a id="tlsfingerprint"></a>TLSFingerprint
+
+TLSFingerprint applies a TLS fingerprint preset.
+
+```go
+c := httpx.New(httpx.TLSFingerprint(httpx.TLSFingerprintChromeKind))
+_ = c
+```
+
+### <a id="tlsfingerprintandroid"></a>TLSFingerprintAndroid
+
+TLSFingerprintAndroid applies the Android TLS fingerprint preset.
+
+```go
+c := httpx.New(httpx.TLSFingerprintAndroid())
+_ = c
+```
+
+### <a id="tlsfingerprintchrome"></a>TLSFingerprintChrome
+
+TLSFingerprintChrome applies the Chrome TLS fingerprint preset.
+
+```go
+c := httpx.New(httpx.TLSFingerprintChrome())
+_ = c
+```
+
+### <a id="tlsfingerprintedge"></a>TLSFingerprintEdge
+
+TLSFingerprintEdge applies the Edge TLS fingerprint preset.
+
+```go
+c := httpx.New(httpx.TLSFingerprintEdge())
+_ = c
+```
+
+### <a id="tlsfingerprintfirefox"></a>TLSFingerprintFirefox
+
+TLSFingerprintFirefox applies the Firefox TLS fingerprint preset.
+
+```go
+c := httpx.New(httpx.TLSFingerprintFirefox())
+_ = c
+```
+
+### <a id="tlsfingerprintios"></a>TLSFingerprintIOS
+
+TLSFingerprintIOS applies the iOS TLS fingerprint preset.
+
+```go
+c := httpx.New(httpx.TLSFingerprintIOS())
+_ = c
+```
+
+### <a id="tlsfingerprintrandomized"></a>TLSFingerprintRandomized
+
+TLSFingerprintRandomized applies a randomized TLS fingerprint preset.
+
+```go
+c := httpx.New(httpx.TLSFingerprintRandomized())
+_ = c
+```
+
+### <a id="tlsfingerprintsafari"></a>TLSFingerprintSafari
+
+TLSFingerprintSafari applies the Safari TLS fingerprint preset.
+
+```go
+c := httpx.New(httpx.TLSFingerprintSafari())
+_ = c
 ```
 <!-- api:embed:end -->
