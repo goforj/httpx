@@ -43,7 +43,14 @@ func (b OptionBuilder) AsChrome() OptionBuilder {
 // Example: use a Firefox profile
 //
 //	c := httpx.New(httpx.AsFirefox())
-//	_ = c
+//	res, err := httpx.Get[map[string]any](c, "https://httpbin.org/headers")
+//	_ = err
+//	httpx.Dump(res) // dumps map[string]any
+//	// #map[string]interface {} {
+//	//   headers => #map[string]interface {} {
+//	//     User-Agent => "<user-agent>" #string
+//	//   }
+//	// }
 func AsFirefox() OptionBuilder {
 	return mergeOptionBuilders(
 		TLSFingerprint(TLSFingerprintFirefoxKind),

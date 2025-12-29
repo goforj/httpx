@@ -18,6 +18,10 @@ It keeps req's power and escape hatches, while making the 90% use case feel effo
 <!-- test-count:embed:end -->
 </p>
 
+<p align="center">
+  <img src="docs/images/goforj_httpx_example_1.png" width="600" alt="httpx Logo">
+</p>
+
 ## v2 Status
 
 httpx v1 has been tagged and is now frozen. The `main` branch is v2, which includes intentional breaking changes to improve API clarity and ergonomics (for example, request helpers return `(T, error)`).
@@ -282,7 +286,14 @@ AsFirefox applies the Firefox browser profile (headers including User-Agent, TLS
 
 ```go
 c := httpx.New(httpx.AsFirefox())
-_ = c
+res, err := httpx.Get[map[string]any](c, "https://httpbin.org/headers")
+_ = err
+httpx.Dump(res) // dumps map[string]any
+// #map[string]interface {} {
+//   headers => #map[string]interface {} {
+//     User-Agent => "<user-agent>" #string
+//   }
+// }
 ```
 
 ### <a id="asmobile"></a>AsMobile
