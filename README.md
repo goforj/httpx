@@ -119,7 +119,7 @@ They are compiled by `example_compile_test.go` to keep docs and code in sync.
 ## API Index
 
 | Group | Functions |
-|------:|-----------|
+|------:|:-----------|
 | **Advanced** | [TLSFingerprint](#tlsfingerprint) [TLSFingerprintAndroid](#tlsfingerprintandroid) [TLSFingerprintChrome](#tlsfingerprintchrome) [TLSFingerprintEdge](#tlsfingerprintedge) [TLSFingerprintFirefox](#tlsfingerprintfirefox) [TLSFingerprintIOS](#tlsfingerprintios) [TLSFingerprintRandomized](#tlsfingerprintrandomized) [TLSFingerprintSafari](#tlsfingerprintsafari) |
 | **Auth** | [Auth](#auth) [Basic](#basic) [Bearer](#bearer) |
 | **Browser Profiles** | [AsChrome](#aschrome) [AsFirefox](#asfirefox) [AsMobile](#asmobile) [AsSafari](#assafari) |

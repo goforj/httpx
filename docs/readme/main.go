@@ -338,7 +338,7 @@ func renderAPI(funcs []*FuncDoc) string {
 	// ---------------- Index ----------------
 	buf.WriteString("## API Index\n\n")
 	buf.WriteString("| Group | Functions |\n")
-	buf.WriteString("|------:|-----------|\n")
+	buf.WriteString("|------:|:-----------|\n")
 
 	for _, group := range groupNames {
 		sort.Slice(byGroup[group], func(i, j int) bool {
