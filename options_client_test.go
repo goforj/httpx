@@ -5,7 +5,10 @@ import (
 	"errors"
 	"io"
 	"net/http"
+	"net/http/cookiejar"
 	"net/http/httptest"
+	"net/url"
+	"reflect"
 	"testing"
 	"time"
 
@@ -126,6 +129,53 @@ func TestWithErrorMapper(t *testing.T) {
 	res := Get[string](c, srv.URL)
 	if !errors.Is(res.Err, want) {
 		t.Fatalf("expected mapped error")
+	}
+}
+
+func TestWithProxy(t *testing.T) {
+	c := New(Proxy("http://localhost:8080"))
+	if c.req.Transport.Options.Proxy == nil {
+		t.Fatalf("expected proxy to be set")
+	}
+}
+
+func TestWithProxyFunc(t *testing.T) {
+	c := New(ProxyFunc(nil))
+	if c == nil {
+		t.Fatalf("expected client")
+	}
+
+	fn := func(req *http.Request) (*url.URL, error) {
+		return http.ProxyFromEnvironment(req)
+	}
+	c = New(ProxyFunc(fn))
+	if c.req.Transport.Options.Proxy == nil {
+		t.Fatalf("expected proxy func to be set")
+	}
+}
+
+func TestWithCookieJar(t *testing.T) {
+	jar, err := cookiejar.New(nil)
+	if err != nil {
+		t.Fatalf("cookie jar: %v", err)
+	}
+	c := New(CookieJar(jar))
+	got := reflect.ValueOf(c.req).Elem().FieldByName("httpClient").Elem().FieldByName("Jar")
+	if got.IsNil() {
+		t.Fatalf("expected cookie jar to be set")
+	}
+}
+
+func TestWithRedirect(t *testing.T) {
+	c := New(Redirect())
+	if c == nil {
+		t.Fatalf("expected client")
+	}
+
+	c = New(Redirect(req.NoRedirectPolicy()))
+	got := reflect.ValueOf(c.req).Elem().FieldByName("httpClient").Elem().FieldByName("CheckRedirect")
+	if got.IsNil() {
+		t.Fatalf("expected redirect policy to be set")
 	}
 }
 

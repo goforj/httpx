@@ -216,6 +216,30 @@ func Delete[T any](client *Client, url string, opts ...Option) Result[T] {
 	return do[T](client, nil, methodDelete, url, nil, opts)
 }
 
+// Head issues a HEAD request using the provided client.
+// @group Requests
+//
+// Example: HEAD request
+//
+//	c := httpx.New()
+//	res := httpx.Head[string](c, "https://example.com")
+//	_ = res
+func Head[T any](client *Client, url string, opts ...Option) Result[T] {
+	return do[T](client, nil, methodHead, url, nil, opts)
+}
+
+// Options issues an OPTIONS request using the provided client.
+// @group Requests
+//
+// Example: OPTIONS request
+//
+//	c := httpx.New()
+//	res := httpx.Options[string](c, "https://example.com")
+//	_ = res
+func Options[T any](client *Client, url string, opts ...Option) Result[T] {
+	return do[T](client, nil, methodOptions, url, nil, opts)
+}
+
 // GetCtx issues a GET request using the provided client and context.
 // @group Requests (Context)
 //
@@ -310,6 +334,32 @@ func DeleteCtx[T any](client *Client, ctx context.Context, url string, opts ...O
 	return do[T](client, ctx, methodDelete, url, nil, opts)
 }
 
+// HeadCtx issues a HEAD request using the provided client and context.
+// @group Requests (Context)
+//
+// Example: context-aware HEAD
+//
+//	c := httpx.New()
+//	ctx := context.Background()
+//	res := httpx.HeadCtx[string](c, ctx, "https://example.com")
+//	_ = res
+func HeadCtx[T any](client *Client, ctx context.Context, url string, opts ...Option) Result[T] {
+	return do[T](client, ctx, methodHead, url, nil, opts)
+}
+
+// OptionsCtx issues an OPTIONS request using the provided client and context.
+// @group Requests (Context)
+//
+// Example: context-aware OPTIONS
+//
+//	c := httpx.New()
+//	ctx := context.Background()
+//	res := httpx.OptionsCtx[string](c, ctx, "https://example.com")
+//	_ = res
+func OptionsCtx[T any](client *Client, ctx context.Context, url string, opts ...Option) Result[T] {
+	return do[T](client, ctx, methodOptions, url, nil, opts)
+}
+
 func do[T any](client *Client, ctx context.Context, method, url string, body any, opts []Option) Result[T] {
 	var res Result[T]
 
@@ -370,11 +420,13 @@ func (c *Client) mapError(resp *req.Response) error {
 }
 
 const (
-	methodGet    = "GET"
-	methodPost   = "POST"
-	methodPut    = "PUT"
-	methodPatch  = "PATCH"
-	methodDelete = "DELETE"
+	methodGet     = "GET"
+	methodPost    = "POST"
+	methodPut     = "PUT"
+	methodPatch   = "PATCH"
+	methodDelete  = "DELETE"
+	methodHead    = "HEAD"
+	methodOptions = "OPTIONS"
 )
 
 func send(r *req.Request, method, url string) (*req.Response, error) {
@@ -389,6 +441,10 @@ func send(r *req.Request, method, url string) (*req.Response, error) {
 		return r.Patch(url)
 	case methodDelete:
 		return r.Delete(url)
+	case methodHead:
+		return r.Head(url)
+	case methodOptions:
+		return r.Options(url)
 	default:
 		return nil, fmt.Errorf("httpx: unsupported method %s", method)
 	}

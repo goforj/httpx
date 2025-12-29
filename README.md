@@ -14,7 +14,7 @@ It keeps req's power and escape hatches, while making the 90% use case feel effo
     <a href="https://goreportcard.com/report/github.com/goforj/httpx"><img src="https://goreportcard.com/badge/github.com/goforj/httpx" alt="Go Report Card"></a>
     <a href="https://codecov.io/gh/goforj/httpx" ><img src="https://codecov.io/gh/goforj/httpx/graph/badge.svg?token=R5O7LYAD4B"/></a>
 <!-- test-count:embed:start -->
-    <img src="https://img.shields.io/badge/tests-170-brightgreen" alt="Tests">
+    <img src="https://img.shields.io/badge/tests-188-brightgreen" alt="Tests">
 <!-- test-count:embed:end -->
 </p>
 
@@ -69,6 +69,16 @@ func main() {
 }
 ```
 
+## Browser Profiles
+
+Browser profiles provide a simple way to match common client behavior without exposing low-level details.
+Internally, profiles may apply transport and protocol settings as needed, but those details are intentionally abstracted.
+
+```go
+c := httpx.New(httpx.AsChrome())
+_ = c
+```
+
 ## Use Any req Feature
 
 **httpx** is built on top of the incredible [req](https://github.com/imroc/req) library, and you can always drop down to it when you need something beyond httpx’s helpers. That means every example in req’s docs is available to you with `c.Req()` or `c.Raw()`.
@@ -87,6 +97,9 @@ rc.EnableTraceAll()
 ```
 
 See the full req documentation here: https://req.cool/docs/prologue/quickstart/
+
+Most users will only need the high-level APIs (browser profiles, request composition, retries, uploads).
+When you need deep control over headers, transports, or protocol behavior, `req` is always there.
 
 ## Options in Practice
 
@@ -129,14 +142,14 @@ They are compiled by `example_compile_test.go` to keep docs and code in sync.
 | **Auth** | [Auth](#auth) [Basic](#basic) [Bearer](#bearer) |
 | **Browser Profiles** | [AsChrome](#aschrome) [AsFirefox](#asfirefox) [AsMobile](#asmobile) [AsSafari](#assafari) |
 | **Client** | [Default](#default) [New](#new) [Raw](#raw) [Req](#req) |
-| **Client Options** | [BaseURL](#baseurl) [ErrorMapper](#errormapper) [Middleware](#middleware) [Transport](#transport) |
-| **Debugging** | [Dump](#dump) [DumpAll](#dumpall) [DumpEachRequest](#dumpeachrequest) [DumpEachRequestTo](#dumpeachrequestto) [DumpTo](#dumpto) [DumpToFile](#dumptofile) |
+| **Client Options** | [BaseURL](#baseurl) [CookieJar](#cookiejar) [ErrorMapper](#errormapper) [Middleware](#middleware) [Proxy](#proxy) [ProxyFunc](#proxyfunc) [Redirect](#redirect) [Transport](#transport) |
+| **Debugging** | [Dump](#dump) [DumpAll](#dumpall) [DumpEachRequest](#dumpeachrequest) [DumpEachRequestTo](#dumpeachrequestto) [DumpTo](#dumpto) [DumpToFile](#dumptofile) [Trace](#trace) [TraceAll](#traceall) |
 | **Download Options** | [OutputFile](#outputfile) |
 | **Errors** | [Error](#error) |
 | **Request Composition** | [Body](#body) [Form](#form) [Header](#header) [Headers](#headers) [JSON](#json) [Path](#path) [Paths](#paths) [Queries](#queries) [Query](#query) [UserAgent](#useragent) |
 | **Request Control** | [Before](#before) [Timeout](#timeout) |
-| **Requests** | [Delete](#delete) [Get](#get) [Patch](#patch) [Post](#post) [Put](#put) |
-| **Requests (Context)** | [DeleteCtx](#deletectx) [GetCtx](#getctx) [PatchCtx](#patchctx) [PostCtx](#postctx) [PutCtx](#putctx) |
+| **Requests** | [Delete](#delete) [Get](#get) [Head](#head) [Options](#options) [Patch](#patch) [Post](#post) [Put](#put) |
+| **Requests (Context)** | [DeleteCtx](#deletectx) [GetCtx](#getctx) [HeadCtx](#headctx) [OptionsCtx](#optionsctx) [PatchCtx](#patchctx) [PostCtx](#postctx) [PutCtx](#putctx) |
 | **Retry** | [RetryBackoff](#retrybackoff) [RetryCondition](#retrycondition) [RetryCount](#retrycount) [RetryFixedInterval](#retryfixedinterval) [RetryHook](#retryhook) [RetryInterval](#retryinterval) |
 | **Retry (Client)** | [Retry](#retry) |
 | **Upload Options** | [File](#file) [FileBytes](#filebytes) [FileReader](#filereader) [Files](#files) [UploadCallback](#uploadcallback) [UploadCallbackWithInterval](#uploadcallbackwithinterval) [UploadProgress](#uploadprogress) |
@@ -292,6 +305,16 @@ c := httpx.New(httpx.BaseURL("https://api.example.com"))
 _ = c
 ```
 
+### <a id="cookiejar"></a>CookieJar
+
+CookieJar sets the cookie jar for the client.
+
+```go
+jar, _ := cookiejar.New(nil)
+c := httpx.New(httpx.CookieJar(jar))
+_ = c
+```
+
 ### <a id="errormapper"></a>ErrorMapper
 
 ErrorMapper sets a custom error mapper for non-2xx responses.
@@ -312,6 +335,33 @@ c := httpx.New(httpx.Middleware(func(_ *req.Client, r *req.Request) error {
 	r.SetHeader("X-Trace", "1")
 	return nil
 }))
+_ = c
+```
+
+### <a id="proxy"></a>Proxy
+
+Proxy sets a proxy URL for the client.
+
+```go
+c := httpx.New(httpx.Proxy("http://localhost:8080"))
+_ = c
+```
+
+### <a id="proxyfunc"></a>ProxyFunc
+
+ProxyFunc sets a proxy function for the client.
+
+```go
+c := httpx.New(httpx.ProxyFunc(http.ProxyFromEnvironment))
+_ = c
+```
+
+### <a id="redirect"></a>Redirect
+
+Redirect sets the redirect policy for the client.
+
+```go
+c := httpx.New(httpx.Redirect(req.NoRedirectPolicy()))
 _ = c
 ```
 
@@ -381,6 +431,24 @@ DumpToFile enables req's request-level dump output to a file path.
 ```go
 c := httpx.New()
 _ = httpx.Get[string](c, "https://example.com", httpx.DumpToFile("httpx.dump"))
+```
+
+### <a id="trace"></a>Trace
+
+Trace enables req's request-level trace output.
+
+```go
+c := httpx.New()
+_ = httpx.Get[string](c, "https://example.com", httpx.Trace())
+```
+
+### <a id="traceall"></a>TraceAll
+
+TraceAll enables req's client-level trace output for all requests.
+
+```go
+c := httpx.New(httpx.TraceAll())
+_ = c
 ```
 
 ## Download Options
@@ -588,6 +656,26 @@ if res.Err != nil {
 godump.Dump(res.Body)
 ```
 
+### <a id="head"></a>Head
+
+Head issues a HEAD request using the provided client.
+
+```go
+c := httpx.New()
+res := httpx.Head[string](c, "https://example.com")
+_ = res
+```
+
+### <a id="options"></a>Options
+
+Options issues an OPTIONS request using the provided client.
+
+```go
+c := httpx.New()
+res := httpx.Options[string](c, "https://example.com")
+_ = res
+```
+
 ### <a id="patch"></a>Patch
 
 Patch issues a PATCH request using the provided client.
@@ -669,6 +757,28 @@ c := httpx.New()
 ctx := context.Background()
 res := httpx.GetCtx[User](c, ctx, "https://api.example.com/users/1")
 _, _ = res.Body, res.Err
+```
+
+### <a id="headctx"></a>HeadCtx
+
+HeadCtx issues a HEAD request using the provided client and context.
+
+```go
+c := httpx.New()
+ctx := context.Background()
+res := httpx.HeadCtx[string](c, ctx, "https://example.com")
+_ = res
+```
+
+### <a id="optionsctx"></a>OptionsCtx
+
+OptionsCtx issues an OPTIONS request using the provided client and context.
+
+```go
+c := httpx.New()
+ctx := context.Background()
+res := httpx.OptionsCtx[string](c, ctx, "https://example.com")
+_ = res
 ```
 
 ### <a id="patchctx"></a>PatchCtx

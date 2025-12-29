@@ -2,6 +2,7 @@ package httpx
 
 import (
 	"net/http"
+	"net/url"
 
 	"github.com/imroc/req/v3"
 )
@@ -87,5 +88,87 @@ func ErrorMapper(fn ErrorMapperFunc) OptionBuilder {
 func (b OptionBuilder) ErrorMapper(fn ErrorMapperFunc) OptionBuilder {
 	return b.add(clientOnly(func(c *Client) {
 		c.errorMapper = fn
+	}))
+}
+
+// Proxy sets a proxy URL for the client.
+// @group Client Options
+//
+// Applies to client configuration only.
+// Example: set proxy URL
+//
+//	c := httpx.New(httpx.Proxy("http://localhost:8080"))
+//	_ = c
+func Proxy(proxyURL string) OptionBuilder {
+	return OptionBuilder{}.Proxy(proxyURL)
+}
+
+func (b OptionBuilder) Proxy(proxyURL string) OptionBuilder {
+	return b.add(clientOnly(func(c *Client) {
+		if proxyURL == "" {
+			return
+		}
+		c.req.SetProxyURL(proxyURL)
+	}))
+}
+
+// ProxyFunc sets a proxy function for the client.
+// @group Client Options
+//
+// Applies to client configuration only.
+// Example: set proxy function
+//
+//	c := httpx.New(httpx.ProxyFunc(http.ProxyFromEnvironment))
+//	_ = c
+func ProxyFunc(fn func(*http.Request) (*url.URL, error)) OptionBuilder {
+	return OptionBuilder{}.ProxyFunc(fn)
+}
+
+func (b OptionBuilder) ProxyFunc(fn func(*http.Request) (*url.URL, error)) OptionBuilder {
+	if fn == nil {
+		return b
+	}
+	return b.add(clientOnly(func(c *Client) {
+		c.req.SetProxy(fn)
+	}))
+}
+
+// CookieJar sets the cookie jar for the client.
+// @group Client Options
+//
+// Applies to client configuration only.
+// Example: set cookie jar
+//
+//	jar, _ := cookiejar.New(nil)
+//	c := httpx.New(httpx.CookieJar(jar))
+//	_ = c
+func CookieJar(jar http.CookieJar) OptionBuilder {
+	return OptionBuilder{}.CookieJar(jar)
+}
+
+func (b OptionBuilder) CookieJar(jar http.CookieJar) OptionBuilder {
+	return b.add(clientOnly(func(c *Client) {
+		c.req.SetCookieJar(jar)
+	}))
+}
+
+// Redirect sets the redirect policy for the client.
+// @group Client Options
+//
+// Applies to client configuration only.
+// Example: disable redirects
+//
+//	c := httpx.New(httpx.Redirect(req.NoRedirectPolicy()))
+//	_ = c
+func Redirect(policies ...req.RedirectPolicy) OptionBuilder {
+	return OptionBuilder{}.Redirect(policies...)
+}
+
+func (b OptionBuilder) Redirect(policies ...req.RedirectPolicy) OptionBuilder {
+	return b.add(clientOnly(func(c *Client) {
+		if len(policies) == 0 {
+			return
+		}
+		c.req.SetRedirectPolicy(policies...)
 	}))
 }

@@ -126,3 +126,39 @@ func (b OptionBuilder) DumpEachRequestTo(output io.Writer) OptionBuilder {
 		})
 	}))
 }
+
+// Trace enables req's request-level trace output.
+// @group Debugging
+//
+// Applies to individual requests only.
+// Example: trace a single request
+//
+//	c := httpx.New()
+//	_ = httpx.Get[string](c, "https://example.com", httpx.Trace())
+func Trace() OptionBuilder {
+	return OptionBuilder{}.Trace()
+}
+
+func (b OptionBuilder) Trace() OptionBuilder {
+	return b.add(requestOnly(func(r *req.Request) {
+		r.EnableTrace()
+	}))
+}
+
+// TraceAll enables req's client-level trace output for all requests.
+// @group Debugging
+//
+// Applies to the client configuration only.
+// Example: trace all requests
+//
+//	c := httpx.New(httpx.TraceAll())
+//	_ = c
+func TraceAll() OptionBuilder {
+	return OptionBuilder{}.TraceAll()
+}
+
+func (b OptionBuilder) TraceAll() OptionBuilder {
+	return b.add(clientOnly(func(c *Client) {
+		c.req.EnableTraceAll()
+	}))
+}

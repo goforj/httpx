@@ -119,6 +119,38 @@ func TestErrorMapper(t *testing.T) {
 	}
 }
 
+func TestHeadRequest(t *testing.T) {
+	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		if r.Method != http.MethodHead {
+			t.Fatalf("method = %s", r.Method)
+		}
+		w.WriteHeader(http.StatusOK)
+	}))
+	t.Cleanup(server.Close)
+
+	client := New()
+	res := Head[string](client, server.URL)
+	if res.Err != nil {
+		t.Fatalf("unexpected error: %v", res.Err)
+	}
+}
+
+func TestOptionsRequest(t *testing.T) {
+	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		if r.Method != http.MethodOptions {
+			t.Fatalf("method = %s", r.Method)
+		}
+		w.WriteHeader(http.StatusOK)
+	}))
+	t.Cleanup(server.Close)
+
+	client := New()
+	res := Options[string](client, server.URL)
+	if res.Err != nil {
+		t.Fatalf("unexpected error: %v", res.Err)
+	}
+}
+
 func TestOptionsApplied(t *testing.T) {
 	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		if r.URL.Path != "/users/123" {
