@@ -18,6 +18,10 @@ It keeps req's power and escape hatches, while making the 90% use case feel effo
 <!-- test-count:embed:end -->
 </p>
 
+## v2 Status
+
+httpx v1 has been tagged and is now frozen. The `main` branch is v2, which includes intentional breaking changes to improve API clarity and ergonomics (for example, request helpers return `(T, error)`).
+
 ## Why httpx
 
 - Typed, zero-ceremony requests with generics.
