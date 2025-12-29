@@ -12,8 +12,10 @@ func main() {
 	// OptionsCtx issues an OPTIONS request using the provided client and context.
 
 	// Example: context-aware OPTIONS
-	c := httpx.New()
 	ctx := context.Background()
-	res := httpx.OptionsCtx[string](c, ctx, "https://example.com")
-	_ = res
+	c := httpx.New()
+	_, err := httpx.OptionsCtx[string](c, ctx, "https://httpbin.org/get")
+	if err != nil {
+		return
+	}
 }

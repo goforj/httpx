@@ -13,8 +13,13 @@ import (
 // Applies to client configuration only.
 // Example: client base URL
 //
-//	c := httpx.New(httpx.BaseURL("https://api.example.com"))
-//	_ = c
+//	c := httpx.New(httpx.BaseURL("https://httpbin.org"))
+//	res, err := httpx.Get[map[string]any](c, "/uuid")
+//	_ = err
+//	httpx.Dump(res) // dumps map[string]any
+//	// #map[string]interface {} {
+//	//   uuid => "<uuid>" #string
+//	// }
 func BaseURL(url string) OptionBuilder {
 	return OptionBuilder{}.BaseURL(url)
 }
@@ -32,7 +37,12 @@ func (b OptionBuilder) BaseURL(url string) OptionBuilder {
 // Example: wrap transport
 //
 //	c := httpx.New(httpx.Transport(http.RoundTripper(http.DefaultTransport)))
-//	_ = c
+//	res, err := httpx.Get[map[string]any](c, "https://httpbin.org/uuid")
+//	_ = err
+//	httpx.Dump(res) // dumps map[string]any
+//	// #map[string]interface {} {
+//	//   uuid => "<uuid>" #string
+//	// }
 func Transport(rt http.RoundTripper) OptionBuilder {
 	return OptionBuilder{}.Transport(rt)
 }
@@ -58,7 +68,14 @@ func (b OptionBuilder) Transport(rt http.RoundTripper) OptionBuilder {
 //		r.SetHeader("X-Trace", "1")
 //		return nil
 //	}))
-//	_ = c
+//	res, err := httpx.Get[map[string]any](c, "https://httpbin.org/headers")
+//	_ = err
+//	httpx.Dump(res) // dumps map[string]any
+//	// #map[string]interface {} {
+//	//   headers => #map[string]interface {} {
+//	//     X-Trace => "1" #string
+//	//   }
+//	// }
 func Middleware(mw ...req.RequestMiddleware) OptionBuilder {
 	return OptionBuilder{}.Middleware(mw...)
 }
@@ -80,7 +97,10 @@ func (b OptionBuilder) Middleware(mw ...req.RequestMiddleware) OptionBuilder {
 //	c := httpx.New(httpx.ErrorMapper(func(resp *req.Response) error {
 //		return fmt.Errorf("status %d", resp.StatusCode)
 //	}))
-//	_ = c
+//	res, err := httpx.Get[map[string]any](c, "https://httpbin.org/status/500")
+//	_ = err
+//	httpx.Dump(res) // dumps map[string]any
+//	// map[string]interface {}(nil)
 func ErrorMapper(fn ErrorMapperFunc) OptionBuilder {
 	return OptionBuilder{}.ErrorMapper(fn)
 }
@@ -98,7 +118,10 @@ func (b OptionBuilder) ErrorMapper(fn ErrorMapperFunc) OptionBuilder {
 // Example: set proxy URL
 //
 //	c := httpx.New(httpx.Proxy("http://localhost:8080"))
-//	_ = c
+//	res, err := httpx.Get[map[string]any](c, "https://httpbin.org/get")
+//	_ = err
+//	httpx.Dump(res) // dumps map[string]any
+//	// map[string]interface {}(nil)
 func Proxy(proxyURL string) OptionBuilder {
 	return OptionBuilder{}.Proxy(proxyURL)
 }
@@ -119,7 +142,12 @@ func (b OptionBuilder) Proxy(proxyURL string) OptionBuilder {
 // Example: set proxy function
 //
 //	c := httpx.New(httpx.ProxyFunc(http.ProxyFromEnvironment))
-//	_ = c
+//	res, err := httpx.Get[map[string]any](c, "https://httpbin.org/uuid")
+//	_ = err
+//	httpx.Dump(res) // dumps map[string]any
+//	// #map[string]interface {} {
+//	//   uuid => "<uuid>" #string
+//	// }
 func ProxyFunc(fn func(*http.Request) (*url.URL, error)) OptionBuilder {
 	return OptionBuilder{}.ProxyFunc(fn)
 }
@@ -140,12 +168,19 @@ func (b OptionBuilder) ProxyFunc(fn func(*http.Request) (*url.URL, error)) Optio
 // Example: set cookie jar and seed cookies
 //
 //	jar, _ := cookiejar.New(nil)
-//	u, _ := url.Parse("https://example.com")
+//	u, _ := url.Parse("https://httpbin.org")
 //	jar.SetCookies(u, []*http.Cookie{
 //		{Name: "session", Value: "abc123"},
 //	})
 //	c := httpx.New(httpx.CookieJar(jar))
-//	_ = c
+//	res, err := httpx.Get[map[string]any](c, "https://httpbin.org/cookies")
+//	_ = err
+//	httpx.Dump(res) // dumps map[string]any
+//	// #map[string]interface {} {
+//	//   cookies => #map[string]interface {} {
+//	//     session => "abc123" #string
+//	//   }
+//	// }
 func CookieJar(jar http.CookieJar) OptionBuilder {
 	return OptionBuilder{}.CookieJar(jar)
 }
@@ -163,7 +198,10 @@ func (b OptionBuilder) CookieJar(jar http.CookieJar) OptionBuilder {
 // Example: disable redirects
 //
 //	c := httpx.New(httpx.Redirect(req.NoRedirectPolicy()))
-//	_ = c
+//	res, err := httpx.Get[map[string]any](c, "https://httpbin.org/redirect/1")
+//	_ = err
+//	httpx.Dump(res) // dumps map[string]any
+//	// map[string]interface {}(nil)
 func Redirect(policies ...req.RedirectPolicy) OptionBuilder {
 	return OptionBuilder{}.Redirect(policies...)
 }

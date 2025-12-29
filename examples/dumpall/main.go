@@ -10,5 +10,10 @@ func main() {
 
 	// Example: dump every request and response
 	c := httpx.New(httpx.DumpAll())
-	_ = c
+	res, err := httpx.Get[map[string]any](c, "https://httpbin.org/uuid")
+	_ = err
+	httpx.Dump(res) // dumps map[string]any
+	// #map[string]interface {} {
+	//   uuid => "<uuid>" #string
+	// }
 }

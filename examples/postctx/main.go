@@ -15,12 +15,20 @@ func main() {
 	type CreateUser struct {
 		Name string `json:"name"`
 	}
-	type User struct {
-		Name string `json:"name"`
+	type CreateUserResponse struct {
+		JSON CreateUser `json:"json"`
 	}
 
-	c := httpx.New()
 	ctx := context.Background()
-	res := httpx.PostCtx[CreateUser, User](c, ctx, "https://api.example.com/users", CreateUser{Name: "Ana"})
-	_, _ = res.Body, res.Err // Body is User
+	c := httpx.New()
+	res, err := httpx.PostCtx[CreateUser, CreateUserResponse](c, ctx, "https://httpbin.org/post", CreateUser{Name: "Ana"})
+	if err != nil {
+		return
+	}
+	httpx.Dump(res) // dumps CreateUserResponse
+	// #CreateUserResponse {
+	//   JSON => #CreateUser {
+	//     Name => "Ana" #string
+	//   }
+	// }
 }

@@ -14,8 +14,18 @@ func main() {
 	// Example: retry interval
 	// Apply to all requests
 	c := httpx.New(httpx.RetryFixedInterval(200 * time.Millisecond))
-	httpx.Get[string](c, "https://example.com")
+	res, err := httpx.Get[map[string]any](c, "https://httpbin.org/uuid")
+	_ = err
+	httpx.Dump(res) // dumps map[string]any
+	// #map[string]interface {} {
+	//   uuid => "<uuid>" #string
+	// }
 
 	// Apply to a single request
-	httpx.Get[string](httpx.Default(), "https://example.com", httpx.RetryFixedInterval(200*time.Millisecond))
+	res, err = httpx.Get[map[string]any](c, "https://httpbin.org/uuid", httpx.RetryFixedInterval(200*time.Millisecond))
+	_ = err
+	httpx.Dump(res) // dumps map[string]any
+	// #map[string]interface {} {
+	//   uuid => "<uuid>" #string
+	// }
 }

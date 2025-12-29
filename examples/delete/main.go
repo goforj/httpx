@@ -10,10 +10,16 @@ func main() {
 
 	// Example: typed DELETE
 	type DeleteResponse struct {
-		OK bool `json:"ok"`
+		URL string `json:"url"`
 	}
 
 	c := httpx.New()
-	res := httpx.Delete[DeleteResponse](c, "https://api.example.com/users/1")
-	_, _ = res.Body, res.Err // Body is DeleteResponse
+	res, err := httpx.Delete[DeleteResponse](c, "https://httpbin.org/delete")
+	if err != nil {
+		return
+	}
+	httpx.Dump(res) // dumps DeleteResponse
+	// #DeleteResponse {
+	//   URL => "https://httpbin.org/delete" #string
+	// }
 }

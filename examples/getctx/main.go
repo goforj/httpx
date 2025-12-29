@@ -12,12 +12,18 @@ func main() {
 	// GetCtx issues a GET request using the provided client and context.
 
 	// Example: context-aware GET
-	type User struct {
-		Name string `json:"name"`
+	type GetResponse struct {
+		URL string `json:"url"`
 	}
 
-	c := httpx.New()
 	ctx := context.Background()
-	res := httpx.GetCtx[User](c, ctx, "https://api.example.com/users/1")
-	_, _ = res.Body, res.Err // Body is User
+	c := httpx.New()
+	res, err := httpx.GetCtx[GetResponse](c, ctx, "https://httpbin.org/get")
+	if err != nil {
+		return
+	}
+	httpx.Dump(res) // dumps GetResponse
+	// #GetResponse {
+	//   URL => "https://httpbin.org/get" #string
+	// }
 }

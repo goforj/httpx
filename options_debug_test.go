@@ -24,9 +24,9 @@ func TestDumpTo(t *testing.T) {
 	defer srv.Close()
 
 	c := New()
-	res := Get[string](c, srv.URL, DumpTo(buf))
-	if res.Err != nil {
-		t.Fatalf("request failed: %v", res.Err)
+	_, err := Get[string](c, srv.URL, DumpTo(buf))
+	if err != nil {
+		t.Fatalf("request failed: %v", err)
 	}
 	if buf.Len() == 0 {
 		t.Fatalf("expected dump output")
@@ -39,9 +39,9 @@ func TestDumpToFile(t *testing.T) {
 
 	path := t.TempDir() + "/dump.txt"
 	c := New()
-	res := Get[string](c, srv.URL, DumpToFile(path))
-	if res.Err != nil {
-		t.Fatalf("request failed: %v", res.Err)
+	_, err := Get[string](c, srv.URL, DumpToFile(path))
+	if err != nil {
+		t.Fatalf("request failed: %v", err)
 	}
 	data, err := os.ReadFile(path)
 	if err != nil {
@@ -52,16 +52,30 @@ func TestDumpToFile(t *testing.T) {
 	}
 }
 
+func TestDumpAll(t *testing.T) {
+	srv := debugServer()
+	defer srv.Close()
+
+	c := New(DumpAll())
+	_, err := Get[string](c, srv.URL)
+	if err != nil {
+		t.Fatalf("request failed: %v", err)
+	}
+}
+
 func TestDumpAndClientDump(t *testing.T) {
 	srv := debugServer()
 	defer srv.Close()
 
-	c := New(DumpAll().DumpEachRequest())
-	res := Get[string](c, srv.URL, Dump())
-	if res.Err != nil {
-		t.Fatalf("request failed: %v", res.Err)
+	req := req.C().R()
+	EnableDump().applyRequest(req)
+	req.SetURL(srv.URL)
+	req.Method = http.MethodGet
+	_, resp, err := Do[string](req)
+	if err != nil {
+		t.Fatalf("request failed: %v", err)
 	}
-	if res.Response == nil || res.Response.Dump() == "" {
+	if resp == nil || resp.Dump() == "" {
 		t.Fatalf("expected response dump")
 	}
 }
@@ -72,9 +86,9 @@ func TestWithDumpEachRequestTo(t *testing.T) {
 	defer srv.Close()
 
 	c := New(DumpEachRequestTo(buf))
-	res := Get[string](c, srv.URL)
-	if res.Err != nil {
-		t.Fatalf("request failed: %v", res.Err)
+	_, err := Get[string](c, srv.URL)
+	if err != nil {
+		t.Fatalf("request failed: %v", err)
 	}
 	if buf.Len() == 0 {
 		t.Fatalf("expected dump output")
@@ -86,14 +100,14 @@ func TestWithDumpEachRequestToNilAndRespNil(t *testing.T) {
 	buf := &bytes.Buffer{}
 	DumpEachRequestTo(buf).applyClient(c)
 
-	clientVal := reflect.ValueOf(c.Req()).Elem()
+	clientVal := reflect.ValueOf(c.req).Elem()
 	afterField := clientVal.FieldByName("afterResponse")
 	afterField = reflect.NewAt(afterField.Type(), unsafe.Pointer(afterField.UnsafeAddr())).Elem()
 	if afterField.Len() == 0 {
 		t.Fatalf("expected afterResponse middleware")
 	}
 	mw := afterField.Index(afterField.Len() - 1).Interface().(req.ResponseMiddleware)
-	if err := mw(c.Req(), nil); err != nil {
+	if err := mw(c.req, nil); err != nil {
 		t.Fatalf("unexpected error: %v", err)
 	}
 }
@@ -103,9 +117,9 @@ func TestDumpEachRequestFunction(t *testing.T) {
 	defer srv.Close()
 
 	c := New(DumpEachRequest())
-	res := Get[string](c, srv.URL)
-	if res.Err != nil {
-		t.Fatalf("request failed: %v", res.Err)
+	_, err := Get[string](c, srv.URL)
+	if err != nil {
+		t.Fatalf("request failed: %v", err)
 	}
 }
 
@@ -120,7 +134,7 @@ func TestTrace(t *testing.T) {
 
 func TestTraceAll(t *testing.T) {
 	c := New(TraceAll())
-	traceField := reflect.ValueOf(c.Req()).Elem().FieldByName("trace")
+	traceField := reflect.ValueOf(c.req).Elem().FieldByName("trace")
 	if !traceField.Bool() {
 		t.Fatalf("expected trace to be enabled")
 	}

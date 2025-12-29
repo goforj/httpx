@@ -18,12 +18,10 @@ func main() {
 	// Example: configure all client options
 	var buf bytes.Buffer
 	c := httpx.New(httpx.
-		BaseURL("https://api.example.com").
+		BaseURL("https://httpbin.org").
 		Timeout(5*time.Second).
 		Header("X-Trace", "1").
-		Headers(map[string]string{
-			"Accept": "application/json",
-		}).
+		Header("Accept", "application/json").
 		Transport(http.RoundTripper(http.DefaultTransport)).
 		Middleware(func(_ *req.Client, r *req.Request) error {
 			r.SetHeader("X-Middleware", "1")

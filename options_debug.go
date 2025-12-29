@@ -6,19 +6,24 @@ import (
 	"github.com/imroc/req/v3"
 )
 
-// Dump enables req's request-level dump output.
+// EnableDump enables req's request-level dump output.
 // @group Debugging
 //
 // Applies to individual requests only.
 // Example: dump a single request
 //
 //	c := httpx.New()
-//	_ = httpx.Get[string](c, "https://example.com", httpx.Dump())
-func Dump() OptionBuilder {
-	return OptionBuilder{}.Dump()
+//	res, err := httpx.Get[map[string]any](c, "https://httpbin.org/uuid", httpx.EnableDump())
+//	_ = err
+//	httpx.Dump(res) // dumps map[string]any
+//	// #map[string]interface {} {
+//	//   uuid => "<uuid>" #string
+//	// }
+func EnableDump() OptionBuilder {
+	return OptionBuilder{}.EnableDump()
 }
 
-func (b OptionBuilder) Dump() OptionBuilder {
+func (b OptionBuilder) EnableDump() OptionBuilder {
 	return b.add(requestOnly(func(r *req.Request) {
 		r.EnableDump()
 	}))
@@ -32,7 +37,12 @@ func (b OptionBuilder) Dump() OptionBuilder {
 //
 //	var buf bytes.Buffer
 //	c := httpx.New()
-//	_ = httpx.Get[string](c, "https://example.com", httpx.DumpTo(&buf))
+//	res, err := httpx.Get[map[string]any](c, "https://httpbin.org/uuid", httpx.DumpTo(&buf))
+//	_ = err
+//	httpx.Dump(res) // dumps map[string]any
+//	// #map[string]interface {} {
+//	//   uuid => "<uuid>" #string
+//	// }
 func DumpTo(output io.Writer) OptionBuilder {
 	return OptionBuilder{}.DumpTo(output)
 }
@@ -50,7 +60,12 @@ func (b OptionBuilder) DumpTo(output io.Writer) OptionBuilder {
 // Example: dump to a file
 //
 //	c := httpx.New()
-//	_ = httpx.Get[string](c, "https://example.com", httpx.DumpToFile("httpx.dump"))
+//	res, err := httpx.Get[map[string]any](c, "https://httpbin.org/uuid", httpx.DumpToFile("httpx.dump"))
+//	_ = err
+//	httpx.Dump(res) // dumps map[string]any
+//	// #map[string]interface {} {
+//	//   uuid => "<uuid>" #string
+//	// }
 func DumpToFile(filename string) OptionBuilder {
 	return OptionBuilder{}.DumpToFile(filename)
 }
@@ -68,7 +83,12 @@ func (b OptionBuilder) DumpToFile(filename string) OptionBuilder {
 // Example: dump every request and response
 //
 //	c := httpx.New(httpx.DumpAll())
-//	_ = c
+//	res, err := httpx.Get[map[string]any](c, "https://httpbin.org/uuid")
+//	_ = err
+//	httpx.Dump(res) // dumps map[string]any
+//	// #map[string]interface {} {
+//	//   uuid => "<uuid>" #string
+//	// }
 func DumpAll() OptionBuilder {
 	return OptionBuilder{}.DumpAll()
 }
@@ -86,7 +106,12 @@ func (b OptionBuilder) DumpAll() OptionBuilder {
 // Example: dump each request as it is sent
 //
 //	c := httpx.New(httpx.DumpEachRequest())
-//	_ = c
+//	res, err := httpx.Get[map[string]any](c, "https://httpbin.org/uuid")
+//	_ = err
+//	httpx.Dump(res) // dumps map[string]any
+//	// #map[string]interface {} {
+//	//   uuid => "<uuid>" #string
+//	// }
 func DumpEachRequest() OptionBuilder {
 	return OptionBuilder{}.DumpEachRequest()
 }
@@ -105,7 +130,12 @@ func (b OptionBuilder) DumpEachRequest() OptionBuilder {
 //
 //	var buf bytes.Buffer
 //	c := httpx.New(httpx.DumpEachRequestTo(&buf))
-//	_ = httpx.Get[string](c, "https://example.com")
+//	res, err := httpx.Get[map[string]any](c, "https://httpbin.org/uuid")
+//	_ = err
+//	httpx.Dump(res) // dumps map[string]any
+//	// #map[string]interface {} {
+//	//   uuid => "<uuid>" #string
+//	// }
 //	_ = buf.String()
 func DumpEachRequestTo(output io.Writer) OptionBuilder {
 	return OptionBuilder{}.DumpEachRequestTo(output)
@@ -134,7 +164,12 @@ func (b OptionBuilder) DumpEachRequestTo(output io.Writer) OptionBuilder {
 // Example: trace a single request
 //
 //	c := httpx.New()
-//	_ = httpx.Get[string](c, "https://example.com", httpx.Trace())
+//	res, err := httpx.Get[map[string]any](c, "https://httpbin.org/uuid", httpx.Trace())
+//	_ = err
+//	httpx.Dump(res) // dumps map[string]any
+//	// #map[string]interface {} {
+//	//   uuid => "<uuid>" #string
+//	// }
 func Trace() OptionBuilder {
 	return OptionBuilder{}.Trace()
 }
@@ -152,7 +187,12 @@ func (b OptionBuilder) Trace() OptionBuilder {
 // Example: trace all requests
 //
 //	c := httpx.New(httpx.TraceAll())
-//	_ = c
+//	res, err := httpx.Get[map[string]any](c, "https://httpbin.org/uuid")
+//	_ = err
+//	httpx.Dump(res) // dumps map[string]any
+//	// #map[string]interface {} {
+//	//   uuid => "<uuid>" #string
+//	// }
 func TraceAll() OptionBuilder {
 	return OptionBuilder{}.TraceAll()
 }

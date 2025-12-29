@@ -15,10 +15,17 @@ func main() {
 
 	// Example: set cookie jar and seed cookies
 	jar, _ := cookiejar.New(nil)
-	u, _ := url.Parse("https://example.com")
+	u, _ := url.Parse("https://httpbin.org")
 	jar.SetCookies(u, []*http.Cookie{
 		{Name: "session", Value: "abc123"},
 	})
 	c := httpx.New(httpx.CookieJar(jar))
-	_ = c
+	res, err := httpx.Get[map[string]any](c, "https://httpbin.org/cookies")
+	_ = err
+	httpx.Dump(res) // dumps map[string]any
+	// #map[string]interface {} {
+	//   cookies => #map[string]interface {} {
+	//     session => "abc123" #string
+	//   }
+	// }
 }

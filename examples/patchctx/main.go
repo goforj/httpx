@@ -15,12 +15,20 @@ func main() {
 	type UpdateUser struct {
 		Name string `json:"name"`
 	}
-	type User struct {
-		Name string `json:"name"`
+	type UpdateUserResponse struct {
+		JSON UpdateUser `json:"json"`
 	}
 
-	c := httpx.New()
 	ctx := context.Background()
-	res := httpx.PatchCtx[UpdateUser, User](c, ctx, "https://api.example.com/users/1", UpdateUser{Name: "Ana"})
-	_, _ = res.Body, res.Err // Body is User
+	c := httpx.New()
+	res, err := httpx.PatchCtx[UpdateUser, UpdateUserResponse](c, ctx, "https://httpbin.org/patch", UpdateUser{Name: "Ana"})
+	if err != nil {
+		return
+	}
+	httpx.Dump(res) // dumps UpdateUserResponse
+	// #UpdateUserResponse {
+	//   JSON => #UpdateUser {
+	//     Name => "Ana" #string
+	//   }
+	// }
 }

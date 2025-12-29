@@ -53,13 +53,13 @@ func TestFileAndFiles(t *testing.T) {
 		}
 	})
 	defer srv.Close()
-
 	c := New()
-	res := Post[any, string](c, srv.URL, nil,
+
+	_, err := Post[any, string](c, srv.URL, nil,
 		File("file", fileA).Files(map[string]string{"fileB": fileB}),
 	)
-	if res.Err != nil {
-		t.Fatalf("upload failed: %v", res.Err)
+	if err != nil {
+		t.Fatalf("upload failed: %v", err)
 	}
 	if got["file"] != "alpha" {
 		t.Fatalf("file content = %q", got["file"])
@@ -87,11 +87,11 @@ func TestFilesFunction(t *testing.T) {
 		got = string(data)
 	})
 	defer srv.Close()
-
 	c := New()
-	res := Post[any, string](c, srv.URL, nil, Files(map[string]string{"file": file}))
-	if res.Err != nil {
-		t.Fatalf("upload failed: %v", res.Err)
+
+	_, err := Post[any, string](c, srv.URL, nil, Files(map[string]string{"file": file}))
+	if err != nil {
+		t.Fatalf("upload failed: %v", err)
 	}
 	if got != "payload" {
 		t.Fatalf("file content = %q", got)
@@ -113,11 +113,11 @@ func TestFileBytes(t *testing.T) {
 		content = string(data)
 	})
 	defer srv.Close()
-
 	c := New()
-	res := Post[any, string](c, srv.URL, nil, FileBytes("file", "report.txt", []byte("hello")))
-	if res.Err != nil {
-		t.Fatalf("upload failed: %v", res.Err)
+
+	_, err := Post[any, string](c, srv.URL, nil, FileBytes("file", "report.txt", []byte("hello")))
+	if err != nil {
+		t.Fatalf("upload failed: %v", err)
 	}
 	if content != "hello" {
 		t.Fatalf("content = %q", content)
@@ -174,17 +174,17 @@ func TestFileReaderSizes(t *testing.T) {
 				_, _ = io.Copy(io.Discard, r.Body)
 			})
 			defer srv.Close()
-
 			c := New()
-			res := Post[any, string](c, srv.URL, nil,
+
+			_, err := Post[any, string](c, srv.URL, nil,
 				FileReader("file", "payload.bin", tc.reader).UploadCallback(func(info req.UploadInfo) {
 					if info.FileSize > 0 {
 						gotSize = info.FileSize
 					}
 				}),
 			)
-			if res.Err != nil {
-				t.Fatalf("upload failed: %v", res.Err)
+			if err != nil {
+				t.Fatalf("upload failed: %v", err)
 			}
 			if gotSize == 0 {
 				t.Fatalf("file size not detected")
@@ -206,15 +206,15 @@ func TestFileReaderSeekError(t *testing.T) {
 		_, _ = io.Copy(io.Discard, r.Body)
 	})
 	defer srv.Close()
-
 	c := New()
-	res := Post[any, string](c, srv.URL, nil,
+
+	_, err := Post[any, string](c, srv.URL, nil,
 		FileReader("file", "payload.bin", &errorSeeker{}).UploadCallback(func(info req.UploadInfo) {
 			gotSize = info.FileSize
 		}),
 	)
-	if res.Err != nil {
-		t.Fatalf("upload failed: %v", res.Err)
+	if err != nil {
+		t.Fatalf("upload failed: %v", err)
 	}
 	if gotSize != 0 {
 		t.Fatalf("expected size 0, got %d", gotSize)
@@ -241,15 +241,15 @@ func TestFileReaderSeekEndError(t *testing.T) {
 		_, _ = io.Copy(io.Discard, r.Body)
 	})
 	defer srv.Close()
-
 	c := New()
-	res := Post[any, string](c, srv.URL, nil,
+
+	_, err := Post[any, string](c, srv.URL, nil,
 		FileReader("file", "payload.bin", &partialSeeker{}).UploadCallback(func(info req.UploadInfo) {
 			gotSize = info.FileSize
 		}),
 	)
-	if res.Err != nil {
-		t.Fatalf("upload failed: %v", res.Err)
+	if err != nil {
+		t.Fatalf("upload failed: %v", err)
 	}
 	if gotSize != 0 {
 		t.Fatalf("expected size 0, got %d", gotSize)
@@ -262,16 +262,16 @@ func TestFileReaderReadCloser(t *testing.T) {
 		_, _ = io.Copy(io.Discard, r.Body)
 	})
 	defer srv.Close()
+	c := New()
 
 	reader := io.NopCloser(bytes.NewReader([]byte("abc")))
-	c := New()
-	res := Post[any, string](c, srv.URL, nil,
+	_, err := Post[any, string](c, srv.URL, nil,
 		FileReader("file", "payload.bin", reader).UploadCallback(func(info req.UploadInfo) {
 			gotSize = info.FileSize
 		}),
 	)
-	if res.Err != nil {
-		t.Fatalf("upload failed: %v", res.Err)
+	if err != nil {
+		t.Fatalf("upload failed: %v", err)
 	}
 	if gotSize != 0 {
 		t.Fatalf("expected size 0, got %d", gotSize)
@@ -321,16 +321,16 @@ func TestUploadCallbackFinal(t *testing.T) {
 		_, _ = io.Copy(io.Discard, r.Body)
 	})
 	defer srv.Close()
-
 	c := New()
-	res := Post[any, string](c, srv.URL, nil,
+
+	_, err := Post[any, string](c, srv.URL, nil,
 		FileBytes("file", "report.bin", []byte("payload")).UploadCallback(func(info req.UploadInfo) {
 			atomic.AddInt32(&calls, 1)
 			last = info
 		}),
 	)
-	if res.Err != nil {
-		t.Fatalf("upload failed: %v", res.Err)
+	if err != nil {
+		t.Fatalf("upload failed: %v", err)
 	}
 	if atomic.LoadInt32(&calls) == 0 {
 		t.Fatalf("callback not invoked")
@@ -396,13 +396,13 @@ func TestUploadCallbackNoFile(t *testing.T) {
 		_, _ = io.Copy(io.Discard, r.Body)
 	})
 	defer srv.Close()
-
 	c := New()
-	res := Post[any, string](c, srv.URL, "ok", UploadCallback(func(info req.UploadInfo) {
+
+	_, err := Post[any, string](c, srv.URL, "ok", UploadCallback(func(info req.UploadInfo) {
 		called = true
 	}))
-	if res.Err != nil {
-		t.Fatalf("request failed: %v", res.Err)
+	if err != nil {
+		t.Fatalf("request failed: %v", err)
 	}
 	if called {
 		t.Fatalf("expected callback not to run")
@@ -420,15 +420,15 @@ func TestUploadCallbackWithIntervalFinal(t *testing.T) {
 		_, _ = io.Copy(io.Discard, r.Body)
 	})
 	defer srv.Close()
-
 	c := New()
-	res := Post[any, string](c, srv.URL, nil,
+
+	_, err := Post[any, string](c, srv.URL, nil,
 		FileBytes("file", "report.bin", []byte("payload")).UploadCallbackWithInterval(func(info req.UploadInfo) {
 			last = info
 		}, 5*time.Millisecond),
 	)
-	if res.Err != nil {
-		t.Fatalf("upload failed: %v", res.Err)
+	if err != nil {
+		t.Fatalf("upload failed: %v", err)
 	}
 	if last.FileSize == 0 || last.UploadedSize != last.FileSize {
 		t.Fatalf("final callback size = %d/%d", last.UploadedSize, last.FileSize)
@@ -466,13 +466,13 @@ func TestUploadCallbackWithIntervalNoFile(t *testing.T) {
 		_, _ = io.Copy(io.Discard, r.Body)
 	})
 	defer srv.Close()
-
 	c := New()
-	res := Post[any, string](c, srv.URL, "ok", UploadCallbackWithInterval(func(info req.UploadInfo) {
+
+	_, err := Post[any, string](c, srv.URL, "ok", UploadCallbackWithInterval(func(info req.UploadInfo) {
 		called = true
 	}, 10*time.Millisecond))
-	if res.Err != nil {
-		t.Fatalf("request failed: %v", res.Err)
+	if err != nil {
+		t.Fatalf("request failed: %v", err)
 	}
 	if called {
 		t.Fatalf("expected callback not to run")
@@ -513,6 +513,7 @@ func TestUploadProgress(t *testing.T) {
 		_, _ = io.Copy(io.Discard, r.Body)
 	})
 	defer srv.Close()
+	c := New()
 
 	buf := &bytes.Buffer{}
 	stdout := os.Stdout
@@ -522,8 +523,7 @@ func TestUploadProgress(t *testing.T) {
 	}
 	os.Stdout = w
 
-	c := New()
-	res := Post[any, string](c, srv.URL, nil,
+	_, err = Post[any, string](c, srv.URL, nil,
 		FileBytes("file", "report.bin", bytes.Repeat([]byte("x"), 1024)).UploadProgress(),
 	)
 	_ = w.Close()
@@ -531,8 +531,8 @@ func TestUploadProgress(t *testing.T) {
 	_, _ = io.Copy(buf, r)
 	_ = r.Close()
 
-	if res.Err != nil {
-		t.Fatalf("upload failed: %v", res.Err)
+	if err != nil {
+		t.Fatalf("upload failed: %v", err)
 	}
 	if !strings.Contains(buf.String(), "upload") {
 		t.Fatalf("expected progress output, got %q", buf.String())

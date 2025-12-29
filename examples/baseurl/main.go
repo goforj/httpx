@@ -9,6 +9,11 @@ func main() {
 	// BaseURL sets a base URL on the client.
 
 	// Example: client base URL
-	c := httpx.New(httpx.BaseURL("https://api.example.com"))
-	_ = c
+	c := httpx.New(httpx.BaseURL("https://httpbin.org"))
+	res, err := httpx.Get[map[string]any](c, "/uuid")
+	_ = err
+	httpx.Dump(res) // dumps map[string]any
+	// #map[string]interface {} {
+	//   uuid => "<uuid>" #string
+	// }
 }

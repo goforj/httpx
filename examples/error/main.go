@@ -17,9 +17,11 @@ func main() {
 	}
 
 	c := httpx.New()
-	res := httpx.Get[User](c, "https://example.com/users/1")
+	res, err := httpx.Get[map[string]any](c, "https://httpbin.org/status/404")
+	httpx.Dump(res) // dumps map[string]any
+	// map[string]interface {}(nil)
 	var httpErr *httpx.HTTPError
-	if errors.As(res.Err, &httpErr) {
+	if errors.As(err, &httpErr) {
 		_ = httpErr.StatusCode
 	}
 }

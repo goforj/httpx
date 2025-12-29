@@ -14,8 +14,14 @@ func main() {
 	// Example: timeout
 	// Apply to all requests
 	c := httpx.New(httpx.Timeout(2 * time.Second))
-	httpx.Get[string](c, "https://example.com")
+	res, err := httpx.Get[map[string]any](c, "https://httpbin.org/delay/2")
+	_ = err
+	httpx.Dump(res) // dumps map[string]any
+	// map[string]interface {}(nil)
 
 	// Apply to a single request
-	httpx.Get[string](httpx.Default(), "https://example.com", httpx.Timeout(2*time.Second))
+	res, err = httpx.Get[map[string]any](c, "https://httpbin.org/delay/2", httpx.Timeout(2*time.Second))
+	_ = err
+	httpx.Dump(res) // dumps map[string]any
+	// map[string]interface {}(nil)
 }

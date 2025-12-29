@@ -13,7 +13,12 @@ func main() {
 
 	// Example: mutate req.Request
 	c := httpx.New()
-	_ = httpx.Get[string](c, "https://example.com", httpx.Before(func(r *req.Request) {
+	res, err := httpx.Get[map[string]any](c, "https://httpbin.org/get", httpx.Before(func(r *req.Request) {
 		r.EnableDump()
 	}))
+	_ = err
+	httpx.Dump(res) // dumps map[string]any
+	// #map[string]interface {} {
+	//   url => "https://httpbin.org/get" #string
+	// }
 }

@@ -14,6 +14,11 @@ func main() {
 	// Example: dump each request to a buffer
 	var buf bytes.Buffer
 	c := httpx.New(httpx.DumpEachRequestTo(&buf))
-	_ = httpx.Get[string](c, "https://example.com")
+	res, err := httpx.Get[map[string]any](c, "https://httpbin.org/uuid")
+	_ = err
+	httpx.Dump(res) // dumps map[string]any
+	// #map[string]interface {} {
+	//   uuid => "<uuid>" #string
+	// }
 	_ = buf.String()
 }

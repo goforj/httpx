@@ -14,8 +14,18 @@ func main() {
 	// Example: retry backoff
 	// Apply to all requests
 	c := httpx.New(httpx.RetryBackoff(100*time.Millisecond, 2*time.Second))
-	httpx.Get[string](c, "https://example.com")
+	res, err := httpx.Get[map[string]any](c, "https://httpbin.org/uuid")
+	_ = err
+	httpx.Dump(res) // dumps map[string]any
+	// #map[string]interface {} {
+	//   uuid => "<uuid>" #string
+	// }
 
 	// Apply to a single request
-	httpx.Get[string](httpx.Default(), "https://example.com", httpx.RetryBackoff(100*time.Millisecond, 2*time.Second))
+	res, err = httpx.Get[map[string]any](c, "https://httpbin.org/uuid", httpx.RetryBackoff(100*time.Millisecond, 2*time.Second))
+	_ = err
+	httpx.Dump(res) // dumps map[string]any
+	// #map[string]interface {} {
+	//   uuid => "<uuid>" #string
+	// }
 }

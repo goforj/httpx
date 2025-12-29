@@ -10,6 +10,8 @@ func main() {
 
 	// Example: OPTIONS request
 	c := httpx.New()
-	res := httpx.Options[string](c, "https://example.com")
-	_ = res
+	_, err := httpx.Options[string](c, "https://httpbin.org/get")
+	if err != nil {
+		return
+	}
 }

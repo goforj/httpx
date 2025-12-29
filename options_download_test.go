@@ -17,9 +17,9 @@ func TestOutputFile(t *testing.T) {
 
 	c := New()
 	path := filepath.Join(t.TempDir(), "out.txt")
-	res := Get[string](c, srv.URL, OutputFile(path))
-	if res.Err != nil {
-		t.Fatalf("download failed: %v", res.Err)
+	_, err := Get[string](c, srv.URL, OutputFile(path))
+	if err != nil {
+		t.Fatalf("download failed: %v", err)
 	}
 	data, err := os.ReadFile(path)
 	if err != nil {

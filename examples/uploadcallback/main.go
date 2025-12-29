@@ -14,7 +14,7 @@ func main() {
 
 	// Example: track upload progress
 	c := httpx.New()
-	_ = httpx.Post[any, string](c, "https://example.com/upload", nil,
+	res, err := httpx.Post[any, map[string]any](c, "https://httpbin.org/post", nil,
 		httpx.File("file", "/tmp/report.bin"),
 		httpx.UploadCallback(func(info req.UploadInfo) {
 			percent := float64(info.UploadedSize) / float64(info.FileSize) * 100
@@ -24,4 +24,11 @@ func main() {
 			}
 		}),
 	)
+	_ = err
+	httpx.Dump(res) // dumps map[string]any
+	// #map[string]interface {} {
+	//   files => #map[string]interface {} {
+	//     file => "<file>" #string
+	//   }
+	// }
 }

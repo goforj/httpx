@@ -16,5 +16,12 @@ func main() {
 		r.SetHeader("X-Trace", "1")
 		return nil
 	}))
-	_ = c
+	res, err := httpx.Get[map[string]any](c, "https://httpbin.org/headers")
+	_ = err
+	httpx.Dump(res) // dumps map[string]any
+	// #map[string]interface {} {
+	//   headers => #map[string]interface {} {
+	//     X-Trace => "1" #string
+	//   }
+	// }
 }

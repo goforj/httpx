@@ -11,8 +11,22 @@ func main() {
 	// Example: basic auth
 	// Apply to all requests
 	c := httpx.New(httpx.Basic("user", "pass"))
-	httpx.Get[string](c, "https://example.com")
+	res, err := httpx.Get[map[string]any](c, "https://httpbin.org/headers")
+	_ = err
+	httpx.Dump(res) // dumps map[string]any
+	// #map[string]interface {} {
+	//   headers => #map[string]interface {} {
+	//     Authorization => "Basic dXNlcjpwYXNz" #string
+	//   }
+	// }
 
 	// Apply to a single request
-	httpx.Get[string](httpx.Default(), "https://example.com", httpx.Basic("user", "pass"))
+	res, err = httpx.Get[map[string]any](c, "https://httpbin.org/headers", httpx.Basic("user", "pass"))
+	_ = err
+	httpx.Dump(res) // dumps map[string]any
+	// #map[string]interface {} {
+	//   headers => #map[string]interface {} {
+	//     Authorization => "Basic dXNlcjpwYXNz" #string
+	//   }
+	// }
 }

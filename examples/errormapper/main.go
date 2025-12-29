@@ -16,5 +16,8 @@ func main() {
 	c := httpx.New(httpx.ErrorMapper(func(resp *req.Response) error {
 		return fmt.Errorf("status %d", resp.StatusCode)
 	}))
-	_ = c
+	res, err := httpx.Get[map[string]any](c, "https://httpbin.org/status/500")
+	_ = err
+	httpx.Dump(res) // dumps map[string]any
+	// map[string]interface {}(nil)
 }

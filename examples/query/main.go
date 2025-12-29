@@ -10,5 +10,12 @@ func main() {
 
 	// Example: add query params
 	c := httpx.New()
-	_ = httpx.Get[string](c, "https://example.com/search", httpx.Query("q", "go", "ok", "1"))
+	res, err := httpx.Get[map[string]any](c, "https://httpbin.org/get", httpx.Query("q", "search"))
+	_ = err
+	httpx.Dump(res) // dumps map[string]any
+	// #map[string]interface {} {
+	//   args => #map[string]interface {} {
+	//     q => "search" #string
+	//   }
+	// }
 }
