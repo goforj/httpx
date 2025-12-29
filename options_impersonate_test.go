@@ -2,70 +2,10 @@ package httpx
 
 import (
 	"reflect"
-	"strings"
 	"testing"
 
 	"github.com/imroc/req/v3"
 )
-
-func TestAsChrome(t *testing.T) {
-	c := New(AsChrome())
-	if c.req.Transport.TLSHandshakeContext == nil {
-		t.Fatalf("expected TLS handshake context to be set")
-	}
-	if got := c.req.Headers.Get("User-Agent"); !strings.Contains(got, "Chrome") {
-		t.Fatalf("User-Agent = %q", got)
-	}
-}
-
-func TestAsFirefox(t *testing.T) {
-	c := New(AsFirefox())
-	if c.req.Transport.TLSHandshakeContext == nil {
-		t.Fatalf("expected TLS handshake context to be set")
-	}
-	if got := c.req.Headers.Get("User-Agent"); !strings.Contains(got, "Firefox") {
-		t.Fatalf("User-Agent = %q", got)
-	}
-}
-
-func TestAsSafari(t *testing.T) {
-	c := New(AsSafari())
-	if c.req.Transport.TLSHandshakeContext == nil {
-		t.Fatalf("expected TLS handshake context to be set")
-	}
-	if got := c.req.Headers.Get("User-Agent"); !strings.Contains(got, "Safari") {
-		t.Fatalf("User-Agent = %q", got)
-	}
-}
-
-func TestAsMobile(t *testing.T) {
-	c := New(AsMobile())
-	if c.req.Transport.TLSHandshakeContext == nil {
-		t.Fatalf("expected TLS handshake context to be set")
-	}
-	if got := c.req.Headers.Get("User-Agent"); !strings.Contains(got, "Android") {
-		t.Fatalf("User-Agent = %q", got)
-	}
-}
-
-func TestAsProfileMethods(t *testing.T) {
-	c := New(OptionBuilder{}.AsChrome())
-	if got := c.req.Headers.Get("User-Agent"); !strings.Contains(got, "Chrome") {
-		t.Fatalf("User-Agent = %q", got)
-	}
-	c = New(OptionBuilder{}.AsFirefox())
-	if got := c.req.Headers.Get("User-Agent"); !strings.Contains(got, "Firefox") {
-		t.Fatalf("User-Agent = %q", got)
-	}
-	c = New(OptionBuilder{}.AsSafari())
-	if got := c.req.Headers.Get("User-Agent"); !strings.Contains(got, "Safari") {
-		t.Fatalf("User-Agent = %q", got)
-	}
-	c = New(OptionBuilder{}.AsMobile())
-	if got := c.req.Headers.Get("User-Agent"); !strings.Contains(got, "Android") {
-		t.Fatalf("User-Agent = %q", got)
-	}
-}
 
 func TestTLSFingerprintKinds(t *testing.T) {
 	kinds := []TLSFingerprintKind{

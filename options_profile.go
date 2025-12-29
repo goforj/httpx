@@ -3,6 +3,7 @@ package httpx
 import (
 	"crypto/rand"
 	"encoding/binary"
+	"io"
 	"math/big"
 	"strconv"
 	"strings"
@@ -177,7 +178,7 @@ func firefoxMultipartBoundaryFunc() string {
 
 	for i := 0; i < 3; i++ {
 		var b [8]byte
-		if _, err := rand.Read(b[:]); err != nil {
+		if _, err := io.ReadFull(rand.Reader, b[:]); err != nil {
 			panic(err)
 		}
 		u32 := binary.LittleEndian.Uint32(b[:])

@@ -1,9 +1,13 @@
 package httpx
 
 import (
+	"crypto/rand"
+	"errors"
 	"reflect"
+	"strings"
 	"testing"
 
+	"github.com/imroc/req/v3"
 	"github.com/imroc/req/v3/http2"
 )
 
@@ -49,6 +53,147 @@ func TestHTTP2PriorityFramesOption(t *testing.T) {
 	if got.Len() != 1 {
 		t.Fatalf("expected priority frames, got %d", got.Len())
 	}
+}
+
+func TestAsChrome(t *testing.T) {
+	c := New(AsChrome())
+	if c.req.Transport.TLSHandshakeContext == nil {
+		t.Fatalf("expected TLS handshake context to be set")
+	}
+	if got := c.req.Headers.Get("User-Agent"); !strings.Contains(got, "Chrome") {
+		t.Fatalf("User-Agent = %q", got)
+	}
+}
+
+func TestAsFirefox(t *testing.T) {
+	c := New(AsFirefox())
+	if c.req.Transport.TLSHandshakeContext == nil {
+		t.Fatalf("expected TLS handshake context to be set")
+	}
+	if got := c.req.Headers.Get("User-Agent"); !strings.Contains(got, "Firefox") {
+		t.Fatalf("User-Agent = %q", got)
+	}
+}
+
+func TestAsSafari(t *testing.T) {
+	c := New(AsSafari())
+	if c.req.Transport.TLSHandshakeContext == nil {
+		t.Fatalf("expected TLS handshake context to be set")
+	}
+	if got := c.req.Headers.Get("User-Agent"); !strings.Contains(got, "Safari") {
+		t.Fatalf("User-Agent = %q", got)
+	}
+}
+
+func TestAsMobile(t *testing.T) {
+	c := New(AsMobile())
+	if c.req.Transport.TLSHandshakeContext == nil {
+		t.Fatalf("expected TLS handshake context to be set")
+	}
+	if got := c.req.Headers.Get("User-Agent"); !strings.Contains(got, "Android") {
+		t.Fatalf("User-Agent = %q", got)
+	}
+}
+
+func TestAsProfileMethods(t *testing.T) {
+	c := New(OptionBuilder{}.AsChrome())
+	if got := c.req.Headers.Get("User-Agent"); !strings.Contains(got, "Chrome") {
+		t.Fatalf("User-Agent = %q", got)
+	}
+	c = New(OptionBuilder{}.AsFirefox())
+	if got := c.req.Headers.Get("User-Agent"); !strings.Contains(got, "Firefox") {
+		t.Fatalf("User-Agent = %q", got)
+	}
+	c = New(OptionBuilder{}.AsSafari())
+	if got := c.req.Headers.Get("User-Agent"); !strings.Contains(got, "Safari") {
+		t.Fatalf("User-Agent = %q", got)
+	}
+	c = New(OptionBuilder{}.AsMobile())
+	if got := c.req.Headers.Get("User-Agent"); !strings.Contains(got, "Android") {
+		t.Fatalf("User-Agent = %q", got)
+	}
+}
+
+func TestMergeOptionBuilders(t *testing.T) {
+	b := mergeOptionBuilders(Header("X-Trace", "1"), Query("q", "go"))
+	if len(b.ops) != 2 {
+		t.Fatalf("expected 2 options, got %d", len(b.ops))
+	}
+
+	c := New(b)
+	if got := c.req.Headers.Get("X-Trace"); got != "1" {
+		t.Fatalf("client header = %q", got)
+	}
+
+	r := req.C().R()
+	b.applyRequest(r)
+	if got := r.Headers.Get("X-Trace"); got != "1" {
+		t.Fatalf("request header = %q", got)
+	}
+	if got := r.QueryParams.Get("q"); got != "go" {
+		t.Fatalf("query param = %q", got)
+	}
+}
+
+func TestWebkitMultipartBoundaryFunc(t *testing.T) {
+	got := webkitMultipartBoundaryFunc()
+	prefix := "----WebKitFormBoundary"
+	if !strings.HasPrefix(got, prefix) {
+		t.Fatalf("boundary = %q", got)
+	}
+	if len(got) != len(prefix)+16 {
+		t.Fatalf("boundary length = %d", len(got))
+	}
+}
+
+func TestWebkitMultipartBoundaryFuncRandError(t *testing.T) {
+	original := rand.Reader
+	rand.Reader = failingReader{}
+	defer func() {
+		rand.Reader = original
+	}()
+	defer func() {
+		if recover() == nil {
+			t.Fatalf("expected panic")
+		}
+	}()
+	_ = webkitMultipartBoundaryFunc()
+}
+
+func TestFirefoxMultipartBoundaryFunc(t *testing.T) {
+	got := firefoxMultipartBoundaryFunc()
+	prefix := "-------------------------"
+	if !strings.HasPrefix(got, prefix) {
+		t.Fatalf("boundary = %q", got)
+	}
+	if len(got) <= len(prefix) {
+		t.Fatalf("boundary length = %d", len(got))
+	}
+	for i := len(prefix); i < len(got); i++ {
+		if got[i] < '0' || got[i] > '9' {
+			t.Fatalf("boundary suffix = %q", got[len(prefix):])
+		}
+	}
+}
+
+func TestFirefoxMultipartBoundaryFuncRandError(t *testing.T) {
+	original := rand.Reader
+	rand.Reader = failingReader{}
+	defer func() {
+		rand.Reader = original
+	}()
+	defer func() {
+		if recover() == nil {
+			t.Fatalf("expected panic")
+		}
+	}()
+	_ = firefoxMultipartBoundaryFunc()
+}
+
+type failingReader struct{}
+
+func (failingReader) Read(_ []byte) (int, error) {
+	return 0, errors.New("rand error")
 }
 
 func getHTTP2Field(t *testing.T, c *Client, name string) reflect.Value {
