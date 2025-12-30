@@ -48,11 +48,11 @@ type User struct {
 c := httpx.New(
 	httpx.BaseURL("https://api.example.com"),
 	httpx.Bearer("token"),
+	// options...
 )
 
-user, err := httpx.Get[User](c, "/users/42", httpx.Query("include", "profile"))
-_ = err
-
+// httpx.Get[T](client, url, options...)
+user, _ := httpx.Get[User](c, "/users/42", httpx.Query("include", "profile"))
 fmt.Println(user.Name)
 ```
 
