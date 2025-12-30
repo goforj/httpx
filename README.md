@@ -26,6 +26,17 @@ It keeps req's power and escape hatches, while making the 90% use case feel effo
 
 httpx v1 has been tagged and is now frozen. The `main` branch is v2, which includes intentional breaking changes to improve API clarity and ergonomics (for example, request helpers return `(T, error)`).
 
+## The 90% You Need
+
+Learn these first—most users never need more:
+
+1. `Get / Post / Put / Patch / Delete` (+ `*Ctx` variants)
+2. `Query`, `Path`, `Header`, `JSON`
+3. `New(...)` client options (BaseURL, auth, timeouts)
+4. `Retry*` (when you need resiliency)
+5. `Dump` (quick debugging)
+6. `Req`/`Raw` escape hatch when you outgrow the helpers
+
 ## Why httpx
 
 - Typed, zero-ceremony requests with generics.
@@ -42,116 +53,65 @@ go get github.com/goforj/httpx
 ## Quick Start
 
 ```go
-package main
+type User struct {
+	ID   int    `json:"id"`
+	Name string `json:"name"`
+}
 
-import (
-	"context"
-	"fmt"
-	"log"
-	"net/http"
-
-	"github.com/goforj/httpx"
-	"github.com/imroc/req/v3"
+c := httpx.New(
+	httpx.BaseURL("https://api.example.com"),
+	httpx.Bearer("token"),
 )
 
-func main() {
-	type GetResponse struct {
-		URL string `json:"url"`
-	}
-
-	c := httpx.New(httpx.UserAgent("demo/1.0"))
-
-	// Simple typed GET.
-	res, err := httpx.Get[GetResponse](c, "https://httpbin.org/get")
-	if err != nil {
-		log.Fatal(err)
-	}
-	fmt.Println(res.URL)
-
-	// Context-aware GET.
-	ctx := context.Background()
-	res2, err := httpx.GetCtx[GetResponse](c, ctx, "https://httpbin.org/get")
-	if err != nil {
-		log.Fatal(err)
-	}
-	fmt.Println(res2.URL)
-
-	// Access the underlying response when you need it.
-	r := req.C().R()
-	r.SetURL("https://httpbin.org/get")
-	r.Method = http.MethodGet
-	res3, resp, err := httpx.Do[map[string]any](r)
-	if err != nil {
-		log.Fatal(err)
-	}
-	fmt.Println(res3)
-	fmt.Println(resp.StatusCode)
+user, err := httpx.Get[User](c, "/users/42", httpx.Query("include", "profile"))
+if err != nil {
+	log.Fatal(err)
 }
+
+fmt.Println(user.Name)
 ```
+
+All request helpers return `(T, error)`. The low-level escape hatch `Do` returns `(T, *req.Response, error)` when you need raw access.
 
 ## Most Common Tasks
 
 Brevity-first, idiomatic patterns. Handle errors; dump what matters.
 
+Singular helpers (`Query`, `Path`, `Header`) set one value; plural helpers (`Queries`, `Paths`, `Headers`) set many at once.
+
 ```go
 type GetResponse struct {
 	URL string `json:"url"`
 }
-
-c := httpx.New()
-
-// Typed GET
-res, err := httpx.Get[GetResponse](c, "https://httpbin.org/get")
-if err != nil {
-	// handler error 
-}
-httpx.Dump(res) // URL => "https://httpbin.org/get"
-
-// POST JSON (typed request/response)
 type CreateUser struct {
 	Name string `json:"name"`
 }
 type CreateUserResponse struct {
 	JSON CreateUser `json:"json"`
 }
-resPost, err := httpx.Post[CreateUser, CreateUserResponse](c, "https://httpbin.org/post", CreateUser{Name: "Ana"})
-if err != nil {
-	panic(err)
+
+c := httpx.New()
+must := func[T any](v T, err error) T {
+	if err != nil {
+		log.Fatal(err)
+	}
+	return v
 }
+
+res := must(httpx.Get[GetResponse](c, "https://httpbin.org/get"))
+httpx.Dump(res) // URL => "https://httpbin.org/get"
+
+resPost := must(httpx.Post[CreateUser, CreateUserResponse](c, "https://httpbin.org/post", CreateUser{Name: "Ana"}))
 httpx.Dump(resPost) // JSON.Name => "Ana"
 
-// Headers
-res, err = httpx.Get[map[string]any](c, "https://httpbin.org/headers", httpx.Header("X-Test", "true"))
-if err != nil {
-	panic(err)
-}
+res = must(httpx.Get[map[string]any](c, "https://httpbin.org/headers", httpx.Header("X-Test", "true")))
 httpx.Dump(res) // headers.X-Test => "true"
 
-// Query params
-res, err = httpx.Get[map[string]any](c, "https://httpbin.org/get", httpx.Query("q", "search"))
-if err != nil {
-	panic(err)
-}
+res = must(httpx.Get[map[string]any](c, "https://httpbin.org/get", httpx.Query("q", "search")))
 httpx.Dump(res) // args.q => "search"
 
-// File upload
-resUpload, err := httpx.Post[any, map[string]any](c, "https://httpbin.org/post", nil, httpx.File("file", "./report.txt"))
-if err != nil {
-	panic(err)
-}
+resUpload := must(httpx.Post[any, map[string]any](c, "https://httpbin.org/post", nil, httpx.File("file", "./report.txt")))
 httpx.Dump(resUpload) // files.file => "...report.txt"
-```
-
-## v2 Error Handling
-
-httpx v2 returns errors as the second return value from request helpers.
-
-```go
-res, err := httpx.Get[map[string]any](c, "https://httpbin.org/get")
-if err != nil {
-	return err
-}
-_ = res
 ```
 
 ## Browser Profiles
