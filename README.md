@@ -149,11 +149,12 @@ res, err := httpx.Get[map[string]any](
 	httpx.Path("id", "42"),
 	httpx.Query("include", "teams", "active", "1"),
 	httpx.Header("Accept", "application/json"),
+	// stack more options...
 )
 if err != nil {
-	panic(err)
+	// handler error
 }
-_ = res
+httpx.Dump(res) // dumps map[string]any
 ```
 
 ## Debugging and Tracing
