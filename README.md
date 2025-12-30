@@ -28,9 +28,9 @@ Here’s a **clean, tightened, production-ready rewrite** of the README **exclud
 
 **httpx** is a modern, ergonomic HTTP client for Go.
 
-It builds on top of [`req`](https://github.com/imroc/req), preserving its flexibility while dramatically reducing boilerplate for common use cases. You get clean defaults, strong typing, and an API designed to stay out of your way.
+It builds on top of the amazing [`req`](https://github.com/imroc/req) library, preserving its flexibility while dramatically reducing boilerplate for common use cases. You get clean defaults, strong typing, and an API designed to stay out of your way.
 
-Think of it as *the 90% solution* — powerful enough for real-world systems, without sacrificing clarity or control.
+Think of it as *the 90% solution* - powerful enough for real-world systems, without sacrificing clarity or control.
 
 ## Quick Start
 
@@ -55,11 +55,11 @@ fmt.Println(res.URL)
 
 ## Design Principles
 
-* **Simple by default** – minimal configuration for common cases
-* **Composable** – everything is opt-in and chainable
-* **Predictable** – no hidden behavior or magic
-* **Typed** – first-class generics with zero reflection
-* **Escape hatches included** – full access to `req` when needed
+* **Simple by default** - minimal configuration for common cases
+* **Composable** - everything is opt-in and chainable
+* **Predictable** - no hidden behavior or magic
+* **Typed** - first-class generics with zero reflection
+* **Escape hatches included** - full access to `req` when needed
 
 ## When to Use httpx
 
@@ -70,7 +70,7 @@ Use httpx when you want:
 * Easy composition of headers, params, and behavior
 * A smooth path from simple requests to advanced control
 
-If you’re comfortable with `net/http` or `req`, httpx will feel immediately familiar — just faster to write and easier to read.
+If you’re comfortable with `net/http` or `req`, httpx will feel immediately familiar - just faster to write and easier to read.
 
 ## Installation
 
