@@ -22,139 +22,62 @@ It keeps req's power and escape hatches, while making the 90% use case feel effo
   <img src="docs/images/goforj_httpx_example_1.png" alt="httpx Logo">
 </p>
 
-## Why httpx
+Here’s a **clean, tightened, production-ready rewrite** of the README **excluding the API reference section**, preserving your intent but removing redundancy and tightening tone.
 
-- Developer-first ergonomics: fast to read, fast to write, predictable to use.
-- Reliability by default: sensible timeouts, safe error handling, resilient retries.
-- Typed, zero-ceremony requests with generics.
-- Opinionated defaults (timeouts, result handling, safe error mapping).
-- Built on req, with full escape hatches via `Client.Req()` and `Client.Raw()`.
-- Ergonomic options for headers, query params, auth, retries, dumps, and uploads.
+---
 
-## Install
+## What is httpx?
 
-```bash
-go get github.com/goforj/httpx
-```
+**httpx** is a modern, ergonomic HTTP client for Go.
+
+It builds on top of [`req`](https://github.com/imroc/req), preserving its flexibility while dramatically reducing boilerplate for common use cases. You get clean defaults, strong typing, and an API designed to stay out of your way.
+
+Think of it as *the 90% solution* — powerful enough for real-world systems, without sacrificing clarity or control.
 
 ## Quick Start
 
 ```go
-type User struct {
-	ID   int    `json:"id"`
-	Name string `json:"name"`
+type Response struct {
+    URL string `json:"url"`
 }
 
 c := httpx.New(
-	httpx.BaseURL("https://api.example.com"),
-	httpx.Bearer("token"),
-	// options...
+    httpx.BaseURL("https://httpbin.org"),
+	// ...other options as needed
 )
 
 // httpx.Get[T](client, url, options...)
-user, _ := httpx.Get[User](c, "/users/42", httpx.Query("include", "profile"))
-fmt.Println(user.Name)
-```
-
-All request helpers return `(T, error)`. The low-level escape hatch `Do` returns `(T, *req.Response, error)` when you need raw access.
-
-## Core Surface (use these first)
-
-- Requests: `Get / Post / Put / Patch / Delete` (+ `*Ctx`)
-- Composition: `Query`, `Path`, `Header`, `JSON`
-- Client defaults: `New(...)` with BaseURL, auth, timeouts
-- Resiliency: `Retry*`
-- Debug: `Dump`
-- Power-user: `Req` / `Raw` escape hatch
-
-## Most Common Tasks
-
-Brevity-first, idiomatic patterns. Handle errors; dump what matters.
-
-Singular helpers (`Query`, `Path`, `Header`) set one value; plural helpers (`Queries`, `Paths`, `Headers`) set many at once.
-
-```go
-type GetResponse struct {
-	URL string `json:"url"`
-}
-type CreateUser struct {
-	Name string `json:"name"`
-}
-type CreateUserResponse struct {
-	JSON CreateUser `json:"json"`
-}
-
-c := httpx.New()
-
-// Simple request
-res, _ := httpx.Get[GetResponse](c, "https://httpbin.org/get")
-httpx.Dump(res) // URL => "https://httpbin.org/get"
-
-// POST JSON with typed request/response
-resPost, _ := httpx.Post[CreateUser, CreateUserResponse](c, "https://httpbin.org/post", CreateUser{Name: "Ana"})
-httpx.Dump(resPost) // JSON.Name => "Ana"
-
-// Passing a header option
-res, _ = httpx.Get[map[string]any](c, "https://httpbin.org/headers", httpx.Header("X-Test", "true"))
-httpx.Dump(res) // headers.X-Test => "true"
-
-// Passing query params
-res, _ = httpx.Get[map[string]any](c, "https://httpbin.org/get", httpx.Query("q", "search"))
-httpx.Dump(res) // args.q => "search"
-
-// File upload
-resUpload, _ := httpx.Post[any, map[string]any](c, "https://httpbin.org/post", nil, httpx.File("file", "./report.txt"))
-httpx.Dump(resUpload) // files.file => "...report.txt"
-```
-
-## Browser Profiles
-
-Browser profiles provide a simple way to match common client behavior without exposing low-level details.
-Internally, profiles may apply transport and protocol settings as needed, but those details are intentionally abstracted.
-
-```go
-_ = httpx.New(httpx.AsChrome())
-```
-
-## Use Any req Feature
-
-**httpx** is built on top of the incredible [req](https://github.com/imroc/req) library, and you can always drop down to it when you need something beyond httpx’s helpers. That means every example in req’s docs is available to you with `c.Req()` or `c.Raw()`.
-
-While httpx provides ergonomic helpers for the most common use cases, req is a powerful and flexible HTTP client library with tons of features.
-
-```go
-c := httpx.New()
-
-// Grab the underlying req client.
-rc := c.Req()
-
-// Now you can use any req feature from their docs.
-// Example: enable trace, custom transports, cookie jars, proxies, etc.
-rc.EnableTraceAll()
-```
-
-See the full req documentation here: https://req.cool/docs/prologue/quickstart/
-
-Most users will only need the high-level APIs (browser profiles, request composition, retries, uploads).
-When you need deep control over headers, transports, or protocol behavior, `req` is always there.
-
-## Options in Practice
-
-```go
-c := httpx.New(httpx.BaseURL("https://httpbin.org"))
-
-res, err := httpx.Get[map[string]any](
-	c,
-	"/anything/{id}",
-	httpx.Path("id", "42"),
-	httpx.Query("include", "teams", "active", "1"),
-	httpx.Header("Accept", "application/json"),
-	// stack more options...
-)
+res, err := httpx.Get[Response](c, "/get")
 if err != nil {
-	// handle error
+    panic(err) // handle error appropriately
 }
-httpx.Dump(res) // dumps map[string]any
+
+fmt.Println(res.URL)
+````
+
+## Design Principles
+
+* **Simple by default** – minimal configuration for common cases
+* **Composable** – everything is opt-in and chainable
+* **Predictable** – no hidden behavior or magic
+* **Typed** – first-class generics with zero reflection
+* **Escape hatches included** – full access to `req` when needed
+
+## When to Use httpx
+
+Use httpx when you want:
+
+* A clean, expressive HTTP client without boilerplate
+* Strong typing without fighting the type system
+* Easy composition of headers, params, and behavior
+* A smooth path from simple requests to advanced control
+
+If you’re comfortable with `net/http` or `req`, httpx will feel immediately familiar — just faster to write and easier to read.
+
+## Installation
+
+```bash
+go get github.com/goforj/httpx
 ```
 
 ## Debugging and Tracing
@@ -163,10 +86,13 @@ httpx.Dump(res) // dumps map[string]any
 - `httpx.EnableDump()` enables dump for a single request.
 - `httpx.DumpEachRequest()` enables per-request dumps on a client.
 
-## Examples
+## Documentation
+
+The full API reference below is generated directly from source and kept in sync with the codebase.
 
 All runnable examples are generated from doc comments and live in `./examples`.
-They are compiled by `example_compile_test.go` to keep docs and code in sync.
+
+They are compiled by `example_compile_test.go` and ran in CI to keep docs and code in sync.
 
 ## Contributing
 
