@@ -86,8 +86,6 @@ go get github.com/goforj/httpx
 
 ## Documentation
 
-**API Reference & Examples**
-
 The full API reference below is generated directly from source and always reflects the current codebase.
 
 All runnable examples live in [`./examples`](./examples) and are generated from doc comments.
