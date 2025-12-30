@@ -88,18 +88,23 @@ type CreateUserResponse struct {
 
 c := httpx.New()
 
+// Simple request
 res, _ := httpx.Get[GetResponse](c, "https://httpbin.org/get")
 httpx.Dump(res) // URL => "https://httpbin.org/get"
 
+// POST JSON with typed request/response
 resPost, _ := httpx.Post[CreateUser, CreateUserResponse](c, "https://httpbin.org/post", CreateUser{Name: "Ana"})
 httpx.Dump(resPost) // JSON.Name => "Ana"
 
+// Passing a header option
 res, _ = httpx.Get[map[string]any](c, "https://httpbin.org/headers", httpx.Header("X-Test", "true"))
 httpx.Dump(res) // headers.X-Test => "true"
 
+// Passing query params
 res, _ = httpx.Get[map[string]any](c, "https://httpbin.org/get", httpx.Query("q", "search"))
 httpx.Dump(res) // args.q => "search"
 
+// File upload
 resUpload, _ := httpx.Post[any, map[string]any](c, "https://httpbin.org/post", nil, httpx.File("file", "./report.txt"))
 httpx.Dump(resUpload) // files.file => "...report.txt"
 ```
@@ -930,10 +935,7 @@ type GetResponse struct {
 }
 
 c := httpx.New()
-res, err := httpx.Get[GetResponse](c, "https://httpbin.org/get")
-if err != nil {
-	return
-}
+res, _ := httpx.Get[GetResponse](c, "https://httpbin.org/get")
 httpx.Dump(res)
 // #GetResponse {
 //   URL => "https://httpbin.org/get" #string
@@ -943,11 +945,8 @@ httpx.Dump(res)
 _Example: bind to a string body_
 
 ```go
-resText, err := httpx.Get[string](c, "https://httpbin.org/uuid")
-if err != nil {
-	return
-}
-println(resText) // dumps string
+resString, _ := httpx.Get[string](c, "https://httpbin.org/uuid")
+println(resString) // dumps string
 // {
 //   "uuid": "becbda6d-9950-4966-ae23-0369617ba065"
 // }
