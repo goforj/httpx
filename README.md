@@ -22,12 +22,10 @@ It keeps req's power and escape hatches, while making the 90% use case feel effo
   <img src="docs/images/goforj_httpx_example_1.png" alt="httpx Logo">
 </p>
 
-## v2 Status
-
-httpx v1 has been tagged and is now frozen. The `main` branch is v2, which includes intentional breaking changes to improve API clarity and ergonomics (for example, request helpers return `(T, error)`).
-
 ## Why httpx
 
+- Developer-first ergonomics: fast to read, fast to write, predictable to use.
+- Reliability by default: sensible timeouts, safe error handling, resilient retries.
 - Typed, zero-ceremony requests with generics.
 - Opinionated defaults (timeouts, result handling, safe error mapping).
 - Built on req, with full escape hatches via `Client.Req()` and `Client.Raw()`.
@@ -174,6 +172,10 @@ They are compiled by `example_compile_test.go` to keep docs and code in sync.
 - Run `go run ./docs/examplegen` after updating doc examples.
 - Run `go run ./docs/readme/main.go` to refresh the API index and test count.
 - Run `go test ./...`.
+
+## v2 Status
+
+httpx v1 has been tagged and is now frozen. The `main` branch is v2, which includes intentional breaking changes to improve API clarity and ergonomics (for example, request helpers return `(T, error)`).
 
 <!-- api:embed:start -->
 
