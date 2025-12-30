@@ -738,7 +738,7 @@ httpx.Dump(res) // dumps map[string]any
 
 ### <a id="json"></a>JSON
 
-JSON sets the request body as JSON.
+JSON forces JSON encoding for the request body (even when inference might choose differently).
 
 ```go
 type Payload struct {
