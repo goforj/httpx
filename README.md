@@ -86,11 +86,13 @@ go get github.com/goforj/httpx
 
 ## Documentation
 
-The full API reference below is generated directly from source and kept in sync with the codebase.
+**API Reference & Examples**
 
-All runnable examples are generated from doc comments and live in `./examples`.
+The full API reference below is generated directly from source and always reflects the current codebase.
 
-They are compiled by `example_compile_test.go` and ran in CI to keep docs and code in sync.
+All runnable examples live in [`./examples`](./examples) and are generated from doc comments.
+
+They are compiled and executed in CI to ensure the documentation stays accurate and up to date.
 
 ## Contributing
 
