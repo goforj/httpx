@@ -9,6 +9,5 @@ func main() {
 	// TLSFingerprintRandomized applies a randomized TLS fingerprint preset.
 
 	// Example: apply randomized TLS fingerprint
-	c := httpx.New(httpx.TLSFingerprintRandomized())
-	_ = c
+	_ = httpx.New(httpx.TLSFingerprintRandomized())
 }

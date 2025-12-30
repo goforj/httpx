@@ -9,6 +9,5 @@ func main() {
 	// AsMobile applies a mobile Chrome-like profile (headers including User-Agent, TLS, and HTTP/2 behavior).
 
 	// Example: use a mobile profile
-	c := httpx.New(httpx.AsMobile())
-	_ = c
+	_ = httpx.New(httpx.AsMobile())
 }

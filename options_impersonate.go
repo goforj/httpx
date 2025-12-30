@@ -21,8 +21,7 @@ const (
 // Applies to client configuration only.
 // Example: apply a TLS fingerprint preset
 //
-//	c := httpx.New(httpx.TLSFingerprint(httpx.TLSFingerprintChromeKind))
-//	_ = c
+//	_ = httpx.New(httpx.TLSFingerprint(httpx.TLSFingerprintChromeKind))
 func TLSFingerprint(kind TLSFingerprintKind) OptionBuilder {
 	return OptionBuilder{}.TLSFingerprint(kind)
 }
@@ -54,8 +53,7 @@ func (b OptionBuilder) TLSFingerprint(kind TLSFingerprintKind) OptionBuilder {
 // Applies to client configuration only.
 // Example: apply Chrome TLS fingerprint
 //
-//	c := httpx.New(httpx.TLSFingerprintChrome())
-//	_ = c
+//	_ = httpx.New(httpx.TLSFingerprintChrome())
 func TLSFingerprintChrome() OptionBuilder {
 	return OptionBuilder{}.TLSFingerprintChrome()
 }
@@ -72,8 +70,7 @@ func (b OptionBuilder) TLSFingerprintChrome() OptionBuilder {
 // Applies to client configuration only.
 // Example: apply Firefox TLS fingerprint
 //
-//	c := httpx.New(httpx.TLSFingerprintFirefox())
-//	_ = c
+//	_ = httpx.New(httpx.TLSFingerprintFirefox())
 func TLSFingerprintFirefox() OptionBuilder {
 	return OptionBuilder{}.TLSFingerprintFirefox()
 }
@@ -90,8 +87,7 @@ func (b OptionBuilder) TLSFingerprintFirefox() OptionBuilder {
 // Applies to client configuration only.
 // Example: apply Safari TLS fingerprint
 //
-//	c := httpx.New(httpx.TLSFingerprintSafari())
-//	_ = c
+//	_ = httpx.New(httpx.TLSFingerprintSafari())
 func TLSFingerprintSafari() OptionBuilder {
 	return OptionBuilder{}.TLSFingerprintSafari()
 }
@@ -108,8 +104,7 @@ func (b OptionBuilder) TLSFingerprintSafari() OptionBuilder {
 // Applies to client configuration only.
 // Example: apply Edge TLS fingerprint
 //
-//	c := httpx.New(httpx.TLSFingerprintEdge())
-//	_ = c
+//	_ = httpx.New(httpx.TLSFingerprintEdge())
 func TLSFingerprintEdge() OptionBuilder {
 	return OptionBuilder{}.TLSFingerprintEdge()
 }
@@ -126,8 +121,7 @@ func (b OptionBuilder) TLSFingerprintEdge() OptionBuilder {
 // Applies to client configuration only.
 // Example: apply Android TLS fingerprint
 //
-//	c := httpx.New(httpx.TLSFingerprintAndroid())
-//	_ = c
+//	_ = httpx.New(httpx.TLSFingerprintAndroid())
 func TLSFingerprintAndroid() OptionBuilder {
 	return OptionBuilder{}.TLSFingerprintAndroid()
 }
@@ -144,8 +138,7 @@ func (b OptionBuilder) TLSFingerprintAndroid() OptionBuilder {
 // Applies to client configuration only.
 // Example: apply iOS TLS fingerprint
 //
-//	c := httpx.New(httpx.TLSFingerprintIOS())
-//	_ = c
+//	_ = httpx.New(httpx.TLSFingerprintIOS())
 func TLSFingerprintIOS() OptionBuilder {
 	return OptionBuilder{}.TLSFingerprintIOS()
 }
@@ -162,8 +155,7 @@ func (b OptionBuilder) TLSFingerprintIOS() OptionBuilder {
 // Applies to client configuration only.
 // Example: apply randomized TLS fingerprint
 //
-//	c := httpx.New(httpx.TLSFingerprintRandomized())
-//	_ = c
+//	_ = httpx.New(httpx.TLSFingerprintRandomized())
 func TLSFingerprintRandomized() OptionBuilder {
 	return OptionBuilder{}.TLSFingerprintRandomized()
 }

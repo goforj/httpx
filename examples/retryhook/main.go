@@ -10,6 +10,7 @@ import (
 
 func main() {
 	// RetryHook registers a retry hook for a request.
+	// Runs before each retry attempt; no hooks are configured by default.
 
 	// Example: hook on retry
 	// Apply to all requests

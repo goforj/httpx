@@ -9,6 +9,5 @@ func main() {
 	// TLSFingerprintIOS applies the iOS TLS fingerprint preset.
 
 	// Example: apply iOS TLS fingerprint
-	c := httpx.New(httpx.TLSFingerprintIOS())
-	_ = c
+	_ = httpx.New(httpx.TLSFingerprintIOS())
 }

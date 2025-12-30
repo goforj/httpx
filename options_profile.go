@@ -17,8 +17,7 @@ import (
 // Applies to client configuration only.
 // Example: use a Chrome profile
 //
-//	c := httpx.New(httpx.AsChrome())
-//	_ = c
+//	_ = httpx.New(httpx.AsChrome())
 func AsChrome() OptionBuilder {
 	return mergeOptionBuilders(
 		TLSFingerprint(TLSFingerprintChromeKind),
@@ -75,8 +74,7 @@ func (b OptionBuilder) AsFirefox() OptionBuilder {
 // Applies to client configuration only.
 // Example: use a Safari profile
 //
-//	c := httpx.New(httpx.AsSafari())
-//	_ = c
+//	_ = httpx.New(httpx.AsSafari())
 func AsSafari() OptionBuilder {
 	return mergeOptionBuilders(
 		TLSFingerprint(TLSFingerprintSafariKind),
@@ -100,8 +98,7 @@ func (b OptionBuilder) AsSafari() OptionBuilder {
 // Applies to client configuration only.
 // Example: use a mobile profile
 //
-//	c := httpx.New(httpx.AsMobile())
-//	_ = c
+//	_ = httpx.New(httpx.AsMobile())
 func AsMobile() OptionBuilder {
 	return mergeOptionBuilders(
 		TLSFingerprint(TLSFingerprintAndroidKind),

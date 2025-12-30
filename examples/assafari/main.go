@@ -9,6 +9,5 @@ func main() {
 	// AsSafari applies the Safari browser profile (headers including User-Agent, TLS, and HTTP/2 behavior).
 
 	// Example: use a Safari profile
-	c := httpx.New(httpx.AsSafari())
-	_ = c
+	_ = httpx.New(httpx.AsSafari())
 }

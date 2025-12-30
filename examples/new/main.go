@@ -17,7 +17,7 @@ func main() {
 
 	// Example: configure all client options
 	var buf bytes.Buffer
-	c := httpx.New(httpx.
+	_ = httpx.New(httpx.
 		BaseURL("https://httpbin.org").
 		Timeout(5*time.Second).
 		Header("X-Trace", "1").
@@ -47,5 +47,4 @@ func main() {
 		}).
 		RetryHook(func(_ *req.Response, _ error) {}),
 	)
-	_ = c
 }

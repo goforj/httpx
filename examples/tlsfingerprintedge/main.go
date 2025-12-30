@@ -9,6 +9,5 @@ func main() {
 	// TLSFingerprintEdge applies the Edge TLS fingerprint preset.
 
 	// Example: apply Edge TLS fingerprint
-	c := httpx.New(httpx.TLSFingerprintEdge())
-	_ = c
+	_ = httpx.New(httpx.TLSFingerprintEdge())
 }

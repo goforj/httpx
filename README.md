@@ -14,7 +14,7 @@ It keeps req's power and escape hatches, while making the 90% use case feel effo
     <a href="https://goreportcard.com/report/github.com/goforj/httpx"><img src="https://goreportcard.com/badge/github.com/goforj/httpx" alt="Go Report Card"></a>
     <a href="https://codecov.io/gh/goforj/httpx" ><img src="https://codecov.io/gh/goforj/httpx/graph/badge.svg?token=R5O7LYAD4B"/></a>
 <!-- test-count:embed:start -->
-    <img src="https://img.shields.io/badge/tests-197-brightgreen" alt="Tests">
+    <img src="https://img.shields.io/badge/tests-203-brightgreen" alt="Tests">
 <!-- test-count:embed:end -->
 </p>
 
@@ -102,8 +102,7 @@ Browser profiles provide a simple way to match common client behavior without ex
 Internally, profiles may apply transport and protocol settings as needed, but those details are intentionally abstracted.
 
 ```go
-c := httpx.New(httpx.AsChrome())
-_ = c
+_ = httpx.New(httpx.AsChrome())
 ```
 
 ## Use Any req Feature
@@ -176,7 +175,7 @@ They are compiled by `example_compile_test.go` to keep docs and code in sync.
 | **Debugging** | [Dump](#dump) [DumpAll](#dumpall) [DumpEachRequest](#dumpeachrequest) [DumpEachRequestTo](#dumpeachrequestto) [DumpTo](#dumpto) [DumpToFile](#dumptofile) [EnableDump](#enabledump) [Trace](#trace) [TraceAll](#traceall) |
 | **Download Options** | [OutputFile](#outputfile) |
 | **Errors** | [Error](#error) |
-| **Request Composition** | [Body](#body) [Form](#form) [Header](#header) [JSON](#json) [Path](#path) [Query](#query) [UserAgent](#useragent) |
+| **Request Composition** | [Body](#body) [Form](#form) [Header](#header) [Headers](#headers) [JSON](#json) [Path](#path) [Paths](#paths) [Queries](#queries) [Query](#query) [UserAgent](#useragent) |
 | **Request Control** | [Before](#before) [Timeout](#timeout) |
 | **Requests** | [Delete](#delete) [Do](#do) [Get](#get) [Head](#head) [Options](#options) [Patch](#patch) [Post](#post) [Put](#put) |
 | **Requests (Context)** | [DeleteCtx](#deletectx) [GetCtx](#getctx) [HeadCtx](#headctx) [OptionsCtx](#optionsctx) [PatchCtx](#patchctx) [PostCtx](#postctx) [PutCtx](#putctx) |
@@ -276,8 +275,7 @@ httpx.Dump(res) // dumps map[string]any
 AsChrome applies the Chrome browser profile (headers including User-Agent, TLS, and HTTP/2 behavior).
 
 ```go
-c := httpx.New(httpx.AsChrome())
-_ = c
+_ = httpx.New(httpx.AsChrome())
 ```
 
 ### <a id="asfirefox"></a>AsFirefox
@@ -301,8 +299,7 @@ httpx.Dump(res) // dumps map[string]any
 AsMobile applies a mobile Chrome-like profile (headers including User-Agent, TLS, and HTTP/2 behavior).
 
 ```go
-c := httpx.New(httpx.AsMobile())
-_ = c
+_ = httpx.New(httpx.AsMobile())
 ```
 
 ### <a id="assafari"></a>AsSafari
@@ -310,8 +307,7 @@ _ = c
 AsSafari applies the Safari browser profile (headers including User-Agent, TLS, and HTTP/2 behavior).
 
 ```go
-c := httpx.New(httpx.AsSafari())
-_ = c
+_ = httpx.New(httpx.AsSafari())
 ```
 
 ## Client
@@ -326,7 +322,7 @@ New creates a client with opinionated defaults and optional overrides.
 
 ```go
 var buf bytes.Buffer
-c := httpx.New(httpx.
+_ = httpx.New(httpx.
 	BaseURL("https://httpbin.org").
 	Timeout(5*time.Second).
 	Header("X-Trace", "1").
@@ -356,7 +352,6 @@ c := httpx.New(httpx.
 	}).
 	RetryHook(func(_ *req.Response, _ error) {}),
 )
-_ = c
 ```
 
 ### <a id="raw"></a>Raw
@@ -721,6 +716,41 @@ httpx.Dump(res) // dumps map[string]any
 // }
 ```
 
+### <a id="headers"></a>Headers
+
+Headers sets multiple headers on a request or client.
+
+```go
+// Apply to all requests
+c := httpx.New(httpx.Headers(map[string]string{
+	"X-Trace": "1",
+	"Accept":  "application/json",
+}))
+res, err := httpx.Get[map[string]any](c, "https://httpbin.org/headers")
+_ = err
+httpx.Dump(res) // dumps map[string]any
+// #map[string]interface {} {
+//   headers => #map[string]interface {} {
+//     Accept => "application/json" #string
+//     X-Trace => "1" #string
+//   }
+// }
+
+// Apply to a single request
+res, err = httpx.Get[map[string]any](c, "https://httpbin.org/headers", httpx.Headers(map[string]string{
+	"X-Trace": "1",
+	"Accept":  "application/json",
+}))
+_ = err
+httpx.Dump(res) // dumps map[string]any
+// #map[string]interface {} {
+//   headers => #map[string]interface {} {
+//     Accept => "application/json" #string
+//     X-Trace => "1" #string
+//   }
+// }
+```
+
 ### <a id="json"></a>JSON
 
 JSON sets the request body as JSON.
@@ -756,6 +786,43 @@ _ = err
 httpx.Dump(res) // dumps map[string]any
 // #map[string]interface {} {
 //   url => "https://httpbin.org/anything/42" #string
+// }
+```
+
+### <a id="paths"></a>Paths
+
+Paths sets multiple path parameters from a map.
+
+```go
+c := httpx.New()
+res, err := httpx.Get[map[string]any](c, "https://httpbin.org/anything/{org}/users/{id}", httpx.Paths(map[string]any{
+	"org": "goforj",
+	"id":  7,
+}))
+_ = err
+httpx.Dump(res) // dumps map[string]any
+// #map[string]interface {} {
+//   url => "https://httpbin.org/anything/goforj/users/7" #string
+// }
+```
+
+### <a id="queries"></a>Queries
+
+Queries sets query parameters from a map.
+
+```go
+c := httpx.New()
+res, err := httpx.Get[map[string]any](c, "https://httpbin.org/get", httpx.Queries(map[string]string{
+	"q":  "search",
+	"ok": "1",
+}))
+_ = err
+httpx.Dump(res) // dumps map[string]any
+// #map[string]interface {} {
+//   args => #map[string]interface {} {
+//     ok => "1" #string
+//     q => "search" #string
+//   }
 // }
 ```
 
@@ -1168,6 +1235,7 @@ httpx.Dump(res) // dumps UpdateUserResponse
 ### <a id="retrybackoff"></a>RetryBackoff
 
 RetryBackoff sets a capped exponential backoff retry interval for a request.
+Overrides the req default interval (fixed 100ms) with jittered backoff.
 
 ```go
 // Apply to all requests
@@ -1191,6 +1259,7 @@ httpx.Dump(res) // dumps map[string]any
 ### <a id="retrycondition"></a>RetryCondition
 
 RetryCondition sets the retry condition for a request.
+Overrides the default behavior (retry only when a request error occurs).
 
 ```go
 // Apply to all requests
@@ -1214,6 +1283,9 @@ httpx.Dump(res) // dumps map[string]any
 ### <a id="retrycount"></a>RetryCount
 
 RetryCount enables retry for a request and sets the maximum retry count.
+Default behavior from req: retries are disabled (count = 0). When enabled,
+retries happen only on request errors unless RetryCondition is set, and the
+default interval is a fixed 100ms between attempts.
 
 ```go
 // Apply to all requests
@@ -1237,6 +1309,7 @@ httpx.Dump(res) // dumps map[string]any
 ### <a id="retryfixedinterval"></a>RetryFixedInterval
 
 RetryFixedInterval sets a fixed retry interval for a request.
+Overrides the req default interval (fixed 100ms).
 
 ```go
 // Apply to all requests
@@ -1260,6 +1333,7 @@ httpx.Dump(res) // dumps map[string]any
 ### <a id="retryhook"></a>RetryHook
 
 RetryHook registers a retry hook for a request.
+Runs before each retry attempt; no hooks are configured by default.
 
 ```go
 // Apply to all requests
@@ -1283,6 +1357,7 @@ httpx.Dump(res) // dumps map[string]any
 ### <a id="retryinterval"></a>RetryInterval
 
 RetryInterval sets a custom retry interval function for a request.
+Overrides the req default interval (fixed 100ms).
 
 ```go
 // Apply to all requests
@@ -1312,12 +1387,12 @@ httpx.Dump(res) // dumps map[string]any
 ### <a id="retry"></a>Retry
 
 Retry applies a custom retry configuration to the client.
+Defaults remain in effect unless the callback modifies them.
 
 ```go
-c := httpx.New(httpx.Retry(func(rc *req.Client) {
+_ = httpx.New(httpx.Retry(func(rc *req.Client) {
 	rc.SetCommonRetryCount(2)
 }))
-_ = c
 ```
 
 ## Upload Options
@@ -1466,8 +1541,7 @@ httpx.Dump(res) // dumps map[string]any
 TLSFingerprint applies a TLS fingerprint preset.
 
 ```go
-c := httpx.New(httpx.TLSFingerprint(httpx.TLSFingerprintChromeKind))
-_ = c
+_ = httpx.New(httpx.TLSFingerprint(httpx.TLSFingerprintChromeKind))
 ```
 
 ### <a id="tlsfingerprintandroid"></a>TLSFingerprintAndroid
@@ -1475,8 +1549,7 @@ _ = c
 TLSFingerprintAndroid applies the Android TLS fingerprint preset.
 
 ```go
-c := httpx.New(httpx.TLSFingerprintAndroid())
-_ = c
+_ = httpx.New(httpx.TLSFingerprintAndroid())
 ```
 
 ### <a id="tlsfingerprintchrome"></a>TLSFingerprintChrome
@@ -1484,8 +1557,7 @@ _ = c
 TLSFingerprintChrome applies the Chrome TLS fingerprint preset.
 
 ```go
-c := httpx.New(httpx.TLSFingerprintChrome())
-_ = c
+_ = httpx.New(httpx.TLSFingerprintChrome())
 ```
 
 ### <a id="tlsfingerprintedge"></a>TLSFingerprintEdge
@@ -1493,8 +1565,7 @@ _ = c
 TLSFingerprintEdge applies the Edge TLS fingerprint preset.
 
 ```go
-c := httpx.New(httpx.TLSFingerprintEdge())
-_ = c
+_ = httpx.New(httpx.TLSFingerprintEdge())
 ```
 
 ### <a id="tlsfingerprintfirefox"></a>TLSFingerprintFirefox
@@ -1502,8 +1573,7 @@ _ = c
 TLSFingerprintFirefox applies the Firefox TLS fingerprint preset.
 
 ```go
-c := httpx.New(httpx.TLSFingerprintFirefox())
-_ = c
+_ = httpx.New(httpx.TLSFingerprintFirefox())
 ```
 
 ### <a id="tlsfingerprintios"></a>TLSFingerprintIOS
@@ -1511,8 +1581,7 @@ _ = c
 TLSFingerprintIOS applies the iOS TLS fingerprint preset.
 
 ```go
-c := httpx.New(httpx.TLSFingerprintIOS())
-_ = c
+_ = httpx.New(httpx.TLSFingerprintIOS())
 ```
 
 ### <a id="tlsfingerprintrandomized"></a>TLSFingerprintRandomized
@@ -1520,8 +1589,7 @@ _ = c
 TLSFingerprintRandomized applies a randomized TLS fingerprint preset.
 
 ```go
-c := httpx.New(httpx.TLSFingerprintRandomized())
-_ = c
+_ = httpx.New(httpx.TLSFingerprintRandomized())
 ```
 
 ### <a id="tlsfingerprintsafari"></a>TLSFingerprintSafari
@@ -1529,7 +1597,6 @@ _ = c
 TLSFingerprintSafari applies the Safari TLS fingerprint preset.
 
 ```go
-c := httpx.New(httpx.TLSFingerprintSafari())
-_ = c
+_ = httpx.New(httpx.TLSFingerprintSafari())
 ```
 <!-- api:embed:end -->

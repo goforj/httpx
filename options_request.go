@@ -50,8 +50,46 @@ func (b OptionBuilder) Header(key, value string) OptionBuilder {
 	))
 }
 
-func headers(values map[string]string) OptionBuilder {
-	return OptionBuilder{}.add(bothOption(
+// Headers sets multiple headers on a request or client.
+// @group Request Composition
+//
+// Applies to both client defaults and request-time headers.
+// Example: apply headers
+//
+//	// Apply to all requests
+//	c := httpx.New(httpx.Headers(map[string]string{
+//		"X-Trace": "1",
+//		"Accept":  "application/json",
+//	}))
+//	res, err := httpx.Get[map[string]any](c, "https://httpbin.org/headers")
+//	_ = err
+//	httpx.Dump(res) // dumps map[string]any
+//	// #map[string]interface {} {
+//	//   headers => #map[string]interface {} {
+//	//     Accept => "application/json" #string
+//	//     X-Trace => "1" #string
+//	//   }
+//	// }
+//
+//	// Apply to a single request
+//	res, err = httpx.Get[map[string]any](c, "https://httpbin.org/headers", httpx.Headers(map[string]string{
+//		"X-Trace": "1",
+//		"Accept":  "application/json",
+//	}))
+//	_ = err
+//	httpx.Dump(res) // dumps map[string]any
+//	// #map[string]interface {} {
+//	//   headers => #map[string]interface {} {
+//	//     Accept => "application/json" #string
+//	//     X-Trace => "1" #string
+//	//   }
+//	// }
+func Headers(values map[string]string) OptionBuilder {
+	return OptionBuilder{}.Headers(values)
+}
+
+func (b OptionBuilder) Headers(values map[string]string) OptionBuilder {
+	return b.add(bothOption(
 		func(c *Client) {
 			c.req.SetCommonHeaders(values)
 		},
@@ -59,6 +97,10 @@ func headers(values map[string]string) OptionBuilder {
 			r.SetHeaders(values)
 		},
 	))
+}
+
+func headers(values map[string]string) OptionBuilder {
+	return OptionBuilder{}.Headers(values)
 }
 
 // UserAgent sets the User-Agent header on a request or client.
@@ -132,6 +174,35 @@ func (b OptionBuilder) Query(kv ...string) OptionBuilder {
 	}))
 }
 
+// Queries sets query parameters from a map.
+// @group Request Composition
+//
+// Applies to individual requests only.
+// Example: add query params
+//
+//	c := httpx.New()
+//	res, err := httpx.Get[map[string]any](c, "https://httpbin.org/get", httpx.Queries(map[string]string{
+//		"q":  "search",
+//		"ok": "1",
+//	}))
+//	_ = err
+//	httpx.Dump(res) // dumps map[string]any
+//	// #map[string]interface {} {
+//	//   args => #map[string]interface {} {
+//	//     ok => "1" #string
+//	//     q => "search" #string
+//	//   }
+//	// }
+func Queries(values map[string]string) OptionBuilder {
+	return OptionBuilder{}.Queries(values)
+}
+
+func (b OptionBuilder) Queries(values map[string]string) OptionBuilder {
+	return b.add(requestOnly(func(r *req.Request) {
+		r.SetQueryParams(values)
+	}))
+}
+
 // Path sets a path parameter by name.
 // @group Request Composition
 //
@@ -156,6 +227,36 @@ func Path(key string, value any) OptionBuilder {
 func (b OptionBuilder) Path(key string, value any) OptionBuilder {
 	return b.add(requestOnly(func(r *req.Request) {
 		r.SetPathParam(key, fmt.Sprint(value))
+	}))
+}
+
+// Paths sets multiple path parameters from a map.
+// @group Request Composition
+//
+// Applies to individual requests only.
+// Example: path parameters
+//
+//	c := httpx.New()
+//	res, err := httpx.Get[map[string]any](c, "https://httpbin.org/anything/{org}/users/{id}", httpx.Paths(map[string]any{
+//		"org": "goforj",
+//		"id":  7,
+//	}))
+//	_ = err
+//	httpx.Dump(res) // dumps map[string]any
+//	// #map[string]interface {} {
+//	//   url => "https://httpbin.org/anything/goforj/users/7" #string
+//	// }
+func Paths(values map[string]any) OptionBuilder {
+	return OptionBuilder{}.Paths(values)
+}
+
+func (b OptionBuilder) Paths(values map[string]any) OptionBuilder {
+	return b.add(requestOnly(func(r *req.Request) {
+		params := make(map[string]string, len(values))
+		for key, value := range values {
+			params[key] = fmt.Sprint(value)
+		}
+		r.SetPathParams(params)
 	}))
 }
 

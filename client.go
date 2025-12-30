@@ -31,7 +31,7 @@ type Client struct {
 // Example: configure all client options
 //
 //	var buf bytes.Buffer
-//	c := httpx.New(httpx.
+//	_ = httpx.New(httpx.
 //		BaseURL("https://httpbin.org").
 //		Timeout(5*time.Second).
 //		Header("X-Trace", "1").
@@ -61,7 +61,6 @@ type Client struct {
 //		}).
 //		RetryHook(func(_ *req.Response, _ error) {}),
 //	)
-//	_ = c
 func New(opts ...Option) *Client {
 	c := &Client{
 		req: req.C().SetTimeout(defaultTimeout).SetUserAgent(defaultUserAgent),

@@ -10,6 +10,7 @@ import (
 
 func main() {
 	// RetryBackoff sets a capped exponential backoff retry interval for a request.
+	// Overrides the req default interval (fixed 100ms) with jittered backoff.
 
 	// Example: retry backoff
 	// Apply to all requests

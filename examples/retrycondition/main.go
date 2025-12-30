@@ -10,6 +10,7 @@ import (
 
 func main() {
 	// RetryCondition sets the retry condition for a request.
+	// Overrides the default behavior (retry only when a request error occurs).
 
 	// Example: retry on 503
 	// Apply to all requests

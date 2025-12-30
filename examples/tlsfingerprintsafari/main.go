@@ -9,6 +9,5 @@ func main() {
 	// TLSFingerprintSafari applies the Safari TLS fingerprint preset.
 
 	// Example: apply Safari TLS fingerprint
-	c := httpx.New(httpx.TLSFingerprintSafari())
-	_ = c
+	_ = httpx.New(httpx.TLSFingerprintSafari())
 }

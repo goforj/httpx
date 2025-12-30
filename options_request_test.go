@@ -138,6 +138,27 @@ func TestQueriesFunctionAlone(t *testing.T) {
 	}
 }
 
+func TestQueriesMap(t *testing.T) {
+	capture := &requestCapture{}
+	srv := newCaptureServer(t, capture)
+	defer srv.Close()
+
+	c := New()
+	_, err := Get[string](c, srv.URL, Queries(map[string]string{
+		"lang": "go",
+		"ok":   "1",
+	}))
+	if err != nil {
+		t.Fatalf("request failed: %v", err)
+	}
+	if capture.query.Get("lang") != "go" {
+		t.Fatalf("lang = %q", capture.query.Get("lang"))
+	}
+	if capture.query.Get("ok") != "1" {
+		t.Fatalf("ok = %q", capture.query.Get("ok"))
+	}
+}
+
 func TestPathAndPaths(t *testing.T) {
 	capture := &requestCapture{}
 	srv := newCaptureServer(t, capture)
@@ -162,6 +183,24 @@ func TestPathAndPaths(t *testing.T) {
 	}
 	if capture2.path != "/orgs/goforj/users/7" {
 		t.Fatalf("paths = %q", capture2.path)
+	}
+}
+
+func TestPathsMap(t *testing.T) {
+	capture := &requestCapture{}
+	srv := newCaptureServer(t, capture)
+	defer srv.Close()
+
+	c := New()
+	_, err := Get[string](c, srv.URL+"/orgs/{org}/users/{id}", Paths(map[string]any{
+		"org": "goforj",
+		"id":  7,
+	}))
+	if err != nil {
+		t.Fatalf("paths request failed: %v", err)
+	}
+	if capture.path != "/orgs/goforj/users/7" {
+		t.Fatalf("paths = %q", capture.path)
 	}
 }
 
@@ -226,6 +265,27 @@ func TestHeadersHelper(t *testing.T) {
 	headers(map[string]string{"X-Req": "2"}).applyRequest(r)
 	if got := r.Headers.Get("X-Req"); got != "2" {
 		t.Fatalf("request header = %q", got)
+	}
+}
+
+func TestHeadersMap(t *testing.T) {
+	capture := &requestCapture{}
+	srv := newCaptureServer(t, capture)
+	defer srv.Close()
+
+	c := New()
+	_, err := Get[string](c, srv.URL, Headers(map[string]string{
+		"X-Trace": "1",
+		"Accept":  "application/json",
+	}))
+	if err != nil {
+		t.Fatalf("request failed: %v", err)
+	}
+	if got := capture.headers.Get("X-Trace"); got != "1" {
+		t.Fatalf("X-Trace header = %q", got)
+	}
+	if got := capture.headers.Get("Accept"); got != "application/json" {
+		t.Fatalf("Accept header = %q", got)
 	}
 }
 

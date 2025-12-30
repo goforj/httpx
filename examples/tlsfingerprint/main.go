@@ -9,6 +9,5 @@ func main() {
 	// TLSFingerprint applies a TLS fingerprint preset.
 
 	// Example: apply a TLS fingerprint preset
-	c := httpx.New(httpx.TLSFingerprint(httpx.TLSFingerprintChromeKind))
-	_ = c
+	_ = httpx.New(httpx.TLSFingerprint(httpx.TLSFingerprintChromeKind))
 }

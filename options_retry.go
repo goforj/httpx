@@ -7,6 +7,9 @@ import (
 )
 
 // RetryCount enables retry for a request and sets the maximum retry count.
+// Default behavior from req: retries are disabled (count = 0). When enabled,
+// retries happen only on request errors unless RetryCondition is set, and the
+// default interval is a fixed 100ms between attempts.
 // @group Retry
 //
 // Applies to both client defaults and individual requests.
@@ -44,6 +47,7 @@ func (b OptionBuilder) RetryCount(count int) OptionBuilder {
 }
 
 // RetryFixedInterval sets a fixed retry interval for a request.
+// Overrides the req default interval (fixed 100ms).
 // @group Retry
 //
 // Applies to both client defaults and individual requests.
@@ -81,6 +85,7 @@ func (b OptionBuilder) RetryFixedInterval(interval time.Duration) OptionBuilder 
 }
 
 // RetryBackoff sets a capped exponential backoff retry interval for a request.
+// Overrides the req default interval (fixed 100ms) with jittered backoff.
 // @group Retry
 //
 // Applies to both client defaults and individual requests.
@@ -118,6 +123,7 @@ func (b OptionBuilder) RetryBackoff(min, max time.Duration) OptionBuilder {
 }
 
 // RetryInterval sets a custom retry interval function for a request.
+// Overrides the req default interval (fixed 100ms).
 // @group Retry
 //
 // Applies to both client defaults and individual requests.
@@ -159,6 +165,7 @@ func (b OptionBuilder) RetryInterval(fn req.GetRetryIntervalFunc) OptionBuilder 
 }
 
 // RetryCondition sets the retry condition for a request.
+// Overrides the default behavior (retry only when a request error occurs).
 // @group Retry
 //
 // Applies to both client defaults and individual requests.
@@ -196,6 +203,7 @@ func (b OptionBuilder) RetryCondition(condition req.RetryConditionFunc) OptionBu
 }
 
 // RetryHook registers a retry hook for a request.
+// Runs before each retry attempt; no hooks are configured by default.
 // @group Retry
 //
 // Applies to both client defaults and individual requests.
@@ -233,15 +241,15 @@ func (b OptionBuilder) RetryHook(hook req.RetryHookFunc) OptionBuilder {
 }
 
 // Retry applies a custom retry configuration to the client.
+// Defaults remain in effect unless the callback modifies them.
 // @group Retry (Client)
 //
 // Applies only to client configuration.
 // Example: configure client retry
 //
-//	c := httpx.New(httpx.Retry(func(rc *req.Client) {
+//	_ = httpx.New(httpx.Retry(func(rc *req.Client) {
 //		rc.SetCommonRetryCount(2)
 //	}))
-//	_ = c
 func Retry(fn func(*req.Client)) OptionBuilder {
 	return OptionBuilder{}.Retry(fn)
 }

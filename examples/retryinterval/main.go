@@ -11,6 +11,7 @@ import (
 
 func main() {
 	// RetryInterval sets a custom retry interval function for a request.
+	// Overrides the req default interval (fixed 100ms).
 
 	// Example: custom retry interval
 	// Apply to all requests

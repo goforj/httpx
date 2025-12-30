@@ -10,6 +10,7 @@ import (
 
 func main() {
 	// RetryFixedInterval sets a fixed retry interval for a request.
+	// Overrides the req default interval (fixed 100ms).
 
 	// Example: retry interval
 	// Apply to all requests
