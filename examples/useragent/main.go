@@ -11,8 +11,7 @@ func main() {
 	// Example: set a User-Agent
 	// Apply to all requests
 	c := httpx.New(httpx.UserAgent("my-app/1.0"))
-	res, err := httpx.Get[map[string]any](c, "https://httpbin.org/headers")
-	_ = err
+	res, _ := httpx.Get[map[string]any](c, "https://httpbin.org/headers")
 	httpx.Dump(res) // dumps map[string]any
 	// #map[string]interface {} {
 	//   headers => #map[string]interface {} {
@@ -21,8 +20,7 @@ func main() {
 	// }
 
 	// Apply to a single request
-	res, err = httpx.Get[map[string]any](c, "https://httpbin.org/headers", httpx.UserAgent("my-app/1.0"))
-	_ = err
+	res, _ = httpx.Get[map[string]any](c, "https://httpbin.org/headers", httpx.UserAgent("my-app/1.0"))
 	httpx.Dump(res) // dumps map[string]any
 	// #map[string]interface {} {
 	//   headers => #map[string]interface {} {

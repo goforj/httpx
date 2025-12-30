@@ -15,7 +15,7 @@ func main() {
 
 	// Example: throttle upload progress updates
 	c := httpx.New()
-	res, err := httpx.Post[any, map[string]any](c, "https://httpbin.org/post", nil,
+	res, _ := httpx.Post[any, map[string]any](c, "https://httpbin.org/post", nil,
 		httpx.File("file", "/tmp/report.bin"),
 		httpx.UploadCallbackWithInterval(func(info req.UploadInfo) {
 			percent := float64(info.UploadedSize) / float64(info.FileSize) * 100
@@ -25,7 +25,6 @@ func main() {
 			}
 		}, 200*time.Millisecond),
 	)
-	_ = err
 	httpx.Dump(res) // dumps map[string]any
 	// #map[string]interface {} {
 	//   files => #map[string]interface {} {

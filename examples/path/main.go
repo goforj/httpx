@@ -14,8 +14,7 @@ func main() {
 	}
 
 	c := httpx.New()
-	res, err := httpx.Get[map[string]any](c, "https://httpbin.org/anything/{id}", httpx.Path("id", 42))
-	_ = err
+	res, _ := httpx.Get[map[string]any](c, "https://httpbin.org/anything/{id}", httpx.Path("id", 42))
 	httpx.Dump(res) // dumps map[string]any
 	// #map[string]interface {} {
 	//   url => "https://httpbin.org/anything/42" #string

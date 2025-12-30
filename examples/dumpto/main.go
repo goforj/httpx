@@ -14,8 +14,7 @@ func main() {
 	// Example: dump to a buffer
 	var buf bytes.Buffer
 	c := httpx.New()
-	res, err := httpx.Get[map[string]any](c, "https://httpbin.org/uuid", httpx.DumpTo(&buf))
-	_ = err
+	res, _ := httpx.Get[map[string]any](c, "https://httpbin.org/uuid", httpx.DumpTo(&buf))
 	httpx.Dump(res) // dumps map[string]any
 	// #map[string]interface {} {
 	//   uuid => "<uuid>" #string

@@ -13,8 +13,7 @@ func main() {
 
 	// Example: upload from reader
 	c := httpx.New()
-	res, err := httpx.Post[any, map[string]any](c, "https://httpbin.org/post", nil, httpx.FileReader("file", "report.txt", strings.NewReader("hello")))
-	_ = err
+	res, _ := httpx.Post[any, map[string]any](c, "https://httpbin.org/post", nil, httpx.FileReader("file", "report.txt", strings.NewReader("hello")))
 	httpx.Dump(res) // dumps map[string]any
 	// #map[string]interface {} {
 	//   files => #map[string]interface {} {

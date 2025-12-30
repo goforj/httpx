@@ -14,16 +14,14 @@ func main() {
 	// Example: retry count
 	// Apply to all requests
 	c := httpx.New(httpx.RetryCount(2))
-	res, err := httpx.Get[map[string]any](c, "https://httpbin.org/uuid")
-	_ = err
+	res, _ := httpx.Get[map[string]any](c, "https://httpbin.org/uuid")
 	httpx.Dump(res) // dumps map[string]any
 	// #map[string]interface {} {
 	//   uuid => "<uuid>" #string
 	// }
 
 	// Apply to a single request
-	res, err = httpx.Get[map[string]any](c, "https://httpbin.org/uuid", httpx.RetryCount(2))
-	_ = err
+	res, _ = httpx.Get[map[string]any](c, "https://httpbin.org/uuid", httpx.RetryCount(2))
 	httpx.Dump(res) // dumps map[string]any
 	// #map[string]interface {} {
 	//   uuid => "<uuid>" #string

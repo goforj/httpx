@@ -10,8 +10,7 @@ func main() {
 
 	// Example: set proxy URL
 	c := httpx.New(httpx.Proxy("http://localhost:8080"))
-	res, err := httpx.Get[map[string]any](c, "https://httpbin.org/get")
-	_ = err
+	res, _ := httpx.Get[map[string]any](c, "https://httpbin.org/get")
 	httpx.Dump(res) // dumps map[string]any
 	// map[string]interface {}(nil)
 }

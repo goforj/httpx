@@ -15,16 +15,14 @@ func main() {
 	// Example: hook on retry
 	// Apply to all requests
 	c := httpx.New(httpx.RetryHook(func(_ *req.Response, _ error) {}))
-	res, err := httpx.Get[map[string]any](c, "https://httpbin.org/uuid")
-	_ = err
+	res, _ := httpx.Get[map[string]any](c, "https://httpbin.org/uuid")
 	httpx.Dump(res) // dumps map[string]any
 	// #map[string]interface {} {
 	//   uuid => "<uuid>" #string
 	// }
 
 	// Apply to a single request
-	res, err = httpx.Get[map[string]any](c, "https://httpbin.org/uuid", httpx.RetryHook(func(_ *req.Response, _ error) {}))
-	_ = err
+	res, _ = httpx.Get[map[string]any](c, "https://httpbin.org/uuid", httpx.RetryHook(func(_ *req.Response, _ error) {}))
 	httpx.Dump(res) // dumps map[string]any
 	// #map[string]interface {} {
 	//   uuid => "<uuid>" #string

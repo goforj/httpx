@@ -13,8 +13,7 @@ func main() {
 
 	// Example: disable redirects
 	c := httpx.New(httpx.Redirect(req.NoRedirectPolicy()))
-	res, err := httpx.Get[map[string]any](c, "https://httpbin.org/redirect/1")
-	_ = err
+	res, _ := httpx.Get[map[string]any](c, "https://httpbin.org/redirect/1")
 	httpx.Dump(res) // dumps map[string]any
 	// map[string]interface {}(nil)
 }

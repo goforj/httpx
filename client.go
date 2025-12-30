@@ -456,14 +456,16 @@ func OptionsCtx[T any](client *Client, ctx context.Context, url string, opts ...
 //	r.Method = http.MethodGet
 //
 //	res, rawResp, err := httpx.Do[map[string]any](r)
+//	if err != nil {
+//		return
+//	}
 //	httpx.Dump(res) // dumps map[string]any
 //	// #map[string]interface {} {
 //	//   headers => #map[string]interface {} {
 //	//     X-Trace => "1" #string
 //	//   }
 //	// }
-//	_ = rawResp
-//	_ = err
+//	println(rawResp.StatusCode)
 func Do[T any](r *req.Request) (T, *req.Response, error) {
 	var out T
 

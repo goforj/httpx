@@ -10,8 +10,7 @@ func main() {
 
 	// Example: download to file
 	c := httpx.New()
-	res, err := httpx.Get[map[string]any](c, "https://httpbin.org/bytes/1024", httpx.OutputFile("/tmp/file.bin"))
-	_ = err
+	res, _ := httpx.Get[map[string]any](c, "https://httpbin.org/bytes/1024", httpx.OutputFile("/tmp/file.bin"))
 	httpx.Dump(res) // dumps map[string]any
 	// map[string]interface {}(nil)
 }

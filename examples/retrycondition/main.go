@@ -17,16 +17,14 @@ func main() {
 	c := httpx.New(httpx.RetryCondition(func(resp *req.Response, _ error) bool {
 		return resp != nil && resp.StatusCode == 503
 	}))
-	res, err := httpx.Get[map[string]any](c, "https://httpbin.org/status/503")
-	_ = err
+	res, _ := httpx.Get[map[string]any](c, "https://httpbin.org/status/503")
 	httpx.Dump(res) // dumps map[string]any
 	// map[string]interface {}(nil)
 
 	// Apply to a single request
-	res, err = httpx.Get[map[string]any](c, "https://httpbin.org/status/503", httpx.RetryCondition(func(resp *req.Response, _ error) bool {
+	res, _ = httpx.Get[map[string]any](c, "https://httpbin.org/status/503", httpx.RetryCondition(func(resp *req.Response, _ error) bool {
 		return resp != nil && resp.StatusCode == 503
 	}))
-	_ = err
 	httpx.Dump(res) // dumps map[string]any
 	// map[string]interface {}(nil)
 }

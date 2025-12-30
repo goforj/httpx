@@ -194,8 +194,7 @@ Auth sets the Authorization header using a scheme and token.
 ```go
 // Apply to all requests
 c := httpx.New(httpx.Auth("Token", "abc123"))
-res, err := httpx.Get[map[string]any](c, "https://httpbin.org/headers")
-_ = err
+res, _ := httpx.Get[map[string]any](c, "https://httpbin.org/headers")
 httpx.Dump(res) // dumps map[string]any
 // #map[string]interface {} {
 //   headers => #map[string]interface {} {
@@ -204,8 +203,7 @@ httpx.Dump(res) // dumps map[string]any
 // }
 
 // Apply to a single request
-res, err = httpx.Get[map[string]any](c, "https://httpbin.org/headers", httpx.Auth("Token", "abc123"))
-_ = err
+res, _ = httpx.Get[map[string]any](c, "https://httpbin.org/headers", httpx.Auth("Token", "abc123"))
 httpx.Dump(res) // dumps map[string]any
 // #map[string]interface {} {
 //   headers => #map[string]interface {} {
@@ -221,8 +219,7 @@ Basic sets HTTP basic authentication headers.
 ```go
 // Apply to all requests
 c := httpx.New(httpx.Basic("user", "pass"))
-res, err := httpx.Get[map[string]any](c, "https://httpbin.org/headers")
-_ = err
+res, _ := httpx.Get[map[string]any](c, "https://httpbin.org/headers")
 httpx.Dump(res) // dumps map[string]any
 // #map[string]interface {} {
 //   headers => #map[string]interface {} {
@@ -231,8 +228,7 @@ httpx.Dump(res) // dumps map[string]any
 // }
 
 // Apply to a single request
-res, err = httpx.Get[map[string]any](c, "https://httpbin.org/headers", httpx.Basic("user", "pass"))
-_ = err
+res, _ = httpx.Get[map[string]any](c, "https://httpbin.org/headers", httpx.Basic("user", "pass"))
 httpx.Dump(res) // dumps map[string]any
 // #map[string]interface {} {
 //   headers => #map[string]interface {} {
@@ -248,8 +244,7 @@ Bearer sets the Authorization header with a bearer token.
 ```go
 // Apply to all requests
 c := httpx.New(httpx.Bearer("token"))
-res, err := httpx.Get[map[string]any](c, "https://httpbin.org/headers")
-_ = err
+res, _ := httpx.Get[map[string]any](c, "https://httpbin.org/headers")
 httpx.Dump(res) // dumps map[string]any
 // #map[string]interface {} {
 //   headers => #map[string]interface {} {
@@ -258,8 +253,7 @@ httpx.Dump(res) // dumps map[string]any
 // }
 
 // Apply to a single request
-res, err = httpx.Get[map[string]any](c, "https://httpbin.org/headers", httpx.Bearer("token"))
-_ = err
+res, _ = httpx.Get[map[string]any](c, "https://httpbin.org/headers", httpx.Bearer("token"))
 httpx.Dump(res) // dumps map[string]any
 // #map[string]interface {} {
 //   headers => #map[string]interface {} {
@@ -284,8 +278,7 @@ AsFirefox applies the Firefox browser profile (headers including User-Agent, TLS
 
 ```go
 c := httpx.New(httpx.AsFirefox())
-res, err := httpx.Get[map[string]any](c, "https://httpbin.org/headers")
-_ = err
+res, _ := httpx.Get[map[string]any](c, "https://httpbin.org/headers")
 httpx.Dump(res) // dumps map[string]any
 // #map[string]interface {} {
 //   headers => #map[string]interface {} {
@@ -370,8 +363,7 @@ BaseURL sets a base URL on the client.
 
 ```go
 c := httpx.New(httpx.BaseURL("https://httpbin.org"))
-res, err := httpx.Get[map[string]any](c, "/uuid")
-_ = err
+res, _ := httpx.Get[map[string]any](c, "/uuid")
 httpx.Dump(res) // dumps map[string]any
 // #map[string]interface {} {
 //   uuid => "<uuid>" #string
@@ -389,8 +381,7 @@ jar.SetCookies(u, []*http.Cookie{
 	{Name: "session", Value: "abc123"},
 })
 c := httpx.New(httpx.CookieJar(jar))
-res, err := httpx.Get[map[string]any](c, "https://httpbin.org/cookies")
-_ = err
+res, _ := httpx.Get[map[string]any](c, "https://httpbin.org/cookies")
 httpx.Dump(res) // dumps map[string]any
 // #map[string]interface {} {
 //   cookies => #map[string]interface {} {
@@ -407,8 +398,7 @@ ErrorMapper sets a custom error mapper for non-2xx responses.
 c := httpx.New(httpx.ErrorMapper(func(resp *req.Response) error {
 	return fmt.Errorf("status %d", resp.StatusCode)
 }))
-res, err := httpx.Get[map[string]any](c, "https://httpbin.org/status/500")
-_ = err
+res, _ := httpx.Get[map[string]any](c, "https://httpbin.org/status/500")
 httpx.Dump(res) // dumps map[string]any
 // map[string]interface {}(nil)
 ```
@@ -422,8 +412,7 @@ c := httpx.New(httpx.Middleware(func(_ *req.Client, r *req.Request) error {
 	r.SetHeader("X-Trace", "1")
 	return nil
 }))
-res, err := httpx.Get[map[string]any](c, "https://httpbin.org/headers")
-_ = err
+res, _ := httpx.Get[map[string]any](c, "https://httpbin.org/headers")
 httpx.Dump(res) // dumps map[string]any
 // #map[string]interface {} {
 //   headers => #map[string]interface {} {
@@ -438,8 +427,7 @@ Proxy sets a proxy URL for the client.
 
 ```go
 c := httpx.New(httpx.Proxy("http://localhost:8080"))
-res, err := httpx.Get[map[string]any](c, "https://httpbin.org/get")
-_ = err
+res, _ := httpx.Get[map[string]any](c, "https://httpbin.org/get")
 httpx.Dump(res) // dumps map[string]any
 // map[string]interface {}(nil)
 ```
@@ -450,8 +438,7 @@ ProxyFunc sets a proxy function for the client.
 
 ```go
 c := httpx.New(httpx.ProxyFunc(http.ProxyFromEnvironment))
-res, err := httpx.Get[map[string]any](c, "https://httpbin.org/uuid")
-_ = err
+res, _ := httpx.Get[map[string]any](c, "https://httpbin.org/uuid")
 httpx.Dump(res) // dumps map[string]any
 // #map[string]interface {} {
 //   uuid => "<uuid>" #string
@@ -464,8 +451,7 @@ Redirect sets the redirect policy for the client.
 
 ```go
 c := httpx.New(httpx.Redirect(req.NoRedirectPolicy()))
-res, err := httpx.Get[map[string]any](c, "https://httpbin.org/redirect/1")
-_ = err
+res, _ := httpx.Get[map[string]any](c, "https://httpbin.org/redirect/1")
 httpx.Dump(res) // dumps map[string]any
 // map[string]interface {}(nil)
 ```
@@ -476,8 +462,7 @@ Transport wraps the underlying transport with a custom RoundTripper.
 
 ```go
 c := httpx.New(httpx.Transport(http.RoundTripper(http.DefaultTransport)))
-res, err := httpx.Get[map[string]any](c, "https://httpbin.org/uuid")
-_ = err
+res, _ := httpx.Get[map[string]any](c, "https://httpbin.org/uuid")
 httpx.Dump(res) // dumps map[string]any
 // #map[string]interface {} {
 //   uuid => "<uuid>" #string
@@ -491,8 +476,7 @@ httpx.Dump(res) // dumps map[string]any
 Dump prints values using the bundled godump formatter.
 
 ```go
-res, err := httpx.Get[map[string]any](httpx.Default(), "https://httpbin.org/uuid")
-_ = err
+res, _ := httpx.Get[map[string]any](httpx.Default(), "https://httpbin.org/uuid")
 httpx.Dump(res)
 // #map[string]interface {} {
 //   uuid => "<uuid>" #string
@@ -505,8 +489,7 @@ DumpAll enables req's client-level dump output for all requests.
 
 ```go
 c := httpx.New(httpx.DumpAll())
-res, err := httpx.Get[map[string]any](c, "https://httpbin.org/uuid")
-_ = err
+res, _ := httpx.Get[map[string]any](c, "https://httpbin.org/uuid")
 httpx.Dump(res) // dumps map[string]any
 // #map[string]interface {} {
 //   uuid => "<uuid>" #string
@@ -519,8 +502,7 @@ DumpEachRequest enables request-level dumps for each request on the client.
 
 ```go
 c := httpx.New(httpx.DumpEachRequest())
-res, err := httpx.Get[map[string]any](c, "https://httpbin.org/uuid")
-_ = err
+res, _ := httpx.Get[map[string]any](c, "https://httpbin.org/uuid")
 httpx.Dump(res) // dumps map[string]any
 // #map[string]interface {} {
 //   uuid => "<uuid>" #string
@@ -534,8 +516,7 @@ DumpEachRequestTo enables request-level dumps for each request and writes them t
 ```go
 var buf bytes.Buffer
 c := httpx.New(httpx.DumpEachRequestTo(&buf))
-res, err := httpx.Get[map[string]any](c, "https://httpbin.org/uuid")
-_ = err
+res, _ := httpx.Get[map[string]any](c, "https://httpbin.org/uuid")
 httpx.Dump(res) // dumps map[string]any
 // #map[string]interface {} {
 //   uuid => "<uuid>" #string
@@ -550,8 +531,7 @@ DumpTo enables req's request-level dump output to a writer.
 ```go
 var buf bytes.Buffer
 c := httpx.New()
-res, err := httpx.Get[map[string]any](c, "https://httpbin.org/uuid", httpx.DumpTo(&buf))
-_ = err
+res, _ := httpx.Get[map[string]any](c, "https://httpbin.org/uuid", httpx.DumpTo(&buf))
 httpx.Dump(res) // dumps map[string]any
 // #map[string]interface {} {
 //   uuid => "<uuid>" #string
@@ -564,8 +544,7 @@ DumpToFile enables req's request-level dump output to a file path.
 
 ```go
 c := httpx.New()
-res, err := httpx.Get[map[string]any](c, "https://httpbin.org/uuid", httpx.DumpToFile("httpx.dump"))
-_ = err
+res, _ := httpx.Get[map[string]any](c, "https://httpbin.org/uuid", httpx.DumpToFile("httpx.dump"))
 httpx.Dump(res) // dumps map[string]any
 // #map[string]interface {} {
 //   uuid => "<uuid>" #string
@@ -578,8 +557,7 @@ EnableDump enables req's request-level dump output.
 
 ```go
 c := httpx.New()
-res, err := httpx.Get[map[string]any](c, "https://httpbin.org/uuid", httpx.EnableDump())
-_ = err
+res, _ := httpx.Get[map[string]any](c, "https://httpbin.org/uuid", httpx.EnableDump())
 httpx.Dump(res) // dumps map[string]any
 // #map[string]interface {} {
 //   uuid => "<uuid>" #string
@@ -592,8 +570,7 @@ Trace enables req's request-level trace output.
 
 ```go
 c := httpx.New()
-res, err := httpx.Get[map[string]any](c, "https://httpbin.org/uuid", httpx.Trace())
-_ = err
+res, _ := httpx.Get[map[string]any](c, "https://httpbin.org/uuid", httpx.Trace())
 httpx.Dump(res) // dumps map[string]any
 // #map[string]interface {} {
 //   uuid => "<uuid>" #string
@@ -606,8 +583,7 @@ TraceAll enables req's client-level trace output for all requests.
 
 ```go
 c := httpx.New(httpx.TraceAll())
-res, err := httpx.Get[map[string]any](c, "https://httpbin.org/uuid")
-_ = err
+res, _ := httpx.Get[map[string]any](c, "https://httpbin.org/uuid")
 httpx.Dump(res) // dumps map[string]any
 // #map[string]interface {} {
 //   uuid => "<uuid>" #string
@@ -622,8 +598,7 @@ OutputFile streams the response body to a file path.
 
 ```go
 c := httpx.New()
-res, err := httpx.Get[map[string]any](c, "https://httpbin.org/bytes/1024", httpx.OutputFile("/tmp/file.bin"))
-_ = err
+res, _ := httpx.Get[map[string]any](c, "https://httpbin.org/bytes/1024", httpx.OutputFile("/tmp/file.bin"))
 httpx.Dump(res) // dumps map[string]any
 // map[string]interface {}(nil)
 ```
@@ -661,8 +636,7 @@ type Payload struct {
 }
 
 c := httpx.New()
-res, err := httpx.Post[any, map[string]any](c, "https://httpbin.org/post", nil, httpx.Body(Payload{Name: "Ana"}))
-_ = err
+res, _ := httpx.Post[any, map[string]any](c, "https://httpbin.org/post", nil, httpx.Body(Payload{Name: "Ana"}))
 httpx.Dump(res) // dumps map[string]any
 // #map[string]interface {} {
 //   json => #map[string]interface {} {
@@ -677,10 +651,9 @@ Form sets form data for the request.
 
 ```go
 c := httpx.New()
-res, err := httpx.Post[any, map[string]any](c, "https://httpbin.org/post", nil, httpx.Form(map[string]string{
+res, _ := httpx.Post[any, map[string]any](c, "https://httpbin.org/post", nil, httpx.Form(map[string]string{
 	"name": "alice",
 }))
-_ = err
 httpx.Dump(res) // dumps map[string]any
 // #map[string]interface {} {
 //   form => #map[string]interface {} {
@@ -696,8 +669,7 @@ Header sets a header on a request or client.
 ```go
 // Apply to all requests
 c := httpx.New(httpx.Header("X-Trace", "1"))
-res, err := httpx.Get[map[string]any](c, "https://httpbin.org/headers")
-_ = err
+res, _ := httpx.Get[map[string]any](c, "https://httpbin.org/headers")
 httpx.Dump(res) // dumps map[string]any
 // #map[string]interface {} {
 //   headers => #map[string]interface {} {
@@ -706,8 +678,7 @@ httpx.Dump(res) // dumps map[string]any
 // }
 
 // Apply to a single request
-res, err = httpx.Get[map[string]any](c, "https://httpbin.org/headers", httpx.Header("X-Trace", "1"))
-_ = err
+res, _ = httpx.Get[map[string]any](c, "https://httpbin.org/headers", httpx.Header("X-Trace", "1"))
 httpx.Dump(res) // dumps map[string]any
 // #map[string]interface {} {
 //   headers => #map[string]interface {} {
@@ -726,8 +697,7 @@ c := httpx.New(httpx.Headers(map[string]string{
 	"X-Trace": "1",
 	"Accept":  "application/json",
 }))
-res, err := httpx.Get[map[string]any](c, "https://httpbin.org/headers")
-_ = err
+res, _ := httpx.Get[map[string]any](c, "https://httpbin.org/headers")
 httpx.Dump(res) // dumps map[string]any
 // #map[string]interface {} {
 //   headers => #map[string]interface {} {
@@ -737,11 +707,10 @@ httpx.Dump(res) // dumps map[string]any
 // }
 
 // Apply to a single request
-res, err = httpx.Get[map[string]any](c, "https://httpbin.org/headers", httpx.Headers(map[string]string{
+res, _ = httpx.Get[map[string]any](c, "https://httpbin.org/headers", httpx.Headers(map[string]string{
 	"X-Trace": "1",
 	"Accept":  "application/json",
 }))
-_ = err
 httpx.Dump(res) // dumps map[string]any
 // #map[string]interface {} {
 //   headers => #map[string]interface {} {
@@ -761,8 +730,7 @@ type Payload struct {
 }
 
 c := httpx.New()
-res, err := httpx.Post[any, map[string]any](c, "https://httpbin.org/post", nil, httpx.JSON(Payload{Name: "Ana"}))
-_ = err
+res, _ := httpx.Post[any, map[string]any](c, "https://httpbin.org/post", nil, httpx.JSON(Payload{Name: "Ana"}))
 httpx.Dump(res) // dumps map[string]any
 // #map[string]interface {} {
 //   json => #map[string]interface {} {
@@ -781,8 +749,7 @@ type User struct {
 }
 
 c := httpx.New()
-res, err := httpx.Get[map[string]any](c, "https://httpbin.org/anything/{id}", httpx.Path("id", 42))
-_ = err
+res, _ := httpx.Get[map[string]any](c, "https://httpbin.org/anything/{id}", httpx.Path("id", 42))
 httpx.Dump(res) // dumps map[string]any
 // #map[string]interface {} {
 //   url => "https://httpbin.org/anything/42" #string
@@ -795,11 +762,10 @@ Paths sets multiple path parameters from a map.
 
 ```go
 c := httpx.New()
-res, err := httpx.Get[map[string]any](c, "https://httpbin.org/anything/{org}/users/{id}", httpx.Paths(map[string]any{
+res, _ := httpx.Get[map[string]any](c, "https://httpbin.org/anything/{org}/users/{id}", httpx.Paths(map[string]any{
 	"org": "goforj",
 	"id":  7,
 }))
-_ = err
 httpx.Dump(res) // dumps map[string]any
 // #map[string]interface {} {
 //   url => "https://httpbin.org/anything/goforj/users/7" #string
@@ -812,11 +778,10 @@ Queries sets query parameters from a map.
 
 ```go
 c := httpx.New()
-res, err := httpx.Get[map[string]any](c, "https://httpbin.org/get", httpx.Queries(map[string]string{
+res, _ := httpx.Get[map[string]any](c, "https://httpbin.org/get", httpx.Queries(map[string]string{
 	"q":  "search",
 	"ok": "1",
 }))
-_ = err
 httpx.Dump(res) // dumps map[string]any
 // #map[string]interface {} {
 //   args => #map[string]interface {} {
@@ -832,8 +797,7 @@ Query adds query parameters as key/value pairs.
 
 ```go
 c := httpx.New()
-res, err := httpx.Get[map[string]any](c, "https://httpbin.org/get", httpx.Query("q", "search"))
-_ = err
+res, _ := httpx.Get[map[string]any](c, "https://httpbin.org/get", httpx.Query("q", "search"))
 httpx.Dump(res) // dumps map[string]any
 // #map[string]interface {} {
 //   args => #map[string]interface {} {
@@ -849,8 +813,7 @@ UserAgent sets the User-Agent header on a request or client.
 ```go
 // Apply to all requests
 c := httpx.New(httpx.UserAgent("my-app/1.0"))
-res, err := httpx.Get[map[string]any](c, "https://httpbin.org/headers")
-_ = err
+res, _ := httpx.Get[map[string]any](c, "https://httpbin.org/headers")
 httpx.Dump(res) // dumps map[string]any
 // #map[string]interface {} {
 //   headers => #map[string]interface {} {
@@ -859,8 +822,7 @@ httpx.Dump(res) // dumps map[string]any
 // }
 
 // Apply to a single request
-res, err = httpx.Get[map[string]any](c, "https://httpbin.org/headers", httpx.UserAgent("my-app/1.0"))
-_ = err
+res, _ = httpx.Get[map[string]any](c, "https://httpbin.org/headers", httpx.UserAgent("my-app/1.0"))
 httpx.Dump(res) // dumps map[string]any
 // #map[string]interface {} {
 //   headers => #map[string]interface {} {
@@ -877,10 +839,9 @@ Before runs a hook before the request is sent.
 
 ```go
 c := httpx.New()
-res, err := httpx.Get[map[string]any](c, "https://httpbin.org/get", httpx.Before(func(r *req.Request) {
+res, _ := httpx.Get[map[string]any](c, "https://httpbin.org/get", httpx.Before(func(r *req.Request) {
 	r.EnableDump()
 }))
-_ = err
 httpx.Dump(res) // dumps map[string]any
 // #map[string]interface {} {
 //   url => "https://httpbin.org/get" #string
@@ -894,14 +855,12 @@ Timeout sets a per-request timeout using context cancellation.
 ```go
 // Apply to all requests
 c := httpx.New(httpx.Timeout(2 * time.Second))
-res, err := httpx.Get[map[string]any](c, "https://httpbin.org/delay/2")
-_ = err
+res, _ := httpx.Get[map[string]any](c, "https://httpbin.org/delay/2")
 httpx.Dump(res) // dumps map[string]any
 // map[string]interface {}(nil)
 
 // Apply to a single request
-res, err = httpx.Get[map[string]any](c, "https://httpbin.org/delay/2", httpx.Timeout(2*time.Second))
-_ = err
+res, _ = httpx.Get[map[string]any](c, "https://httpbin.org/delay/2", httpx.Timeout(2*time.Second))
 httpx.Dump(res) // dumps map[string]any
 // map[string]interface {}(nil)
 ```
@@ -938,14 +897,16 @@ r.SetURL("https://httpbin.org/headers")
 r.Method = http.MethodGet
 
 res, rawResp, err := httpx.Do[map[string]any](r)
+if err != nil {
+	return
+}
 httpx.Dump(res) // dumps map[string]any
 // #map[string]interface {} {
 //   headers => #map[string]interface {} {
 //     X-Trace => "1" #string
 //   }
 // }
-_ = rawResp
-_ = err
+println(rawResp.StatusCode)
 ```
 
 ### <a id="get"></a>Get
@@ -1240,16 +1201,14 @@ Overrides the req default interval (fixed 100ms) with jittered backoff.
 ```go
 // Apply to all requests
 c := httpx.New(httpx.RetryBackoff(100*time.Millisecond, 2*time.Second))
-res, err := httpx.Get[map[string]any](c, "https://httpbin.org/uuid")
-_ = err
+res, _ := httpx.Get[map[string]any](c, "https://httpbin.org/uuid")
 httpx.Dump(res) // dumps map[string]any
 // #map[string]interface {} {
 //   uuid => "<uuid>" #string
 // }
 
 // Apply to a single request
-res, err = httpx.Get[map[string]any](c, "https://httpbin.org/uuid", httpx.RetryBackoff(100*time.Millisecond, 2*time.Second))
-_ = err
+res, _ = httpx.Get[map[string]any](c, "https://httpbin.org/uuid", httpx.RetryBackoff(100*time.Millisecond, 2*time.Second))
 httpx.Dump(res) // dumps map[string]any
 // #map[string]interface {} {
 //   uuid => "<uuid>" #string
@@ -1266,16 +1225,14 @@ Overrides the default behavior (retry only when a request error occurs).
 c := httpx.New(httpx.RetryCondition(func(resp *req.Response, _ error) bool {
 	return resp != nil && resp.StatusCode == 503
 }))
-res, err := httpx.Get[map[string]any](c, "https://httpbin.org/status/503")
-_ = err
+res, _ := httpx.Get[map[string]any](c, "https://httpbin.org/status/503")
 httpx.Dump(res) // dumps map[string]any
 // map[string]interface {}(nil)
 
 // Apply to a single request
-res, err = httpx.Get[map[string]any](c, "https://httpbin.org/status/503", httpx.RetryCondition(func(resp *req.Response, _ error) bool {
+res, _ = httpx.Get[map[string]any](c, "https://httpbin.org/status/503", httpx.RetryCondition(func(resp *req.Response, _ error) bool {
 	return resp != nil && resp.StatusCode == 503
 }))
-_ = err
 httpx.Dump(res) // dumps map[string]any
 // map[string]interface {}(nil)
 ```
@@ -1290,16 +1247,14 @@ default interval is a fixed 100ms between attempts.
 ```go
 // Apply to all requests
 c := httpx.New(httpx.RetryCount(2))
-res, err := httpx.Get[map[string]any](c, "https://httpbin.org/uuid")
-_ = err
+res, _ := httpx.Get[map[string]any](c, "https://httpbin.org/uuid")
 httpx.Dump(res) // dumps map[string]any
 // #map[string]interface {} {
 //   uuid => "<uuid>" #string
 // }
 
 // Apply to a single request
-res, err = httpx.Get[map[string]any](c, "https://httpbin.org/uuid", httpx.RetryCount(2))
-_ = err
+res, _ = httpx.Get[map[string]any](c, "https://httpbin.org/uuid", httpx.RetryCount(2))
 httpx.Dump(res) // dumps map[string]any
 // #map[string]interface {} {
 //   uuid => "<uuid>" #string
@@ -1314,16 +1269,14 @@ Overrides the req default interval (fixed 100ms).
 ```go
 // Apply to all requests
 c := httpx.New(httpx.RetryFixedInterval(200 * time.Millisecond))
-res, err := httpx.Get[map[string]any](c, "https://httpbin.org/uuid")
-_ = err
+res, _ := httpx.Get[map[string]any](c, "https://httpbin.org/uuid")
 httpx.Dump(res) // dumps map[string]any
 // #map[string]interface {} {
 //   uuid => "<uuid>" #string
 // }
 
 // Apply to a single request
-res, err = httpx.Get[map[string]any](c, "https://httpbin.org/uuid", httpx.RetryFixedInterval(200*time.Millisecond))
-_ = err
+res, _ = httpx.Get[map[string]any](c, "https://httpbin.org/uuid", httpx.RetryFixedInterval(200*time.Millisecond))
 httpx.Dump(res) // dumps map[string]any
 // #map[string]interface {} {
 //   uuid => "<uuid>" #string
@@ -1338,16 +1291,14 @@ Runs before each retry attempt; no hooks are configured by default.
 ```go
 // Apply to all requests
 c := httpx.New(httpx.RetryHook(func(_ *req.Response, _ error) {}))
-res, err := httpx.Get[map[string]any](c, "https://httpbin.org/uuid")
-_ = err
+res, _ := httpx.Get[map[string]any](c, "https://httpbin.org/uuid")
 httpx.Dump(res) // dumps map[string]any
 // #map[string]interface {} {
 //   uuid => "<uuid>" #string
 // }
 
 // Apply to a single request
-res, err = httpx.Get[map[string]any](c, "https://httpbin.org/uuid", httpx.RetryHook(func(_ *req.Response, _ error) {}))
-_ = err
+res, _ = httpx.Get[map[string]any](c, "https://httpbin.org/uuid", httpx.RetryHook(func(_ *req.Response, _ error) {}))
 httpx.Dump(res) // dumps map[string]any
 // #map[string]interface {} {
 //   uuid => "<uuid>" #string
@@ -1364,18 +1315,16 @@ Overrides the req default interval (fixed 100ms).
 c := httpx.New(httpx.RetryInterval(func(_ *req.Response, attempt int) time.Duration {
 	return time.Duration(attempt) * 100 * time.Millisecond
 }))
-res, err := httpx.Get[map[string]any](c, "https://httpbin.org/uuid")
-_ = err
+res, _ := httpx.Get[map[string]any](c, "https://httpbin.org/uuid")
 httpx.Dump(res) // dumps map[string]any
 // #map[string]interface {} {
 //   uuid => "<uuid>" #string
 // }
 
 // Apply to a single request
-res, err = httpx.Get[map[string]any](c, "https://httpbin.org/uuid", httpx.RetryInterval(func(_ *req.Response, attempt int) time.Duration {
+res, _ = httpx.Get[map[string]any](c, "https://httpbin.org/uuid", httpx.RetryInterval(func(_ *req.Response, attempt int) time.Duration {
 	return time.Duration(attempt) * 100 * time.Millisecond
 }))
-_ = err
 httpx.Dump(res) // dumps map[string]any
 // #map[string]interface {} {
 //   uuid => "<uuid>" #string
@@ -1403,8 +1352,7 @@ File attaches a file from disk as multipart form data.
 
 ```go
 c := httpx.New()
-res, err := httpx.Post[any, map[string]any](c, "https://httpbin.org/post", nil, httpx.File("file", "/tmp/report.txt"))
-_ = err
+res, _ := httpx.Post[any, map[string]any](c, "https://httpbin.org/post", nil, httpx.File("file", "/tmp/report.txt"))
 httpx.Dump(res) // dumps map[string]any
 // #map[string]interface {} {
 //   files => #map[string]interface {} {
@@ -1419,8 +1367,7 @@ FileBytes attaches a file from bytes as multipart form data.
 
 ```go
 c := httpx.New()
-res, err := httpx.Post[any, map[string]any](c, "https://httpbin.org/post", nil, httpx.FileBytes("file", "report.txt", []byte("hello")))
-_ = err
+res, _ := httpx.Post[any, map[string]any](c, "https://httpbin.org/post", nil, httpx.FileBytes("file", "report.txt", []byte("hello")))
 httpx.Dump(res) // dumps map[string]any
 // #map[string]interface {} {
 //   files => #map[string]interface {} {
@@ -1435,8 +1382,7 @@ FileReader attaches a file from a reader as multipart form data.
 
 ```go
 c := httpx.New()
-res, err := httpx.Post[any, map[string]any](c, "https://httpbin.org/post", nil, httpx.FileReader("file", "report.txt", strings.NewReader("hello")))
-_ = err
+res, _ := httpx.Post[any, map[string]any](c, "https://httpbin.org/post", nil, httpx.FileReader("file", "report.txt", strings.NewReader("hello")))
 httpx.Dump(res) // dumps map[string]any
 // #map[string]interface {} {
 //   files => #map[string]interface {} {
@@ -1451,11 +1397,10 @@ Files attaches multiple files from disk as multipart form data.
 
 ```go
 c := httpx.New()
-res, err := httpx.Post[any, map[string]any](c, "https://httpbin.org/post", nil, httpx.Files(map[string]string{
+res, _ := httpx.Post[any, map[string]any](c, "https://httpbin.org/post", nil, httpx.Files(map[string]string{
 	"fileA": "/tmp/a.txt",
 	"fileB": "/tmp/b.txt",
 }))
-_ = err
 httpx.Dump(res) // dumps map[string]any
 // #map[string]interface {} {
 //   files => #map[string]interface {} {
@@ -1471,7 +1416,7 @@ UploadCallback registers a callback for upload progress.
 
 ```go
 c := httpx.New()
-res, err := httpx.Post[any, map[string]any](c, "https://httpbin.org/post", nil,
+res, _ := httpx.Post[any, map[string]any](c, "https://httpbin.org/post", nil,
 	httpx.File("file", "/tmp/report.bin"),
 	httpx.UploadCallback(func(info req.UploadInfo) {
 		percent := float64(info.UploadedSize) / float64(info.FileSize) * 100
@@ -1481,7 +1426,6 @@ res, err := httpx.Post[any, map[string]any](c, "https://httpbin.org/post", nil,
 		}
 	}),
 )
-_ = err
 httpx.Dump(res) // dumps map[string]any
 // #map[string]interface {} {
 //   files => #map[string]interface {} {
@@ -1496,7 +1440,7 @@ UploadCallbackWithInterval registers a callback for upload progress with a minim
 
 ```go
 c := httpx.New()
-res, err := httpx.Post[any, map[string]any](c, "https://httpbin.org/post", nil,
+res, _ := httpx.Post[any, map[string]any](c, "https://httpbin.org/post", nil,
 	httpx.File("file", "/tmp/report.bin"),
 	httpx.UploadCallbackWithInterval(func(info req.UploadInfo) {
 		percent := float64(info.UploadedSize) / float64(info.FileSize) * 100
@@ -1506,7 +1450,6 @@ res, err := httpx.Post[any, map[string]any](c, "https://httpbin.org/post", nil,
 		}
 	}, 200*time.Millisecond),
 )
-_ = err
 httpx.Dump(res) // dumps map[string]any
 // #map[string]interface {} {
 //   files => #map[string]interface {} {
@@ -1521,11 +1464,10 @@ UploadProgress enables a default progress spinner and bar for uploads.
 
 ```go
 c := httpx.New()
-res, err := httpx.Post[any, map[string]any](c, "https://httpbin.org/post", nil,
+res, _ := httpx.Post[any, map[string]any](c, "https://httpbin.org/post", nil,
 	httpx.File("file", "/tmp/report.bin"),
 	httpx.UploadProgress(),
 )
-_ = err
 httpx.Dump(res) // dumps map[string]any
 // #map[string]interface {} {
 //   files => #map[string]interface {} {

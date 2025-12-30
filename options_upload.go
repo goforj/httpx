@@ -18,8 +18,7 @@ import (
 // Example: upload a file
 //
 //	c := httpx.New()
-//	res, err := httpx.Post[any, map[string]any](c, "https://httpbin.org/post", nil, httpx.File("file", "/tmp/report.txt"))
-//	_ = err
+//	res, _ := httpx.Post[any, map[string]any](c, "https://httpbin.org/post", nil, httpx.File("file", "/tmp/report.txt"))
 //	httpx.Dump(res) // dumps map[string]any
 //	// #map[string]interface {} {
 //	//   files => #map[string]interface {} {
@@ -43,11 +42,10 @@ func (b OptionBuilder) File(paramName, filePath string) OptionBuilder {
 // Example: upload multiple files
 //
 //	c := httpx.New()
-//	res, err := httpx.Post[any, map[string]any](c, "https://httpbin.org/post", nil, httpx.Files(map[string]string{
+//	res, _ := httpx.Post[any, map[string]any](c, "https://httpbin.org/post", nil, httpx.Files(map[string]string{
 //		"fileA": "/tmp/a.txt",
 //		"fileB": "/tmp/b.txt",
 //	}))
-//	_ = err
 //	httpx.Dump(res) // dumps map[string]any
 //	// #map[string]interface {} {
 //	//   files => #map[string]interface {} {
@@ -72,8 +70,7 @@ func (b OptionBuilder) Files(files map[string]string) OptionBuilder {
 // Example: upload bytes as a file
 //
 //	c := httpx.New()
-//	res, err := httpx.Post[any, map[string]any](c, "https://httpbin.org/post", nil, httpx.FileBytes("file", "report.txt", []byte("hello")))
-//	_ = err
+//	res, _ := httpx.Post[any, map[string]any](c, "https://httpbin.org/post", nil, httpx.FileBytes("file", "report.txt", []byte("hello")))
 //	httpx.Dump(res) // dumps map[string]any
 //	// #map[string]interface {} {
 //	//   files => #map[string]interface {} {
@@ -104,8 +101,7 @@ func (b OptionBuilder) FileBytes(paramName, filename string, content []byte) Opt
 // Example: upload from reader
 //
 //	c := httpx.New()
-//	res, err := httpx.Post[any, map[string]any](c, "https://httpbin.org/post", nil, httpx.FileReader("file", "report.txt", strings.NewReader("hello")))
-//	_ = err
+//	res, _ := httpx.Post[any, map[string]any](c, "https://httpbin.org/post", nil, httpx.FileReader("file", "report.txt", strings.NewReader("hello")))
 //	httpx.Dump(res) // dumps map[string]any
 //	// #map[string]interface {} {
 //	//   files => #map[string]interface {} {
@@ -158,7 +154,7 @@ func (b OptionBuilder) FileReader(paramName, filename string, reader io.Reader) 
 // Example: track upload progress
 //
 //	c := httpx.New()
-//	res, err := httpx.Post[any, map[string]any](c, "https://httpbin.org/post", nil,
+//	res, _ := httpx.Post[any, map[string]any](c, "https://httpbin.org/post", nil,
 //		httpx.File("file", "/tmp/report.bin"),
 //		httpx.UploadCallback(func(info req.UploadInfo) {
 //			percent := float64(info.UploadedSize) / float64(info.FileSize) * 100
@@ -168,7 +164,6 @@ func (b OptionBuilder) FileReader(paramName, filename string, reader io.Reader) 
 //			}
 //		}),
 //	)
-//	_ = err
 //	httpx.Dump(res) // dumps map[string]any
 //	// #map[string]interface {} {
 //	//   files => #map[string]interface {} {
@@ -228,7 +223,7 @@ func (b OptionBuilder) UploadCallback(callback req.UploadCallback) OptionBuilder
 // Example: throttle upload progress updates
 //
 //	c := httpx.New()
-//	res, err := httpx.Post[any, map[string]any](c, "https://httpbin.org/post", nil,
+//	res, _ := httpx.Post[any, map[string]any](c, "https://httpbin.org/post", nil,
 //		httpx.File("file", "/tmp/report.bin"),
 //		httpx.UploadCallbackWithInterval(func(info req.UploadInfo) {
 //			percent := float64(info.UploadedSize) / float64(info.FileSize) * 100
@@ -238,7 +233,6 @@ func (b OptionBuilder) UploadCallback(callback req.UploadCallback) OptionBuilder
 //			}
 //		}, 200*time.Millisecond),
 //	)
-//	_ = err
 //	httpx.Dump(res) // dumps map[string]any
 //	// #map[string]interface {} {
 //	//   files => #map[string]interface {} {
@@ -298,11 +292,10 @@ func (b OptionBuilder) UploadCallbackWithInterval(callback req.UploadCallback, m
 // Example: upload with automatic progress
 //
 //	c := httpx.New()
-//	res, err := httpx.Post[any, map[string]any](c, "https://httpbin.org/post", nil,
+//	res, _ := httpx.Post[any, map[string]any](c, "https://httpbin.org/post", nil,
 //		httpx.File("file", "/tmp/report.bin"),
 //		httpx.UploadProgress(),
 //	)
-//	_ = err
 //	httpx.Dump(res) // dumps map[string]any
 //	// #map[string]interface {} {
 //	//   files => #map[string]interface {} {

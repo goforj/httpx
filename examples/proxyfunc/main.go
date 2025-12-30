@@ -13,8 +13,7 @@ func main() {
 
 	// Example: set proxy function
 	c := httpx.New(httpx.ProxyFunc(http.ProxyFromEnvironment))
-	res, err := httpx.Get[map[string]any](c, "https://httpbin.org/uuid")
-	_ = err
+	res, _ := httpx.Get[map[string]any](c, "https://httpbin.org/uuid")
 	httpx.Dump(res) // dumps map[string]any
 	// #map[string]interface {} {
 	//   uuid => "<uuid>" #string

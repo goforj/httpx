@@ -20,8 +20,7 @@ func main() {
 		{Name: "session", Value: "abc123"},
 	})
 	c := httpx.New(httpx.CookieJar(jar))
-	res, err := httpx.Get[map[string]any](c, "https://httpbin.org/cookies")
-	_ = err
+	res, _ := httpx.Get[map[string]any](c, "https://httpbin.org/cookies")
 	httpx.Dump(res) // dumps map[string]any
 	// #map[string]interface {} {
 	//   cookies => #map[string]interface {} {
