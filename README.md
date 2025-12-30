@@ -152,7 +152,7 @@ res, err := httpx.Get[map[string]any](
 	// stack more options...
 )
 if err != nil {
-	// handler error
+	// handle error
 }
 httpx.Dump(res) // dumps map[string]any
 ```
