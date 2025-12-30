@@ -26,17 +26,6 @@ It keeps req's power and escape hatches, while making the 90% use case feel effo
 
 httpx v1 has been tagged and is now frozen. The `main` branch is v2, which includes intentional breaking changes to improve API clarity and ergonomics (for example, request helpers return `(T, error)`).
 
-## The 90% You Need
-
-Learn these first—most users never need more:
-
-1. `Get / Post / Put / Patch / Delete` (+ `*Ctx` variants)
-2. `Query`, `Path`, `Header`, `JSON`
-3. `New(...)` client options (BaseURL, auth, timeouts)
-4. `Retry*` (when you need resiliency)
-5. `Dump` (quick debugging)
-6. `Req`/`Raw` escape hatch when you outgrow the helpers
-
 ## Why httpx
 
 - Typed, zero-ceremony requests with generics.
@@ -64,14 +53,21 @@ c := httpx.New(
 )
 
 user, err := httpx.Get[User](c, "/users/42", httpx.Query("include", "profile"))
-if err != nil {
-	log.Fatal(err)
-}
+_ = err
 
 fmt.Println(user.Name)
 ```
 
 All request helpers return `(T, error)`. The low-level escape hatch `Do` returns `(T, *req.Response, error)` when you need raw access.
+
+## Core Surface (use these first)
+
+- Requests: `Get / Post / Put / Patch / Delete` (+ `*Ctx`)
+- Composition: `Query`, `Path`, `Header`, `JSON`
+- Client defaults: `New(...)` with BaseURL, auth, timeouts
+- Resiliency: `Retry*`
+- Debug: `Dump`
+- Power-user: `Req` / `Raw` escape hatch
 
 ## Most Common Tasks
 
@@ -91,26 +87,20 @@ type CreateUserResponse struct {
 }
 
 c := httpx.New()
-must := func[T any](v T, err error) T {
-	if err != nil {
-		log.Fatal(err)
-	}
-	return v
-}
 
-res := must(httpx.Get[GetResponse](c, "https://httpbin.org/get"))
+res, _ := httpx.Get[GetResponse](c, "https://httpbin.org/get")
 httpx.Dump(res) // URL => "https://httpbin.org/get"
 
-resPost := must(httpx.Post[CreateUser, CreateUserResponse](c, "https://httpbin.org/post", CreateUser{Name: "Ana"}))
+resPost, _ := httpx.Post[CreateUser, CreateUserResponse](c, "https://httpbin.org/post", CreateUser{Name: "Ana"})
 httpx.Dump(resPost) // JSON.Name => "Ana"
 
-res = must(httpx.Get[map[string]any](c, "https://httpbin.org/headers", httpx.Header("X-Test", "true")))
+res, _ = httpx.Get[map[string]any](c, "https://httpbin.org/headers", httpx.Header("X-Test", "true"))
 httpx.Dump(res) // headers.X-Test => "true"
 
-res = must(httpx.Get[map[string]any](c, "https://httpbin.org/get", httpx.Query("q", "search")))
+res, _ = httpx.Get[map[string]any](c, "https://httpbin.org/get", httpx.Query("q", "search"))
 httpx.Dump(res) // args.q => "search"
 
-resUpload := must(httpx.Post[any, map[string]any](c, "https://httpbin.org/post", nil, httpx.File("file", "./report.txt")))
+resUpload, _ := httpx.Post[any, map[string]any](c, "https://httpbin.org/post", nil, httpx.File("file", "./report.txt"))
 httpx.Dump(resUpload) // files.file => "...report.txt"
 ```
 
