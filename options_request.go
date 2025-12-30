@@ -278,7 +278,7 @@ func (b OptionBuilder) Body(value any) OptionBuilder {
 	}))
 }
 
-// JSON sets the request body as JSON.
+// JSON forces JSON encoding for the request body (even when inference might choose differently).
 // @group Request Composition
 //
 // Applies to individual requests only.

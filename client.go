@@ -118,10 +118,7 @@ func (c *Client) clone() *Client {
 //	}
 //
 //	c := httpx.New()
-//	res, err := httpx.Get[GetResponse](c, "https://httpbin.org/get")
-//	if err != nil {
-//		return
-//	}
+//	res, _ := httpx.Get[GetResponse](c, "https://httpbin.org/get")
 //	httpx.Dump(res)
 //	// #GetResponse {
 //	//   URL => "https://httpbin.org/get" #string
@@ -129,11 +126,8 @@ func (c *Client) clone() *Client {
 //
 // Example: bind to a string body
 //
-//	resText, err := httpx.Get[string](c, "https://httpbin.org/uuid")
-//	if err != nil {
-//		return
-//	}
-//	println(resText) // dumps string
+//	resString, _ := httpx.Get[string](c, "https://httpbin.org/uuid")
+//	println(resString) // dumps string
 //	// {
 //	//   "uuid": "becbda6d-9950-4966-ae23-0369617ba065"
 //	// }
@@ -447,6 +441,7 @@ func OptionsCtx[T any](client *Client, ctx context.Context, url string, opts ...
 }
 
 // Do executes a pre-configured req request and returns the decoded body and response.
+// This is the low-level escape hatch when you need full req control.
 // @group Requests
 //
 // Example: advanced request with response access
