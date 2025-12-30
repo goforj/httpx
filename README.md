@@ -47,6 +47,7 @@ package main
 import (
 	"context"
 	"fmt"
+	"log"
 	"net/http"
 
 	"github.com/goforj/httpx"
@@ -54,22 +55,26 @@ import (
 )
 
 func main() {
-	c := httpx.New()
+	type GetResponse struct {
+		URL string `json:"url"`
+	}
+
+	c := httpx.New(httpx.UserAgent("demo/1.0"))
 
 	// Simple typed GET.
-	res, err := httpx.Get[map[string]any](c, "https://httpbin.org/get")
+	res, err := httpx.Get[GetResponse](c, "https://httpbin.org/get")
 	if err != nil {
-		panic(err)
+		log.Fatal(err)
 	}
-	fmt.Println(res)
+	fmt.Println(res.URL)
 
 	// Context-aware GET.
 	ctx := context.Background()
-	res2, err := httpx.GetCtx[map[string]any](c, ctx, "https://httpbin.org/get")
+	res2, err := httpx.GetCtx[GetResponse](c, ctx, "https://httpbin.org/get")
 	if err != nil {
-		panic(err)
+		log.Fatal(err)
 	}
-	fmt.Println(res2)
+	fmt.Println(res2.URL)
 
 	// Access the underlying response when you need it.
 	r := req.C().R()
@@ -77,11 +82,64 @@ func main() {
 	r.Method = http.MethodGet
 	res3, resp, err := httpx.Do[map[string]any](r)
 	if err != nil {
-		panic(err)
+		log.Fatal(err)
 	}
 	fmt.Println(res3)
-	fmt.Println(resp.Status)
+	fmt.Println(resp.StatusCode)
 }
+```
+
+## Most Common Tasks
+
+Brevity-first, idiomatic patterns. Handle errors; dump what matters.
+
+```go
+type GetResponse struct {
+	URL string `json:"url"`
+}
+
+c := httpx.New()
+
+// Typed GET
+res, err := httpx.Get[GetResponse](c, "https://httpbin.org/get")
+if err != nil {
+	// handler error 
+}
+httpx.Dump(res) // URL => "https://httpbin.org/get"
+
+// POST JSON (typed request/response)
+type CreateUser struct {
+	Name string `json:"name"`
+}
+type CreateUserResponse struct {
+	JSON CreateUser `json:"json"`
+}
+resPost, err := httpx.Post[CreateUser, CreateUserResponse](c, "https://httpbin.org/post", CreateUser{Name: "Ana"})
+if err != nil {
+	panic(err)
+}
+httpx.Dump(resPost) // JSON.Name => "Ana"
+
+// Headers
+res, err = httpx.Get[map[string]any](c, "https://httpbin.org/headers", httpx.Header("X-Test", "true"))
+if err != nil {
+	panic(err)
+}
+httpx.Dump(res) // headers.X-Test => "true"
+
+// Query params
+res, err = httpx.Get[map[string]any](c, "https://httpbin.org/get", httpx.Query("q", "search"))
+if err != nil {
+	panic(err)
+}
+httpx.Dump(res) // args.q => "search"
+
+// File upload
+resUpload, err := httpx.Post[any, map[string]any](c, "https://httpbin.org/post", nil, httpx.File("file", "./report.txt"))
+if err != nil {
+	panic(err)
+}
+httpx.Dump(resUpload) // files.file => "...report.txt"
 ```
 
 ## v2 Error Handling
@@ -890,6 +948,7 @@ httpx.Dump(res) // dumps DeleteResponse
 ### <a id="do"></a>Do
 
 Do executes a pre-configured req request and returns the decoded body and response.
+This is the low-level escape hatch when you need full req control.
 
 ```go
 r := req.C().R().SetHeader("X-Trace", "1")

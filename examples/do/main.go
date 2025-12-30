@@ -11,6 +11,7 @@ import (
 
 func main() {
 	// Do executes a pre-configured req request and returns the decoded body and response.
+	// This is the low-level escape hatch when you need full req control.
 
 	// Example: advanced request with response access
 	r := req.C().R().SetHeader("X-Trace", "1")

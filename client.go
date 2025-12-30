@@ -447,6 +447,7 @@ func OptionsCtx[T any](client *Client, ctx context.Context, url string, opts ...
 }
 
 // Do executes a pre-configured req request and returns the decoded body and response.
+// This is the low-level escape hatch when you need full req control.
 // @group Requests
 //
 // Example: advanced request with response access
