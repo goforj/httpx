@@ -22,8 +22,6 @@ It keeps req's power and escape hatches, while making the 90% use case feel effo
   <img src="docs/images/goforj_httpx_example_1.png" alt="httpx Logo">
 </p>
 
-Here’s a **clean, tightened, production-ready rewrite** of the README **excluding the API reference section**, preserving your intent but removing redundancy and tightening tone.
-
 ## What is httpx?
 
 **httpx** is a modern, ergonomic HTTP client for Go.
