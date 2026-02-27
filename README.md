@@ -1,5 +1,5 @@
 <p align="center">
-  <img src="docs/images/logo.png" width="600" alt="httpx Logo">
+  <img src="docs/images/logo.png" width="250" alt="httpx Logo">
 </p>
 
 A generics-first HTTP client wrapper for Go, built on top of the amazing `github.com/imroc/req/v3` library.
