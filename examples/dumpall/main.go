@@ -3,7 +3,7 @@
 
 package main
 
-import "github.com/goforj/httpx"
+import "github.com/goforj/httpx/v2"
 
 func main() {
 	// DumpAll enables req's client-level dump output for all requests.

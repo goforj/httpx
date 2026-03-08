@@ -3,7 +3,7 @@
 
 package main
 
-import "github.com/goforj/httpx"
+import "github.com/goforj/httpx/v2"
 
 func main() {
 	// Post issues a POST request using the provided client.

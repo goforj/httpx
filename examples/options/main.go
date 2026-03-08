@@ -3,7 +3,7 @@
 
 package main
 
-import "github.com/goforj/httpx"
+import "github.com/goforj/httpx/v2"
 
 func main() {
 	// Options issues an OPTIONS request using the provided client.

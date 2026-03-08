@@ -3,7 +3,7 @@
 
 package main
 
-import "github.com/goforj/httpx"
+import "github.com/goforj/httpx/v2"
 
 func main() {
 	// DumpEachRequest enables request-level dumps for each request on the client.

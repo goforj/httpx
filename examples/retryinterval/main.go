@@ -4,7 +4,7 @@
 package main
 
 import (
-	"github.com/goforj/httpx"
+	"github.com/goforj/httpx/v2"
 	"github.com/imroc/req/v3"
 	"time"
 )

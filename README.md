@@ -6,20 +6,16 @@ A generics-first HTTP client wrapper for Go, built on top of the amazing `github
 It keeps req's power and escape hatches, while making the 90% use case feel effortless.
 
 <p align="center">
-    <a href="https://pkg.go.dev/github.com/goforj/httpx"><img src="https://pkg.go.dev/badge/github.com/goforj/httpx.svg" alt="Go Reference"></a>
+    <a href="https://pkg.go.dev/github.com/goforj/httpx/v2"><img src="https://pkg.go.dev/badge/github.com/goforj/httpx/v2.svg" alt="Go Reference"></a>
     <a href="LICENSE"><img src="https://img.shields.io/badge/license-MIT-blue.svg" alt="License: MIT"></a>
     <a href="https://github.com/goforj/httpx/actions"><img src="https://github.com/goforj/httpx/actions/workflows/test.yml/badge.svg" alt="Go Test"></a>
     <a href="https://golang.org"><img src="https://img.shields.io/badge/go-1.18+-blue?logo=go" alt="Go version"></a>
     <img src="https://img.shields.io/github/v/tag/goforj/httpx?label=version&sort=semver" alt="Latest tag">
-    <a href="https://goreportcard.com/report/github.com/goforj/httpx"><img src="https://goreportcard.com/badge/github.com/goforj/httpx" alt="Go Report Card"></a>
+    <a href="https://goreportcard.com/report/github.com/goforj/httpx/v2"><img src="https://goreportcard.com/badge/github.com/goforj/httpx/v2" alt="Go Report Card"></a>
     <a href="https://codecov.io/gh/goforj/httpx" ><img src="https://codecov.io/gh/goforj/httpx/graph/badge.svg?token=R5O7LYAD4B"/></a>
 <!-- test-count:embed:start -->
     <img src="https://img.shields.io/badge/tests-203-brightgreen" alt="Tests">
 <!-- test-count:embed:end -->
-</p>
-
-<p align="center">
-  <img src="docs/images/goforj_httpx_example_1.png" alt="httpx Logo">
 </p>
 
 ## What is httpx?
@@ -33,23 +29,24 @@ Think of it as *the 90% solution* - powerful enough for real-world systems, with
 ## Quick Start
 
 ```go
-type Response struct {
-    URL string `json:"url"`
+type Request struct {
+    Uuid string `json:"uuid"`
 }
 
-c := httpx.New(
-    httpx.BaseURL("https://httpbin.org"),
-	// ...other options as needed
-)
+// request, binds result to Request
+res, _ := httpx.Get[Request](httpx.New(), "https://httpbin.org/uuid")
 
-// httpx.Get[T](client, url, options...)
-res, err := httpx.Get[Response](c, "/get")
-if err != nil {
-    panic(err) // handle error appropriately
-}
+httpx.Dump(res)
+// #main.Request {
+//   +Uuid => "6101eccc-8f59-444f-9ccc-9c39a85d5da5" #string
+// }
+```
 
-fmt.Println(res.URL)
-````
+## Installation
+
+```bash
+go get github.com/goforj/httpx/v2
+```
 
 ## Design Principles
 
@@ -70,12 +67,6 @@ Use httpx when you want:
 
 If you’re comfortable with `net/http` or `req`, httpx will feel immediately familiar - just faster to write and easier to read.
 
-## Installation
-
-```bash
-go get github.com/goforj/httpx
-```
-
 ## Debugging and Tracing
 
 - `HTTP_TRACE=1` enables request/response dumps for all requests.
@@ -90,15 +81,15 @@ All runnable examples live in [`./examples`](./examples) and are generated from 
 
 They are compiled and executed in CI to ensure the documentation stays accurate and up to date.
 
-## Contributing
-
-- Run `go run ./docs/examplegen` after updating doc examples.
-- Run `go run ./docs/readme/main.go` to refresh the API index and test count.
-- Run `go test ./...`.
-
 ## v2 Status
 
-httpx v1 has been tagged and is now frozen. The `main` branch is v2, which includes intentional breaking changes to improve API clarity and ergonomics (for example, request helpers return `(T, error)`).
+httpx v1 has been tagged and is now frozen. The current module path is `github.com/goforj/httpx/v2`, and the `main` branch includes intentional breaking changes to improve API clarity and ergonomics (for example, request helpers return `(T, error)`).
+
+## Contributing
+
+- Run `go run ./docs/examplegen/main.go` after updating doc examples.
+- Run `go run ./docs/readme/main.go` to refresh the API index and test count.
+- Run `go test ./...`.
 
 <!-- api:embed:start -->
 

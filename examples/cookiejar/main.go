@@ -4,7 +4,7 @@
 package main
 
 import (
-	"github.com/goforj/httpx"
+	"github.com/goforj/httpx/v2"
 	"net/http"
 	"net/http/cookiejar"
 	"net/url"

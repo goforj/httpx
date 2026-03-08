@@ -5,7 +5,7 @@ package main
 
 import (
 	"bytes"
-	"github.com/goforj/httpx"
+	"github.com/goforj/httpx/v2"
 )
 
 func main() {

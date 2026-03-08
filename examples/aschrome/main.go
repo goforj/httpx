@@ -3,7 +3,7 @@
 
 package main
 
-import "github.com/goforj/httpx"
+import "github.com/goforj/httpx/v2"
 
 func main() {
 	// AsChrome applies the Chrome browser profile (headers including User-Agent, TLS, and HTTP/2 behavior).

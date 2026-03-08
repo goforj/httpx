@@ -1,4 +1,4 @@
-module github.com/goforj/httpx
+module github.com/goforj/httpx/v2
 
 go 1.24.4
 

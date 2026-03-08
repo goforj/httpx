@@ -6,7 +6,7 @@ package main
 import (
 	"bytes"
 	"fmt"
-	"github.com/goforj/httpx"
+	"github.com/goforj/httpx/v2"
 	"github.com/imroc/req/v3"
 	"net/http"
 	"time"
