@@ -97,21 +97,21 @@ httpx v1 has been tagged and is now frozen. The current module path is `github.c
 
 | Group | Functions |
 |------:|:-----------|
-| **Auth** | [Auth](#auth) [Basic](#basic) [Bearer](#bearer) |
-| **Browser Profiles** | [AsChrome](#aschrome) [AsFirefox](#asfirefox) [AsMobile](#asmobile) [AsSafari](#assafari) |
-| **Client** | [Default](#default) [New](#new) [Raw](#raw) [Req](#req) |
-| **Client Options** | [BaseURL](#baseurl) [CookieJar](#cookiejar) [ErrorMapper](#errormapper) [Middleware](#middleware) [Proxy](#proxy) [ProxyFunc](#proxyfunc) [Redirect](#redirect) [Transport](#transport) |
-| **Debugging** | [Dump](#dump) [DumpAll](#dumpall) [DumpEachRequest](#dumpeachrequest) [DumpEachRequestTo](#dumpeachrequestto) [DumpTo](#dumpto) [DumpToFile](#dumptofile) [EnableDump](#enabledump) [Trace](#trace) [TraceAll](#traceall) |
+| **Auth** | [Auth](#auth) · [Basic](#basic) · [Bearer](#bearer) |
+| **Browser Profiles** | [AsChrome](#aschrome) · [AsFirefox](#asfirefox) · [AsMobile](#asmobile) · [AsSafari](#assafari) |
+| **Client** | [Default](#default) · [New](#new) · [Raw](#raw) · [Req](#req) |
+| **Client Options** | [BaseURL](#baseurl) · [CookieJar](#cookiejar) · [ErrorMapper](#errormapper) · [Middleware](#middleware) · [Proxy](#proxy) · [ProxyFunc](#proxyfunc) · [Redirect](#redirect) · [Transport](#transport) |
+| **Debugging** | [Dump](#dump) · [DumpAll](#dumpall) · [DumpEachRequest](#dumpeachrequest) · [DumpEachRequestTo](#dumpeachrequestto) · [DumpTo](#dumpto) · [DumpToFile](#dumptofile) · [EnableDump](#enabledump) · [Trace](#trace) · [TraceAll](#traceall) |
 | **Download Options** | [OutputFile](#outputfile) |
 | **Errors** | [Error](#error) |
-| **Request Composition** | [Body](#body) [Form](#form) [Header](#header) [Headers](#headers) [JSON](#json) [Path](#path) [Paths](#paths) [Queries](#queries) [Query](#query) [UserAgent](#useragent) |
-| **Request Control** | [Before](#before) [Timeout](#timeout) |
-| **Requests** | [Delete](#delete) [Do](#do) [Get](#get) [Head](#head) [Options](#options) [Patch](#patch) [Post](#post) [Put](#put) |
-| **Requests (Context)** | [DeleteCtx](#deletectx) [GetCtx](#getctx) [HeadCtx](#headctx) [OptionsCtx](#optionsctx) [PatchCtx](#patchctx) [PostCtx](#postctx) [PutCtx](#putctx) |
-| **Retry** | [RetryBackoff](#retrybackoff) [RetryCondition](#retrycondition) [RetryCount](#retrycount) [RetryFixedInterval](#retryfixedinterval) [RetryHook](#retryhook) [RetryInterval](#retryinterval) |
+| **Request Composition** | [Body](#body) · [Form](#form) · [Header](#header) · [Headers](#headers) · [JSON](#json) · [Path](#path) · [Paths](#paths) · [Queries](#queries) · [Query](#query) · [UserAgent](#useragent) |
+| **Request Control** | [Before](#before) · [Timeout](#timeout) |
+| **Requests** | [Delete](#delete) · [Do](#do) · [Get](#get) · [Head](#head) · [Options](#options) · [Patch](#patch) · [Post](#post) · [Put](#put) |
+| **Requests (Context)** | [DeleteCtx](#deletectx) · [GetCtx](#getctx) · [HeadCtx](#headctx) · [OptionsCtx](#optionsctx) · [PatchCtx](#patchctx) · [PostCtx](#postctx) · [PutCtx](#putctx) |
+| **Retry** | [RetryBackoff](#retrybackoff) · [RetryCondition](#retrycondition) · [RetryCount](#retrycount) · [RetryFixedInterval](#retryfixedinterval) · [RetryHook](#retryhook) · [RetryInterval](#retryinterval) |
 | **Retry (Client)** | [Retry](#retry) |
-| **Upload Options** | [File](#file) [FileBytes](#filebytes) [FileReader](#filereader) [Files](#files) [UploadCallback](#uploadcallback) [UploadCallbackWithInterval](#uploadcallbackwithinterval) [UploadProgress](#uploadprogress) |
-| **Advanced** | [TLSFingerprint](#tlsfingerprint) [TLSFingerprintAndroid](#tlsfingerprintandroid) [TLSFingerprintChrome](#tlsfingerprintchrome) [TLSFingerprintEdge](#tlsfingerprintedge) [TLSFingerprintFirefox](#tlsfingerprintfirefox) [TLSFingerprintIOS](#tlsfingerprintios) [TLSFingerprintRandomized](#tlsfingerprintrandomized) [TLSFingerprintSafari](#tlsfingerprintsafari) |
+| **Upload Options** | [File](#file) · [FileBytes](#filebytes) · [FileReader](#filereader) · [Files](#files) · [UploadCallback](#uploadcallback) · [UploadCallbackWithInterval](#uploadcallbackwithinterval) · [UploadProgress](#uploadprogress) |
+| **Advanced** | [TLSFingerprint](#tlsfingerprint) · [TLSFingerprintAndroid](#tlsfingerprintandroid) · [TLSFingerprintChrome](#tlsfingerprintchrome) · [TLSFingerprintEdge](#tlsfingerprintedge) · [TLSFingerprintFirefox](#tlsfingerprintfirefox) · [TLSFingerprintIOS](#tlsfingerprintios) · [TLSFingerprintRandomized](#tlsfingerprintrandomized) · [TLSFingerprintSafari](#tlsfingerprintsafari) |
 
 
 ## Auth
