@@ -4,3 +4,4 @@
 cover.out
 coverage.out
 httpx.dump
+.DS_Store
