@@ -84,11 +84,9 @@ They are compiled and executed in CI to ensure the documentation stays accurate 
 
 httpx v1 has been tagged and is now frozen. The current module path is `github.com/goforj/httpx/v2`, and the `main` branch includes intentional breaking changes to improve API clarity and ergonomics (for example, request helpers return `(T, error)`).
 
-## Contributing
+## Development
 
-- Run `go run ./docs/examplegen/main.go` after updating doc examples.
-- Run `go run ./docs/readme/main.go` to refresh the API index and test count.
-- Run `go test ./...`.
+Use `make test` for the test suite, `make vet` for static checks, and `make generate` to refresh generated documentation. Keep examples and documentation accurate with behavior changes.
 
 <!-- api:embed:start -->
 
