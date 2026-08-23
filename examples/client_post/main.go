@@ -6,8 +6,7 @@ package main
 import "github.com/goforj/httpx/v2"
 
 func main() {
-	// Post issues a POST request using the provided client.
-	// It remains available for compatibility; new code can use Client.Post.
+	// Post issues a POST request and decodes its response.
 
 	// Example: typed POST
 	type CreateUser struct {
@@ -18,14 +17,9 @@ func main() {
 	}
 
 	c := httpx.New()
-	res, err := httpx.Post[CreateUser, CreateUserResponse](c, "https://httpbin.org/post", CreateUser{Name: "Ana"})
+	res, err := c.Post[CreateUserResponse]("https://httpbin.org/post", CreateUser{Name: "Ana"})
 	if err != nil {
 		return
 	}
 	httpx.Dump(res) // dumps CreateUserResponse
-	// #CreateUserResponse {
-	//   JSON => #CreateUser {
-	//     Name => "Ana" #string
-	//   }
-	// }
 }

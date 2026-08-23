@@ -10,6 +10,7 @@ import (
 
 func main() {
 	// PutCtx issues a PUT request using the provided client and context.
+	// It remains available for compatibility; new code can use Client.PutCtx.
 
 	// Example: context-aware PUT
 	type UpdateUser struct {

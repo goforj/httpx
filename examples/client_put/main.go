@@ -6,8 +6,7 @@ package main
 import "github.com/goforj/httpx/v2"
 
 func main() {
-	// Put issues a PUT request using the provided client.
-	// It remains available for compatibility; new code can use Client.Put.
+	// Put issues a PUT request and decodes its response.
 
 	// Example: typed PUT
 	type UpdateUser struct {
@@ -18,14 +17,9 @@ func main() {
 	}
 
 	c := httpx.New()
-	res, err := httpx.Put[UpdateUser, UpdateUserResponse](c, "https://httpbin.org/put", UpdateUser{Name: "Ana"})
+	res, err := c.Put[UpdateUserResponse]("https://httpbin.org/put", UpdateUser{Name: "Ana"})
 	if err != nil {
 		return
 	}
 	httpx.Dump(res) // dumps UpdateUserResponse
-	// #UpdateUserResponse {
-	//   JSON => #UpdateUser {
-	//     Name => "Ana" #string
-	//   }
-	// }
 }

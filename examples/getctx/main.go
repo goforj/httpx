@@ -10,6 +10,7 @@ import (
 
 func main() {
 	// GetCtx issues a GET request using the provided client and context.
+	// It remains available for compatibility; new code can use Client.GetCtx.
 
 	// Example: context-aware GET
 	type GetResponse struct {

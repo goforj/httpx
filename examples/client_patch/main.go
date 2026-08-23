@@ -6,8 +6,7 @@ package main
 import "github.com/goforj/httpx/v2"
 
 func main() {
-	// Patch issues a PATCH request using the provided client.
-	// It remains available for compatibility; new code can use Client.Patch.
+	// Patch issues a PATCH request and decodes its response.
 
 	// Example: typed PATCH
 	type UpdateUser struct {
@@ -18,14 +17,9 @@ func main() {
 	}
 
 	c := httpx.New()
-	res, err := httpx.Patch[UpdateUser, UpdateUserResponse](c, "https://httpbin.org/patch", UpdateUser{Name: "Ana"})
+	res, err := c.Patch[UpdateUserResponse]("https://httpbin.org/patch", UpdateUser{Name: "Ana"})
 	if err != nil {
 		return
 	}
 	httpx.Dump(res) // dumps UpdateUserResponse
-	// #UpdateUserResponse {
-	//   JSON => #UpdateUser {
-	//     Name => "Ana" #string
-	//   }
-	// }
 }

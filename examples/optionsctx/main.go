@@ -10,6 +10,7 @@ import (
 
 func main() {
 	// OptionsCtx issues an OPTIONS request using the provided client and context.
+	// It remains available for compatibility; new code can use Client.OptionsCtx.
 
 	// Example: context-aware OPTIONS
 	ctx := context.Background()

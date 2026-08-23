@@ -77,7 +77,10 @@ func run() error {
 //
 
 type FuncDoc struct {
+	Key         string
 	Name        string
+	DisplayName string
+	Anchor      string
 	Group       string
 	Behavior    string
 	Fluent      string
@@ -142,8 +145,21 @@ func parseFuncs(root string) ([]*FuncDoc, error) {
 				continue
 			}
 
+			receiver := extractReceiverName(fn)
+			displayName := fn.Name.Name
+			anchor := strings.ToLower(fn.Name.Name)
+			key := fn.Name.Name
+			if receiver != "" {
+				displayName = receiver + "." + fn.Name.Name
+				anchor = strings.ToLower(receiver + "-" + fn.Name.Name)
+				key = receiver + "." + fn.Name.Name
+			}
+
 			fd := &FuncDoc{
+				Key:         key,
 				Name:        fn.Name.Name,
+				DisplayName: displayName,
+				Anchor:      anchor,
 				Group:       extractGroup(fn.Doc),
 				Behavior:    extractBehavior(fn.Doc),
 				Fluent:      extractFluent(fn.Doc),
@@ -151,10 +167,10 @@ func parseFuncs(root string) ([]*FuncDoc, error) {
 				Examples:    extractExamples(fset, fn),
 			}
 
-			if existing, ok := funcs[fd.Name]; ok {
+			if existing, ok := funcs[fd.Key]; ok {
 				existing.Examples = append(existing.Examples, fd.Examples...)
 			} else {
-				funcs[fd.Name] = fd
+				funcs[fd.Key] = fd
 			}
 		}
 	}
@@ -168,6 +184,32 @@ func parseFuncs(root string) ([]*FuncDoc, error) {
 	}
 
 	return out, nil
+}
+
+// extractReceiverName returns the receiver identifier used to distinguish methods from package functions.
+func extractReceiverName(fn *ast.FuncDecl) string {
+	if fn.Recv == nil || len(fn.Recv.List) == 0 {
+		return ""
+	}
+	return receiverTypeName(fn.Recv.List[0].Type)
+}
+
+// receiverTypeName unwraps receiver syntax into the named type used by documentation anchors.
+func receiverTypeName(expr ast.Expr) string {
+	switch value := expr.(type) {
+	case *ast.Ident:
+		return value.Name
+	case *ast.ParenExpr:
+		return receiverTypeName(value.X)
+	case *ast.StarExpr:
+		return receiverTypeName(value.X)
+	case *ast.IndexExpr:
+		return receiverTypeName(value.X)
+	case *ast.IndexListExpr:
+		return receiverTypeName(value.X)
+	default:
+		return ""
+	}
 }
 
 func extractGroup(group *ast.CommentGroup) string {
@@ -351,12 +393,12 @@ func renderAPI(funcs []*FuncDoc) string {
 
 	for _, group := range groupNames {
 		sort.Slice(byGroup[group], func(i, j int) bool {
-			return byGroup[group][i].Name < byGroup[group][j].Name
+			return byGroup[group][i].DisplayName < byGroup[group][j].DisplayName
 		})
 
 		var links []string
 		for _, fn := range byGroup[group] {
-			links = append(links, fmt.Sprintf("[%s](#%s)", fn.Name, strings.ToLower(fn.Name)))
+			links = append(links, fmt.Sprintf("[%s](#%s)", fn.DisplayName, fn.Anchor))
 		}
 
 		buf.WriteString(fmt.Sprintf("| **%s** | %s |\n",
@@ -372,9 +414,9 @@ func renderAPI(funcs []*FuncDoc) string {
 		buf.WriteString("## " + group + "\n\n")
 
 		for _, fn := range byGroup[group] {
-			anchor := strings.ToLower(fn.Name)
+			anchor := fn.Anchor
 
-			header := fn.Name
+			header := fn.DisplayName
 			if fn.Behavior != "" {
 				header += " · " + fn.Behavior
 			}

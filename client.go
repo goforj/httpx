@@ -109,6 +109,7 @@ func (c *Client) clone() *Client {
 }
 
 // Get issues a GET request using the provided client.
+// It remains available for compatibility; new code can use Client.Get.
 // @group Requests
 //
 // Example: bind to a struct
@@ -137,6 +138,7 @@ func Get[T any](client *Client, url string, opts ...Option) (T, error) {
 }
 
 // Post issues a POST request using the provided client.
+// It remains available for compatibility; new code can use Client.Post.
 // @group Requests
 //
 // Example: typed POST
@@ -165,6 +167,7 @@ func Post[In any, Out any](client *Client, url string, body In, opts ...Option) 
 }
 
 // Put issues a PUT request using the provided client.
+// It remains available for compatibility; new code can use Client.Put.
 // @group Requests
 //
 // Example: typed PUT
@@ -193,6 +196,7 @@ func Put[In any, Out any](client *Client, url string, body In, opts ...Option) (
 }
 
 // Patch issues a PATCH request using the provided client.
+// It remains available for compatibility; new code can use Client.Patch.
 // @group Requests
 //
 // Example: typed PATCH
@@ -221,6 +225,7 @@ func Patch[In any, Out any](client *Client, url string, body In, opts ...Option)
 }
 
 // Delete issues a DELETE request using the provided client.
+// It remains available for compatibility; new code can use Client.Delete.
 // @group Requests
 //
 // Example: typed DELETE
@@ -244,6 +249,7 @@ func Delete[T any](client *Client, url string, opts ...Option) (T, error) {
 }
 
 // Head issues a HEAD request using the provided client.
+// It remains available for compatibility; new code can use Client.Head.
 // @group Requests
 //
 // Example: HEAD request
@@ -259,6 +265,7 @@ func Head[T any](client *Client, url string, opts ...Option) (T, error) {
 }
 
 // Options issues an OPTIONS request using the provided client.
+// It remains available for compatibility; new code can use Client.Options.
 // @group Requests
 //
 // Example: OPTIONS request
@@ -274,6 +281,7 @@ func Options[T any](client *Client, url string, opts ...Option) (T, error) {
 }
 
 // GetCtx issues a GET request using the provided client and context.
+// It remains available for compatibility; new code can use Client.GetCtx.
 // @group Requests (Context)
 //
 // Example: context-aware GET
@@ -298,6 +306,7 @@ func GetCtx[T any](client *Client, ctx context.Context, url string, opts ...Opti
 }
 
 // PostCtx issues a POST request using the provided client and context.
+// It remains available for compatibility; new code can use Client.PostCtx.
 // @group Requests (Context)
 //
 // Example: context-aware POST
@@ -327,6 +336,7 @@ func PostCtx[In any, Out any](client *Client, ctx context.Context, url string, b
 }
 
 // PutCtx issues a PUT request using the provided client and context.
+// It remains available for compatibility; new code can use Client.PutCtx.
 // @group Requests (Context)
 //
 // Example: context-aware PUT
@@ -356,6 +366,7 @@ func PutCtx[In any, Out any](client *Client, ctx context.Context, url string, bo
 }
 
 // PatchCtx issues a PATCH request using the provided client and context.
+// It remains available for compatibility; new code can use Client.PatchCtx.
 // @group Requests (Context)
 //
 // Example: context-aware PATCH
@@ -385,6 +396,7 @@ func PatchCtx[In any, Out any](client *Client, ctx context.Context, url string, 
 }
 
 // DeleteCtx issues a DELETE request using the provided client and context.
+// It remains available for compatibility; new code can use Client.DeleteCtx.
 // @group Requests (Context)
 //
 // Example: context-aware DELETE
@@ -409,6 +421,7 @@ func DeleteCtx[T any](client *Client, ctx context.Context, url string, opts ...O
 }
 
 // HeadCtx issues a HEAD request using the provided client and context.
+// It remains available for compatibility; new code can use Client.HeadCtx.
 // @group Requests (Context)
 //
 // Example: context-aware HEAD
@@ -425,6 +438,7 @@ func HeadCtx[T any](client *Client, ctx context.Context, url string, opts ...Opt
 }
 
 // OptionsCtx issues an OPTIONS request using the provided client and context.
+// It remains available for compatibility; new code can use Client.OptionsCtx.
 // @group Requests (Context)
 //
 // Example: context-aware OPTIONS

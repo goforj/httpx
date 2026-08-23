@@ -1,6 +1,6 @@
 module github.com/goforj/httpx/v2
 
-go 1.24.4
+go 1.27.0
 
 require (
 	github.com/goforj/godump v1.9.0

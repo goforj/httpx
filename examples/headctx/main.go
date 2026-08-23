@@ -10,6 +10,7 @@ import (
 
 func main() {
 	// HeadCtx issues a HEAD request using the provided client and context.
+	// It remains available for compatibility; new code can use Client.HeadCtx.
 
 	// Example: context-aware HEAD
 	ctx := context.Background()

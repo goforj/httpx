@@ -15,6 +15,7 @@ vet: ##@analysis Run Go vet.
 ##@documentation
 generate: ##@documentation Regenerate the documentation.
 	go -C docs run ./readme/main.go
+	go -C docs run ./examplegen/main.go
 
 docs-watch: ##@documentation Watch source changes and regenerate documentation.
 	sh docs/watcher.sh
