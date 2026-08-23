@@ -29,6 +29,11 @@ jobs:
       - name: Run tests
         run: go test ./... -v
 
+      - name: Verify generated documentation
+        run: |
+          make generate
+          git diff --exit-code -- README.md examples
+
       - name: Run tests with coverage
         run: go test -coverprofile=coverage.txt
 
