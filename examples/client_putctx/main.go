@@ -4,23 +4,24 @@
 package main
 
 import (
+	"context"
 	"fmt"
 	"github.com/goforj/httpx/v2"
 )
 
 func main() {
-	// Patch issues a PATCH request and decodes its response.
+	// PutCtx issues a context-aware PUT request and decodes its response.
 
-	// Example: typed PATCH
+	// Example: client context-aware PUT
 	type UpdateUser struct {
 		Name string `json:"name"`
 	}
 	type UpdateUserResponse struct {
 		JSON UpdateUser `json:"json"`
 	}
-
+	ctx := context.Background()
 	c := httpx.New()
-	res, err := c.Patch[UpdateUserResponse]("https://httpbin.org/patch", UpdateUser{Name: "Ana"})
+	res, err := c.PutCtx[UpdateUserResponse](ctx, "https://httpbin.org/put", UpdateUser{Name: "Ana"})
 	if err != nil {
 		return
 	}

@@ -4,23 +4,24 @@
 package main
 
 import (
+	"context"
 	"fmt"
 	"github.com/goforj/httpx/v2"
 )
 
 func main() {
-	// Post issues a POST request and decodes its response.
+	// PostCtx issues a context-aware POST request and decodes its response.
 
-	// Example: typed POST
+	// Example: client context-aware POST
 	type CreateUser struct {
 		Name string `json:"name"`
 	}
 	type CreateUserResponse struct {
 		JSON CreateUser `json:"json"`
 	}
-
+	ctx := context.Background()
 	c := httpx.New()
-	res, err := c.Post[CreateUserResponse]("https://httpbin.org/post", CreateUser{Name: "Ana"})
+	res, err := c.PostCtx[CreateUserResponse](ctx, "https://httpbin.org/post", CreateUser{Name: "Ana"})
 	if err != nil {
 		return
 	}

@@ -4,20 +4,21 @@
 package main
 
 import (
+	"context"
 	"fmt"
 	"github.com/goforj/httpx/v2"
 )
 
 func main() {
-	// Get issues a GET request and decodes its response.
+	// GetCtx issues a context-aware GET request and decodes its response.
 
-	// Example: bind to a struct
+	// Example: client context-aware GET
 	type GetResponse struct {
 		URL string `json:"url"`
 	}
-
+	ctx := context.Background()
 	c := httpx.New()
-	res, err := c.Get[GetResponse]("https://httpbin.org/get")
+	res, err := c.GetCtx[GetResponse](ctx, "https://httpbin.org/get")
 	fmt.Println(err == nil, res.URL)
 	// true https://httpbin.org/get
 }

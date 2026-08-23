@@ -13,7 +13,7 @@ It keeps req's power and escape hatches, while making the 90% use case feel effo
     <img src="https://img.shields.io/github/v/tag/goforj/httpx?label=version&sort=semver" alt="Latest tag">
     <a href="https://codecov.io/gh/goforj/httpx" ><img src="https://codecov.io/gh/goforj/httpx/graph/badge.svg?token=R5O7LYAD4B"/></a>
 <!-- test-count:embed:start -->
-    <img src="https://img.shields.io/badge/tests-223-brightgreen" alt="Tests">
+    <img src="https://img.shields.io/badge/tests-232-brightgreen" alt="Tests">
 <!-- test-count:embed:end -->
 </p>
 
@@ -808,7 +808,8 @@ res, err := c.Delete[DeleteResponse]("https://httpbin.org/delete")
 if err != nil {
 	return
 }
-httpx.Dump(res) // dumps DeleteResponse
+fmt.Println(res.URL)
+// https://httpbin.org/delete
 ```
 
 ### <a id="client-get"></a>Client.Get
@@ -821,17 +822,32 @@ type GetResponse struct {
 }
 
 c := httpx.New()
-res, _ := c.Get[GetResponse]("https://httpbin.org/get")
-httpx.Dump(res) // dumps GetResponse
+res, err := c.Get[GetResponse]("https://httpbin.org/get")
+fmt.Println(err == nil, res.URL)
+// true https://httpbin.org/get
 ```
 
 ### <a id="client-head"></a>Client.Head
 
 Head issues a HEAD request and decodes its response using the established response contract.
 
+```go
+c := httpx.New()
+_, err := c.Head[[]byte]("https://httpbin.org/get")
+fmt.Println(err == nil)
+// true
+```
+
 ### <a id="client-options"></a>Client.Options
 
 Options issues an OPTIONS request and decodes its response.
+
+```go
+c := httpx.New()
+_, err := c.Options[[]byte]("https://httpbin.org/get")
+fmt.Println(err == nil)
+// true
+```
 
 ### <a id="client-patch"></a>Client.Patch
 
@@ -846,7 +862,8 @@ res, err := c.Patch[UpdateUserResponse]("https://httpbin.org/patch", UpdateUser{
 if err != nil {
 	return
 }
-httpx.Dump(res) // dumps UpdateUserResponse
+fmt.Println(res.JSON.Name)
+// Ana
 ```
 
 ### <a id="client-post"></a>Client.Post
@@ -862,7 +879,8 @@ res, err := c.Post[CreateUserResponse]("https://httpbin.org/post", CreateUser{Na
 if err != nil {
 	return
 }
-httpx.Dump(res) // dumps CreateUserResponse
+fmt.Println(res.JSON.Name)
+// Ana
 ```
 
 ### <a id="client-put"></a>Client.Put
@@ -878,7 +896,8 @@ res, err := c.Put[UpdateUserResponse]("https://httpbin.org/put", UpdateUser{Name
 if err != nil {
 	return
 }
-httpx.Dump(res) // dumps UpdateUserResponse
+fmt.Println(res.JSON.Name)
+// Ana
 ```
 
 ### <a id="delete"></a>Delete
@@ -1065,29 +1084,109 @@ httpx.Dump(res) // dumps UpdateUserResponse
 
 DeleteCtx issues a context-aware DELETE request and decodes its response.
 
+```go
+type DeleteResponse struct {
+	URL string `json:"url"`
+}
+ctx := context.Background()
+c := httpx.New()
+res, err := c.DeleteCtx[DeleteResponse](ctx, "https://httpbin.org/delete")
+if err != nil {
+	return
+}
+fmt.Println(res.URL)
+// https://httpbin.org/delete
+```
+
 ### <a id="client-getctx"></a>Client.GetCtx
 
 GetCtx issues a context-aware GET request and decodes its response.
+
+```go
+type GetResponse struct {
+	URL string `json:"url"`
+}
+ctx := context.Background()
+c := httpx.New()
+res, err := c.GetCtx[GetResponse](ctx, "https://httpbin.org/get")
+fmt.Println(err == nil, res.URL)
+// true https://httpbin.org/get
+```
 
 ### <a id="client-headctx"></a>Client.HeadCtx
 
 HeadCtx issues a context-aware HEAD request and decodes its response using the established response contract.
 
+```go
+ctx := context.Background()
+c := httpx.New()
+_, err := c.HeadCtx[[]byte](ctx, "https://httpbin.org/get")
+fmt.Println(err == nil)
+// true
+```
+
 ### <a id="client-optionsctx"></a>Client.OptionsCtx
 
 OptionsCtx issues a context-aware OPTIONS request and decodes its response.
+
+```go
+ctx := context.Background()
+c := httpx.New()
+_, err := c.OptionsCtx[[]byte](ctx, "https://httpbin.org/get")
+fmt.Println(err == nil)
+// true
+```
 
 ### <a id="client-patchctx"></a>Client.PatchCtx
 
 PatchCtx issues a context-aware PATCH request and decodes its response.
 
+```go
+type UpdateUser struct { Name string `json:"name"` }
+type UpdateUserResponse struct { JSON UpdateUser `json:"json"` }
+ctx := context.Background()
+c := httpx.New()
+res, err := c.PatchCtx[UpdateUserResponse](ctx, "https://httpbin.org/patch", UpdateUser{Name: "Ana"})
+if err != nil {
+	return
+}
+fmt.Println(res.JSON.Name)
+// Ana
+```
+
 ### <a id="client-postctx"></a>Client.PostCtx
 
 PostCtx issues a context-aware POST request and decodes its response.
 
+```go
+type CreateUser struct { Name string `json:"name"` }
+type CreateUserResponse struct { JSON CreateUser `json:"json"` }
+ctx := context.Background()
+c := httpx.New()
+res, err := c.PostCtx[CreateUserResponse](ctx, "https://httpbin.org/post", CreateUser{Name: "Ana"})
+if err != nil {
+	return
+}
+fmt.Println(res.JSON.Name)
+// Ana
+```
+
 ### <a id="client-putctx"></a>Client.PutCtx
 
 PutCtx issues a context-aware PUT request and decodes its response.
+
+```go
+type UpdateUser struct { Name string `json:"name"` }
+type UpdateUserResponse struct { JSON UpdateUser `json:"json"` }
+ctx := context.Background()
+c := httpx.New()
+res, err := c.PutCtx[UpdateUserResponse](ctx, "https://httpbin.org/put", UpdateUser{Name: "Ana"})
+if err != nil {
+	return
+}
+fmt.Println(res.JSON.Name)
+// Ana
+```
 
 ### <a id="deletectx"></a>DeleteCtx
 

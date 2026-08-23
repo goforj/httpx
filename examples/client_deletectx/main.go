@@ -4,20 +4,21 @@
 package main
 
 import (
+	"context"
 	"fmt"
 	"github.com/goforj/httpx/v2"
 )
 
 func main() {
-	// Delete issues a DELETE request and decodes its response.
+	// DeleteCtx issues a context-aware DELETE request and decodes its response.
 
-	// Example: typed DELETE
+	// Example: client context-aware DELETE
 	type DeleteResponse struct {
 		URL string `json:"url"`
 	}
-
+	ctx := context.Background()
 	c := httpx.New()
-	res, err := c.Delete[DeleteResponse]("https://httpbin.org/delete")
+	res, err := c.DeleteCtx[DeleteResponse](ctx, "https://httpbin.org/delete")
 	if err != nil {
 		return
 	}

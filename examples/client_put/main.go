@@ -3,7 +3,10 @@
 
 package main
 
-import "github.com/goforj/httpx/v2"
+import (
+	"fmt"
+	"github.com/goforj/httpx/v2"
+)
 
 func main() {
 	// Put issues a PUT request and decodes its response.
@@ -21,5 +24,6 @@ func main() {
 	if err != nil {
 		return
 	}
-	httpx.Dump(res) // dumps UpdateUserResponse
+	fmt.Println(res.JSON.Name)
+	// Ana
 }
