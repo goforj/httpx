@@ -7,6 +7,7 @@ import "github.com/goforj/httpx/v2"
 
 func main() {
 	// Patch issues a PATCH request using the provided client.
+	// It remains available for compatibility; new code can use Client.Patch.
 
 	// Example: typed PATCH
 	type UpdateUser struct {

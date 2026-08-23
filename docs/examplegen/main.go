@@ -127,6 +127,7 @@ func modulePath(root string) (string, error) {
 
 type FuncDoc struct {
 	Name        string
+	Slug        string
 	Group       string
 	Description string
 	Examples    []Example
@@ -173,8 +174,10 @@ func extractFuncDocs(
 			continue
 		}
 
-		out[name] = &FuncDoc{
+		slug := funcSlug(fn)
+		out[slug] = &FuncDoc{
 			Name:        name,
+			Slug:        slug,
 			Group:       extractGroup(fn.Doc),
 			Description: extractFuncDescription(fn.Doc),
 			Examples:    extractBlocks(fset, filename, name, fn),
@@ -182,6 +185,36 @@ func extractFuncDocs(
 	}
 
 	return out
+}
+
+// funcSlug includes receiver identity so methods cannot collide with package functions.
+func funcSlug(fn *ast.FuncDecl) string {
+	if fn.Recv == nil || len(fn.Recv.List) == 0 {
+		return fn.Name.Name
+	}
+	receiver := receiverTypeName(fn.Recv.List[0].Type)
+	if receiver == "" {
+		return fn.Name.Name
+	}
+	return receiver + "_" + fn.Name.Name
+}
+
+// receiverTypeName unwraps receiver syntax into the name used for generated example directories.
+func receiverTypeName(expr ast.Expr) string {
+	switch value := expr.(type) {
+	case *ast.Ident:
+		return value.Name
+	case *ast.ParenExpr:
+		return receiverTypeName(value.X)
+	case *ast.StarExpr:
+		return receiverTypeName(value.X)
+	case *ast.IndexExpr:
+		return receiverTypeName(value.X)
+	case *ast.IndexListExpr:
+		return receiverTypeName(value.X)
+	default:
+		return ""
+	}
 }
 
 func extractGroup(group *ast.CommentGroup) string {
@@ -362,7 +395,7 @@ func writeMain(base string, fd *FuncDoc, importPath string) error {
 		return fmt.Errorf("import path cannot be empty")
 	}
 
-	dir := filepath.Join(base, strings.ToLower(fd.Name))
+	dir := filepath.Join(base, strings.ToLower(fd.Slug))
 	if err := os.MkdirAll(dir, 0o755); err != nil {
 		return err
 	}

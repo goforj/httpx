@@ -7,6 +7,7 @@ import "github.com/goforj/httpx/v2"
 
 func main() {
 	// Get issues a GET request using the provided client.
+	// It remains available for compatibility; new code can use Client.Get.
 
 	// Example: bind to a struct
 	type GetResponse struct {

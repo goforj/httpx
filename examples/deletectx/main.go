@@ -10,6 +10,7 @@ import (
 
 func main() {
 	// DeleteCtx issues a DELETE request using the provided client and context.
+	// It remains available for compatibility; new code can use Client.DeleteCtx.
 
 	// Example: context-aware DELETE
 	type DeleteResponse struct {

@@ -10,6 +10,7 @@ import (
 
 func main() {
 	// PatchCtx issues a PATCH request using the provided client and context.
+	// It remains available for compatibility; new code can use Client.PatchCtx.
 
 	// Example: context-aware PATCH
 	type UpdateUser struct {

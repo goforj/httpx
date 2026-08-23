@@ -7,6 +7,7 @@ import "github.com/goforj/httpx/v2"
 
 func main() {
 	// Put issues a PUT request using the provided client.
+	// It remains available for compatibility; new code can use Client.Put.
 
 	// Example: typed PUT
 	type UpdateUser struct {

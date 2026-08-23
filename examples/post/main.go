@@ -7,6 +7,7 @@ import "github.com/goforj/httpx/v2"
 
 func main() {
 	// Post issues a POST request using the provided client.
+	// It remains available for compatibility; new code can use Client.Post.
 
 	// Example: typed POST
 	type CreateUser struct {

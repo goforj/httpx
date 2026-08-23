@@ -10,6 +10,7 @@ import (
 
 func main() {
 	// PostCtx issues a POST request using the provided client and context.
+	// It remains available for compatibility; new code can use Client.PostCtx.
 
 	// Example: context-aware POST
 	type CreateUser struct {

@@ -1,0 +1,29 @@
+//go:build ignore
+// +build ignore
+
+package main
+
+import (
+	"fmt"
+	"github.com/goforj/httpx/v2"
+)
+
+func main() {
+	// Put issues a PUT request and decodes its response.
+
+	// Example: typed PUT
+	type UpdateUser struct {
+		Name string `json:"name"`
+	}
+	type UpdateUserResponse struct {
+		JSON UpdateUser `json:"json"`
+	}
+
+	c := httpx.New()
+	res, err := c.Put[UpdateUserResponse]("https://httpbin.org/put", UpdateUser{Name: "Ana"})
+	if err != nil {
+		return
+	}
+	fmt.Println(res.JSON.Name)
+	// Ana
+}

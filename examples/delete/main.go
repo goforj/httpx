@@ -7,6 +7,7 @@ import "github.com/goforj/httpx/v2"
 
 func main() {
 	// Delete issues a DELETE request using the provided client.
+	// It remains available for compatibility; new code can use Client.Delete.
 
 	// Example: typed DELETE
 	type DeleteResponse struct {
