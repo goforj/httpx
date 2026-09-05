@@ -3,7 +3,7 @@ module github.com/goforj/httpx/v2
 go 1.27.0
 
 require (
-	github.com/goforj/godump v1.9.0
+	github.com/goforj/godump v1.9.1
 	github.com/imroc/req/v3 v3.58.0
 )
 
