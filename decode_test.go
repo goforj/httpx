@@ -3,6 +3,7 @@ package httpx
 import (
 	"net/http"
 	"net/http/httptest"
+	"reflect"
 	"testing"
 
 	"github.com/imroc/req/v3"
@@ -39,6 +40,76 @@ func TestRawKindAndDecode(t *testing.T) {
 	}
 	if got := decodeRaw[int](resp); got != 0 {
 		t.Fatalf("decode int = %d", got)
+	}
+}
+
+func TestRawResponsesWithNamedTypes(t *testing.T) {
+	type text string
+	type bytes []byte
+	type octet byte
+	type octets []octet
+
+	for _, body := range []string{"hello\x00\xff", ""} {
+		name := "nonempty"
+		if body == "" {
+			name = "empty"
+		}
+		t.Run(name, func(t *testing.T) {
+			server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+				_, _ = w.Write([]byte(body))
+			}))
+			t.Cleanup(server.Close)
+
+			t.Run("string", func(t *testing.T) {
+				testRawResponseType(t, server.URL, text(body))
+			})
+			t.Run("bytes", func(t *testing.T) {
+				testRawResponseType(t, server.URL, bytes(body))
+			})
+			t.Run("octets", func(t *testing.T) {
+				want := make([]octet, len(body))
+				for i := range want {
+					want[i] = octet(body[i])
+				}
+				testRawResponseType(t, server.URL, want)
+			})
+			t.Run("named_octets", func(t *testing.T) {
+				want := make(octets, len(body))
+				for i := range want {
+					want[i] = octet(body[i])
+				}
+				testRawResponseType(t, server.URL, want)
+			})
+		})
+	}
+}
+
+func testRawResponseType[T any](t *testing.T, url string, want T) {
+	t.Helper()
+	client := New()
+	tests := []struct {
+		name string
+		call func() (T, error)
+	}{
+		{"function", func() (T, error) { return Get[T](client, url) }},
+		{"method", func() (T, error) { return client.Get[T](url) }},
+		{"do", func() (T, error) {
+			r := client.Raw().R().SetURL(url)
+			r.Method = http.MethodGet
+			out, _, err := Do[T](r)
+			return out, err
+		}},
+	}
+	for _, test := range tests {
+		t.Run(test.name, func(t *testing.T) {
+			got, err := test.call()
+			if err != nil {
+				t.Fatalf("request failed: %v", err)
+			}
+			if !reflect.DeepEqual(got, want) {
+				t.Fatalf("response = %#v, want %#v", got, want)
+			}
+		})
 	}
 }
 
