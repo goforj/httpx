@@ -32,9 +32,9 @@ func decodeRaw[T any](resp *req.Response) T {
 	var out T
 	switch rawKindOf[T]() {
 	case rawString:
-		out = any(resp.String()).(T)
+		reflect.ValueOf(&out).Elem().SetString(resp.String())
 	case rawBytes:
-		out = any(resp.Bytes()).(T)
+		reflect.ValueOf(&out).Elem().SetBytes(resp.Bytes())
 	}
 	return out
 }
