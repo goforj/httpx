@@ -13,7 +13,7 @@ It keeps req's power and escape hatches, while making the 90% use case feel effo
     <img src="https://img.shields.io/github/v/tag/goforj/httpx?label=version&sort=semver" alt="Latest tag">
     <a href="https://codecov.io/gh/goforj/httpx" ><img src="https://codecov.io/gh/goforj/httpx/graph/badge.svg?token=R5O7LYAD4B"/></a>
 <!-- test-count:embed:start -->
-    <img src="https://img.shields.io/badge/tests-267-brightgreen" alt="Tests">
+    <img src="https://img.shields.io/badge/tests-268-brightgreen" alt="Tests">
 <!-- test-count:embed:end -->
 </p>
 
