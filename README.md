@@ -1692,3 +1692,7 @@ TLSFingerprintSafari applies the Safari TLS fingerprint preset.
 _ = httpx.New(httpx.TLSFingerprintSafari())
 ```
 <!-- api:embed:end -->
+
+## Documentation
+
+Read the [httpx library documentation](https://goforj.dev/httpx) for standalone installation, usage, and API reference.
