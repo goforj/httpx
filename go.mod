@@ -3,9 +3,9 @@ module github.com/goforj/httpx/v2
 go 1.27.0
 
 require (
-	github.com/goforj/godump v1.9.1
+	github.com/goforj/godump v1.10.0
 	github.com/imroc/req/v3 v3.61.0
-	github.com/klauspost/compress v1.20.2
+	github.com/klauspost/compress v1.20.3
 )
 
 require (
